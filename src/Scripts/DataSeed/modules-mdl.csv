@@ -1,0 +1,6 @@
+moduleId,moduleName,parentId,menuLevel,sortOrder,iconClass,componentName,controllerName,feUrl,isParent,isCrud,editComponent,addComponent,tranCode,isAdmin,isActive,createdBy
+1,Tools,,1,100,fa-gear,ToolsComponent,ToolsController,/tools,TRUE,FALSE,EditTools,AddTools,TOOLS01,TRUE,TRUE,1
+3,Role Maintenance,1,2,2,fa-user-shield,RolesPage,Roles,/roles,FALSE,TRUE,EditRoleDashboard,EditRole,RC01,TRUE,TRUE,1
+4,User Maintenance,1,2,3,fa-users,UsersPage,Users,/users,FALSE,TRUE,EditUserDashboard,EditUser,UC01,TRUE,TRUE,1
+6,Application Information,1,2,6,fa-info-circle,EnvViewer,InfoController,/about,FALSE,FALSE,EditInfo,AddInfo,IQ03,TRUE,TRUE,1
+10,Downloads,,1,10,fa-download,DLComponent,mediadl,/downloads,FALSE,FALSE,EditDl,AddDl,DL01,FALSE,TRUE,1

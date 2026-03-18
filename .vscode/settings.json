@@ -1,0 +1,58 @@
+﻿{
+  "rest-client.environmentVariables": {
+    "$shared": {
+      "ClientId":"kb9qvUP9DFKlZ3Ky5Z4OGjAwkI6Bnlymev0sMzclX7EoE0fbQlQzOnEc/nm/ZnL7",
+      "ClientId-w":"udweX/FWtz8HV4dqq7sjSlh0GNlbmquHYiUN5IBzjjkYFDukvQ/v6FA5G8I5j3V1",
+      "ClientSecret":"bv5f6QA6FZ5Xz{wgmiZE]vgn7VzFOsftHKVVTJv[CmekW51/ZBgiy{hI",
+      "host": "http://localhost:3000",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0IiwiZW1haWwiOiJ1MkBlbWFpbC5vcmciLCJuYW1lIjoiVXNlciAyIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwIiwiZXhwIjoxNzczOTEyMTA1LCJpYXQiOjE3NzM4MjU3MDV9.f-vYfoSJpbPxPSWUtIevDMwk6ygKrAQzMXvfee0J7Y0",
+      "tokenOl": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkpSY080bnhzNWpnYzhZZE43STJoTE80Vl9xbDFiZG9pTVhtY1lnSG00SHMifQ.eyJqdGkiOiJGQ0lPRTBvS2ZVTXhubFpmNnhDY2QiLCJzdWIiOiIyMjYyNzc4NTYiLCJpc3MiOiJodHRwczovL2Ficy1jYm4tZGV2Lm9uZWxvZ2luLmNvbS9vaWRjLzIiLCJpYXQiOjE3NDkwOTAwNjcsImV4cCI6MTc0OTE3NjQ2Nywic2NvcGUiOiJvcGVuaWQgcHJvZmlsZSIsImF1ZCI6ImU4ZTk3ZTIwLTU1ZmQtMDEzYy0xMDQ3LTBhNTY5NDVhYTFjNDIzMjc5OCJ9.IOZ9LPFpOWYn56V5_Ym5s_BvNW3EjJoo7s4aV6tyyqrpNKGxXh4EN3UZIhcLDJjCeduiq3zkihCi4ffYIt5u_rggjw0PO9PnoATrIvn6BUYmjiHncXTBLyOayfoxwd0FbpQgeolQOowvIHtFEjKZESkQFbjs0aP8W9eg4foG_ZxVvoyANqUJDqWMSvUO0rc3Id7YkG4vgqmNjUNMIvutVofkw7h8S3QgSknLds4BblLmB6_8gzks-CuAy2AGsEhucDwOhZJBW85ytSqnogNn750FTfhIlIsFuXtCSSR2OGM1J9qebTHXsmjhNcg2G7KDtt7-97YOCjHpncX5fpsNpg"
+    }
+  },
+  "terminal.integrated.profiles.windows": {
+    "Custom CMD": {
+      "path": "C:\\Windows\\System32\\cmd.exe",
+      "args": ["/k", "c:/Users/gaby/.venv/base/Scripts/activate.bat"]
+    }
+  },
+  "terminal.integrated.defaultProfile.windows": "Custom CMD",  
+  "python.defaultInterpreterPath": "c:/Users/gaby/.venv/base/Scripts/python.exe"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

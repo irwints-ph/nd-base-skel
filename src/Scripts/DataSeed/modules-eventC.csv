@@ -1,0 +1,9 @@
+moduleId,moduleName,parentId,menuLevel,sortOrder,iconClass,componentName,controllerName,feUrl,isParent,isCrud,editComponent,addComponent,tranCode,isAdmin,isActive,createdBy
+1,Tools,,1,100,fa-gear,ToolsComponent,ToolsController,/tools,TRUE,FALSE,EditTools,AddTools,TOOLS01,TRUE,TRUE,1
+2,Menu Maintenance,1,2,1,fa-list,ModulesPage,Modules,/modules,FALSE,TRUE,EditModule,EditModule,MC01,TRUE,TRUE,1
+3,Role Maintenance,1,2,2,fa-user-shield,RolesPage,Roles,/roles,FALSE,TRUE,EditRoleDashboard,EditRole,RC01,TRUE,TRUE,1
+4,User Maintenance,1,2,3,fa-users,UsersPage,Users,/users,FALSE,TRUE,EditUserDashboard,EditUser,UC01,TRUE,TRUE,1
+5,Application Query,1,2,5,fa-search,QueryPage,QueryController,/query,FALSE,FALSE,EditQuery,AddQuery,QQ03,TRUE,TRUE,1
+6,Application Information,1,2,6,fa-info-circle,EnvViewer,InfoController,/about,FALSE,FALSE,EditInfo,AddInfo,IQ03,TRUE,TRUE,1
+10,Scout,,1,10,fa-eye,ScoutComponent,ScoutController,/scout,FALSE,FALSE,EditScout,AddScout,SC01,FALSE,TRUE,1
+11,Talents,,1,11,fa-star,TalentComponent,TalentController,/talents,FALSE,FALSE,EditTalent,AddTalent,TL01,FALSE,TRUE,1

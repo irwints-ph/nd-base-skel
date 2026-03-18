@@ -1,0 +1,9 @@
+moduleId,moduleName,parentId,menuLevel,sortOrder,iconClass,componentName,controllerName,feUrl,isParent,isCrud,editComponent,addComponent,tranCode,isAdmin,isActive,createdBy
+1,User Settings,,1,100,fa-user-cog,,,/tools,TRUE,FALSE,EditTools,AddTools,TOOLS01,TRUE,TRUE,1
+3,User Roles,1,2,2,fa-user-shield,RolesPage,Roles,/user/user-role,FALSE,TRUE,EditRoleDashboard,EditRole,RC01,TRUE,TRUE,1
+4,Users,1,2,3,fa-users,UsersPage,Users,/user/users,FALSE,TRUE,EditUserDashboard,EditUser,UC01,TRUE,TRUE,1
+6,Application Information,1,2,6,fa-info-circle,EnvViewer,InfoController,/about,FALSE,FALSE,EditInfo,AddInfo,IQ03,TRUE,TRUE,1
+10,Report,,1,10,fa-file-alt,ReportPage,Report,/report,false,false,,,RQ03,false,true,1
+20,Maintenance,,1,20,fa-cogs,,,/maintenance,true,false,,,MM01,false,true,1
+21,CC/IO,20,2,1,,CCIOPage,CCIO,/maintenance/cc-io,false,true,EditCCIO,EditCCIO,CC01,false,true,1
+22,Business Unit,20,2,2,,BusUnitPage,BusUnit,/maintenance/business-unit,false,true,EditBusUnit,EditBusUnit,BU01,false,true,1

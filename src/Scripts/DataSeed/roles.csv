@@ -1,0 +1,5 @@
+roleId,roleName,roleDescription,parentId,createdBy,isAdmin,isActive
+1,Super Admin,Full system access,,1,TRUE,TRUE
+2,Admin,Administrative access,,1,TRUE,TRUE
+3,User,Standard user access,,1,FALSE,TRUE
+4,Guest,Limited read-only access,,1,FALSE,TRUE
