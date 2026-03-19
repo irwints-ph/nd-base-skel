@@ -2,6 +2,8 @@ import fs from 'fs'
 // import path from 'path'
 // import { Sequelize } from 'sequelize'
 import { sequelize } from '@Infrastructure/Core/sequelize.ts'
+// import { registerAuditHooks } from "@Infrastructure/Audit/registerAuditHooks.ts";
+// import { InitModels } from "@Infrastructure/Core/InitModels.ts";
 
 export function readCsvSimple(filePath: string): Array<Record<string, string>> {
   if (!fs.existsSync(filePath)) return []
@@ -26,6 +28,13 @@ export async function bulkInsertSafe(tableName: string, objects: any[]) {
     console.log(`No rows to insert into ${tableName}`)
     return false;
   }
+  // // if(doAudit){
+  //   // Ensure models are initialized
+  //   InitModels(sequelize);
+  //   // ✅ Register hooks for seeder context
+  //   registerAuditHooks(sequelize);
+  // // }
+
   console.log(`⚡ Seeding ${tableName}...`);
   const now = new Date()
 

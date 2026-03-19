@@ -1,5 +1,5 @@
 // ===================================================================
-// 🖥️ src/api/controllers/Base/UserController.ts
+// 🖥️ src/01-Api/Controllers/Base/UserController.ts
 // ===================================================================
 import { Request, Response } from "express";
 import { BaseApiController } from "../BaseApiController.ts";
@@ -82,7 +82,7 @@ export class UserController extends BaseApiController {
         email: userIn.email || "",
         isEmailValidated: userIn.isEmailValidated || false,
         issuer: localIssuer,
-        createdName: currentUser?.username ?? "system",
+        createdName: currentUser?.fullname ?? "system",
       };
 
       const handler = new CreateUserHandler();
@@ -136,9 +136,11 @@ export class UserController extends BaseApiController {
   // DELETE /:userId
   async deleteUser(req: Request, res: Response) {
     const userId = Number(req.params.userId);
+
     try {
       const currentUser = await this.getCurrentUser(req)
-
+      if(currentUser?.userId == userId)
+        return this.error(res, `Cannot delete own data`);
       const cmd:DeleteUserCommand = {
         userId:userId,
         deletedBy: currentUser?.userId ?? -1,

@@ -11,17 +11,6 @@ import {
 } from "../Core/Serialization.ts";
 import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
 
-// // const c = AuditLogs.getAttributes(tableName); //AuditLogs.tableName
-// // Assuming AuditLogs is a Sequelize model
-// // const attributes = AuditLogs.getAttributes();
-
-// const model = sequelize.models['AuditLogs']; // or use the actual table name if mapped
-// // const attributes = model.getAttributes();
-// // This gives you an object where keys are column names
-// // and values are the attribute definitions
-// // console.log("AuditLogs attributes",attributes);
-// console.log("sequelize.models",sequelize.models);
-
 const AuditLogsTableName = DatabaseNamingConvention.getName("AuditLogs");
 const EXCLUDED = new Set<string>([AuditLogsTableName]);
 

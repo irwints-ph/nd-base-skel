@@ -6,7 +6,6 @@ import { AuditContext } from "./AuditContext.ts";
 import { AuditHandler } from "./AuditHandler.ts";
 
 export function registerAuditHooks(sequelize: Sequelize) {
-  if ((sequelize as any).__auditHooksRegistered) return;
   (sequelize as any).__auditHooksRegistered = true;
 
   const handle = async (
@@ -16,6 +15,10 @@ export function registerAuditHooks(sequelize: Sequelize) {
   ) => {
     const auditInfo = AuditContext.get();
     const showLog = options?.transaction?.__auditMeta?.showlog;    
+    // // Test Logs
+    // const modelName = instance.constructor.name;
+    // const tableName = (instance.constructor as any).tableName;
+    // console.log(`✅ ${action} → Model: ${modelName}, Table: ${tableName}`);
 
     // ✅ Resolve PK fields
     const pkFields = Object.keys((instance.constructor as any).primaryKeys ?? {});

@@ -1,16 +1,18 @@
 // ===========================================
 // 🧩 Domain/Entities/Auth/Role.ts
 // ===========================================
+import { AppTime } from "@Infrastructure/Core/AppTime.ts";
 
 export class Role {
   public RoleId?: number;
   public RoleName: string;
   public RoleDescription: string;
-  public ParentId?: number;
+  public ParentId?: number | null;
   public CreatedBy: number;
   public IsAdmin: boolean;
   public IsActive: boolean;
-  public UpdatedBy?: number;
+  public UpdatedBy?: number| null;
+  public UpdatedOn?: Date| null;
 
   // ---------------------------------------------------------
   // Constructor
@@ -22,6 +24,8 @@ export class Role {
     createdBy: number;
     isAdmin?: boolean;
     isActive?: boolean;
+    updatedBy?: number| null;
+    updatedOn?: Date| null;
     roleId?: number;
   }) {
     this.RoleId = params.roleId;
@@ -31,6 +35,8 @@ export class Role {
     this.CreatedBy = params.createdBy;
     this.IsAdmin = params.isAdmin ?? false;
     this.IsActive = params.isActive ?? true;
+    this.UpdatedBy = params.updatedBy;
+    this.UpdatedOn = params.updatedOn;
   }
 
   // ---------------------------------------------------------
@@ -52,7 +58,7 @@ export class Role {
   public updateDetails(params: {
     roleName?: string;
     roleDescription?: string;
-    parentId?: number;
+    parentId?: number | null;
     updatedBy: number;
     isAdmin?: boolean;
     isActive?: boolean;
@@ -78,5 +84,7 @@ export class Role {
     }
 
     this.UpdatedBy = params.updatedBy;
+    this.UpdatedOn = new Date();
+
   }
 }

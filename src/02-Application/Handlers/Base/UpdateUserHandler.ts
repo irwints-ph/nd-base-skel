@@ -23,8 +23,8 @@ export class UpdateUserHandler {
     // --------- 5️⃣ Persist with Unit of Work ----------
     const action = async (uow: any) => {
       const repo = this.userRepoFactory();
-      // repo.session = uow.session; // attach session
-      const ormUser = await repo.getByIdOrm(cmd.userId,uow.session)
+      repo.session = uow.session; // attach session
+      const ormUser = await repo.getByIdOrm(cmd.userId)
       if (!ormUser) {
         throw new Error(`User not found`);
       }
@@ -44,15 +44,17 @@ export class UpdateUserHandler {
       // UserMapper.updateOrmFromDomain(ormUser,domainUser);
 
       // return ormUser
-      return await repo.save(domainUser,uow.session);
+      // return await repo.save(domainUser);
+      const saved = await repo.save(domainUser);
+      return saved;
     };
 
     const ormUser:UserMstr | void  = await performRepoAction({
-      changedBy: cmd.username,
+      changedBy: cmd.updatedName,
       actionName: "UpdateUser",
       action,
-      idFields: ["UserId"],
-      showlog: false,
+      // idFields: ["UserId"],
+      showlog: true,
     });
 
     // --------- 7️⃣ Return flat DTO ----------

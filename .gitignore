@@ -1,3 +1,5 @@
 node_modules/
 dist/
 
+node-app.sqlite3*
+.vscode/settings.json

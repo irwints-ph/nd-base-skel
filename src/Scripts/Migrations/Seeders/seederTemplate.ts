@@ -4,7 +4,7 @@
 
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
-import { Model, ModelStatic } from "sequelize";
+import { Model, ModelStatic, Transaction } from "sequelize";
 
 import { sequelize } from "@Infrastructure/Persistence/AppDBContext.ts";
 import { AuditContext, AuditInfo } from "@Infrastructure/Audit/AuditContext.ts";
@@ -26,7 +26,8 @@ import {
 // 🔧 CONFIG
 // ------------------------------------------------------------------
 export const doAudit = false;
-const showAuditLogs = true; //Will show log only if doAudit is true and this is true
+const showAuditLogs = doAudit ? true : doAudit; //true or false middle
+
 
 // ------------------------------------------------------------------
 // 🧱 MAIN SEED FUNCTION
@@ -51,11 +52,12 @@ export async function seedCsvEntities<T extends Model>({
   showLineLog?: boolean;
 }): Promise<boolean> {
 
-  // // Ensure models are initialized
-  // InitModels(sequelize);
-
-  // // ✅ Register hooks for seeder context
-  // registerAuditHooks(sequelize);
+  if(doAudit){
+    // Ensure models are initialized
+    InitModels(sequelize);
+    // ✅ Register hooks for seeder context
+    registerAuditHooks(sequelize);
+  }
 
   setBaseDir(dataDir);
 
@@ -95,7 +97,7 @@ export async function seedCsvEntities<T extends Model>({
       sequelize,
       {
         idFields,
-        showlog: doAudit ? showAuditLogs : doAudit,
+        showlog: showAuditLogs,
       },
       tx
     );
@@ -129,6 +131,13 @@ export async function seedCsvEntities<T extends Model>({
           if (showLineLog) {
             logEntityInsert(entity, dbModel.name, row);
           }
+          // if (showAuditLogs) {
+          //   const keyValues: Record<string, any> = {};
+          //   for (const field of idFields ?? []) {
+          //     keyValues[field] = entity?.get(field);
+          //   }
+          //   console.log(`🔹 Audit: ${tableName} Insert ${JSON.stringify(keyValues)}`);
+          // }
 
           successCount++;
         } catch (ex) {
@@ -138,8 +147,8 @@ export async function seedCsvEntities<T extends Model>({
       }
 
       // ✅ NOW THIS IS SAFE
-      await uow.commit();   // ← audit happens here
-      // await tx.commit();    // ← actual DB commit:Removed already done in uow.commit
+      // await uow.commit();   // ← audit happens here: Use this if hook is turned off
+      await tx.commit();    // ← actual DB commit: Use this if hook is turned on
 
       return true;
     } catch (ex) {
@@ -155,7 +164,6 @@ export async function seedCsvEntities<T extends Model>({
   // 🚀 EXECUTION (WITH OR WITHOUT AUDIT)
   // ------------------------------------------------------------------
   let result: boolean;
-
   if (doAudit) {
     const auditInfo: AuditInfo = {
       changedBy,
@@ -163,6 +171,7 @@ export async function seedCsvEntities<T extends Model>({
     };
 
     result = await AuditContext.run(auditInfo, runSeeder);
+
   } else {
     result = await runSeeder();
   }

@@ -1,7 +1,6 @@
 // ===================================================================
-// 🟢 App/Application/Queries/Base/UserQueryService.ts
+// 🟢 src/02-Application/Queries/Base/UserQueryService.ts
 // ===================================================================
-// src/application/services/UserQueryService.ts
 import { Op, fn, col, where } from "sequelize";
 
 import UserMstr from "@Infrastructure/Persistence/Models/Base/UserMstr.ts";

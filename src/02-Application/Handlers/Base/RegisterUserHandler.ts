@@ -4,7 +4,7 @@
 
 import { UserRepository } from "@Infrastructure/Persistence/Repositories/Base/UserRepository.ts";
 import { User } from "@Domain/Entities/Base/User/User.ts";
-import UserDtoMapper from "@Infrastructure/Persistence/Mappers/Base/UserDtoMapper.ts";
+import { UserDtoMapper } from "@Infrastructure/Persistence/Mappers/Base/UserDtoMapper.ts";
 import { UserCreateSchema } from "@Contracts/Base/Users/UserSchemas.ts";
 import { sequelize } from "@Infrastructure/Persistence/AppDBContext.ts";
 import { buildUser } from "@Application/Services/Base/UserFactory.ts";

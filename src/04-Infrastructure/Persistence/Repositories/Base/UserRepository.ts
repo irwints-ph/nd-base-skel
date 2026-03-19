@@ -1,7 +1,6 @@
 // ===================================================================
 // 🧩 App/Infrastructure/Persistence/Repositories/Base/UserRepository.ts
 // ===================================================================
-
 import { Op, Transaction } from "sequelize";
 import { sequelize } from "../../AppDBContext.ts";
 
@@ -48,6 +47,7 @@ export class UserRepository implements IUserRepository {
     return ormUser;
     // return domainUser.withId(ormUser.UserId);
   }
+
   // -------------------------------------------------------------------
   // 🔹 UPDATE USER
   // -------------------------------------------------------------------
@@ -71,16 +71,64 @@ export class UserRepository implements IUserRepository {
 
     return ormUser;
   }
-
   // -------------------------------------------------------------------
-  // 🔹 DELETE USER
+  // 🔹 DELETE USER (with Profile, Contacts, SSO audited)
   // -------------------------------------------------------------------
   async delete(OrmUser: UserMstr): Promise<UserMstr | void> {
-    const dbOrmUser = await UserMstr.findByPk(OrmUser.UserId);
-    if (!dbOrmUser) return;
-    await dbOrmUser.destroy({ transaction: this.session });
-    return OrmUser;
+    const ormUser = await UserMstr.findByPk(OrmUser.UserId, {
+      include: [
+        { model: ContactMstr, as: "Contacts" },
+        { model: SsoKey, as: "Sso" },
+        { association: "Profile" }
+      ],
+      transaction: this.session
+    });
+
+    if (!ormUser) return;
+    // Destroy ormUser should be enough to delete all due to cascade
+    // Delete one at a time for auditing, 
+    // 🔹 Destroy related entities first so hooks fire
+    if (ormUser.Profile) {
+      await ormUser.Profile.destroy({ transaction: this.session });
+    }
+
+    if (ormUser.Contacts) {
+      for (const c of ormUser.Contacts) {
+        await c.destroy({ transaction: this.session });
+      }
+    }
+
+    if (ormUser.Sso) {
+      await ormUser.Sso.destroy({ transaction: this.session });
+    }
+
+    // 🔹 Finally destroy the user itself
+    await ormUser.destroy({ transaction: this.session });
+
+    return ormUser;
   }
+
+  // // -------------------------------------------------------------------
+  // // 🔹 DELETE USER
+  // // -------------------------------------------------------------------
+  // async delete(OrmUser: UserMstr): Promise<UserMstr | void> {
+  //   // const ormUser = await UserMstr.findByPk(OrmUser.UserId);
+  //   const ormUser = await UserMstr.findByPk(OrmUser.UserId, {
+  //     include: [
+  //       { model: ContactMstr, as: "Contacts" },
+  //       { model: SsoKey, as: "Sso" },
+  //       { association: "Profile" }
+  //     ],
+  //     transaction: this.session
+  //   });
+
+  //   if (!ormUser) return;
+  //   //For Audit ?
+  //   const domainUser = UserMapper.toDomain(ormUser);
+  //   await UserMapper.updateOrmFromDomain(OrmUser, domainUser);
+  //   await ormUser.destroy({ transaction: this.session });
+  //   return OrmUser;
+  // }
 
   // -------------------------------------------------------------------
   // 🔹 GET BY ID
@@ -112,12 +160,6 @@ export class UserRepository implements IUserRepository {
       const ormUser = await UserMstr.findOne({
         where: { Username: username },
         include: [{ association: "Profile" }, { model: ContactMstr, as: "Contacts" }, { model: SsoKey, as: "Sso" }],
-
-        // include: [
-        //   { model: ContactMstr, as: "Contacts" },
-        //   { model: SsoKey, as: "Sso" },
-        //   { association: "Profile" }
-        // ],
         transaction: this.session,
       });
       return ormUser ? UserMapper.toDomain(ormUser) : null;
@@ -191,7 +233,7 @@ export class UserRepository implements IUserRepository {
   }
 
   // -------------------------------------------------------------------
-  // 🔹 SAVE DOMAIN USER TO ORM
+  // 🔹 SAVE DOMAIN USER TO ORM - For existing users
   // -------------------------------------------------------------------
   async save(domainUser: User): Promise<UserMstr | void> {
     const ormUser = await UserMstr.findByPk(domainUser.id, {

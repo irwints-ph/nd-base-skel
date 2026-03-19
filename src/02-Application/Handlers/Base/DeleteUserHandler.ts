@@ -22,23 +22,23 @@ export class DeleteUserHandler {
     // --------- 5️⃣ Persist with Unit of Work ----------
     const action = async (uow: any) => {
       const repo = this.userRepoFactory();
-      // repo.session = uow.session; // attach session
-      const ormUser = await repo.getByIdOrm(cmd.userId,uow.session)
+      repo.session = uow.session; // attach session
+      const ormUser = await repo.getByIdOrm(cmd.userId)
       if (!ormUser) {
         throw new Error(`User not found`);
       }
 
 
       // return ormUser
-      return await repo.delete(ormUser,uow.session);
+      return await repo.delete(ormUser);
     };
 
     const ormUser:UserMstr | void  = await performRepoAction({
       changedBy: cmd.deletedName,
       actionName: "DeleteUser",
       action,
-      idFields: ["UserId"],
-      showlog: false,
+      // idFields: ["UserId"],
+      showlog: true,
     });
 
     // --------- 7️⃣ Return flat DTO ----------

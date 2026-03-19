@@ -1,14 +1,10 @@
 // src/middleware/globalInterceptor.ts
 import { Request, Response, NextFunction } from "express";
-// import { AuthQueryService } from "@/02-application/services/auth/AuthQueryService.ts";
-// import { IAuthQueryService } from "@/02-application/interfaces/auth/IAuthQueryService.ts";
-// import { IModuleRepository } from "@/02-application/interfaces/persistence/IModuleRepository.ts";
-// import { ModuleRepository } from "../persistence/repositories/base/ModuleRepository.ts";
-
+// import { IAuthQueryService } from "@Domain/Interfaces/Auth/IAuthQueryService.ts";
+import { AuthQueryService } from "@Application/Queries/Auth/AuthQueryService.ts";
+import { sequelize } from "@Infrastructure/Core/sequelize.ts";
 import { logger } from "@Infrastructure/Core/Logger.ts";
 import { EnvConfig } from '@Infrastructure/Core/Config.ts'
-// import { IUserRepository } from "@Domain/Interfaces/Base/IUserRepository.ts";
-// import type { UserFlatBase } from "01-Contracts/Base/Users/UserSchemas.ts"
 
 import { getActiveUser } from "@Infrastructure/Auth/RequestUtils.ts"
 
@@ -62,56 +58,54 @@ export async function GlobalInterceptor(
     if (user.userId === EnvConfig.admin.superRoot) {
       return next();
     }
-    logger.info(`[Middleware] skipping for Username ${user.userId} unit IModuleRepository and others are created`);
-    // // ----------------------------
-    // // Load user modules via AuthQueryService
-    // // ----------------------------
-    
-    // const moduleRepo: IModuleRepository = new ModuleRepository();
-    // const authService: IAuthQueryService = new AuthQueryService(moduleRepo);
-    // const userModules = await authService.getAuthorizedModulesByUser(user.userId);
+    // logger.info(`[Middleware] skipping for Username ${user.userId} unit IModuleRepository and others are created`);
+    // ----------------------------
+    // Load user modules via AuthQueryService
+    // ----------------------------
+    const authService = new AuthQueryService(sequelize);;
+    const userModules = await authService.getAuthorizedModulesByUser(user.userId);
 
-    // // ----------------------------
-    // // Determine controller name from path
-    // // Remove '/api' prefix if present
-    // // ----------------------------
-    // const segments = path.replace(/^\/+/, "").split("/");
-    // if (segments[0] === "api") segments.shift();
-    // const controllerName = segments[0];
-    // if (!controllerName) {
-    //   return res.status(403).json({
-    //     success: false,
-    //     message: "Forbidden: Missing controller metadata",
-    //   });
-    // }
+    // ----------------------------
+    // Determine controller name from path
+    // Remove '/api' prefix if present
+    // ----------------------------
+    const segments = path.replace(/^\/+/, "").split("/");
+    if (segments[0] === "api") segments.shift();
+    const controllerName = segments[0];
+    if (!controllerName) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: Missing controller metadata",
+      });
+    }
 
-    // // ----------------------------
-    // // Check access
-    // // ----------------------------
-    // const curControllerName = controllerName.toLowerCase();
-    // const allowed = userModules.some(
-    //   mod =>
-    //     mod.module.controllerName?.toLowerCase() === curControllerName &&
-    //     mod.authorization[0] === "Y"
-    // );
+    // ----------------------------
+    // Check access
+    // ----------------------------
+    const curControllerName = controllerName.toLowerCase();
+    const allowed = userModules.some(
+      mod =>
+        mod.controllerName?.toLowerCase() === curControllerName &&
+        mod.authorization[0] === "Y"
+    );
 
-    // if (!allowed) {
-    //   logger.error(`[Middleware] Access denied to path ${method} ${path} for user ID ${user.userId}`);
-    //   return res.status(403).json({
-    //     success: false,
-    //     message: `Forbidden: Access denied to ${method} ${curControllerName} module`,
-    //   });
-    // }
+    if (!allowed) {
+      logger.error(`[Middleware] Access denied to path ${method} ${path} for user ID ${user.userId}`);
+      return res.status(403).json({
+        success: false,
+        message: `Forbidden: Access denied to ${method} ${curControllerName} module`,
+      });
+    }
 
-    // // ----------------------------
-    // // Continue to next middleware / route
-    // // ----------------------------
+    // ----------------------------
+    // Continue to next middleware / route
+    // ----------------------------
     next();
   } catch (err: any) {
     logger.error(`Authorization failed: ${err.message}`);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: `Internal server error: ${err.message}`,
     });
   }
 }
