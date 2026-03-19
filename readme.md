@@ -41,10 +41,6 @@ git update-index --skip-worktree user.http
 git ls-files -v | findstr settings.json
 git ls-files -v | findstr RolesRoutes.ts
 
-git add .
-git commit -m "Update User Routes"
-git push
-
 ### This will delete files on the repo but not on local
 git rm --cached user.http
 git rm --cached node-app.sqlite3
@@ -64,6 +60,13 @@ git rm --cached node-app.sqlite3-wal
 | Local file kept          | ✔️                 | ✔️                                              | ✔️                      | ✔️                                           | ✔️                                                 |
 | Changes pushed to remote | ❌                  | ✔️                                              | ❌                       | ✔️                                           | ❌                                                  |
 | Revert command           | n/a                | `git update-index --no-assume-unchanged <file>` | n/a                     | `git update-index --no-skip-worktree <file>` | n/a                                                |
+
+### git update
+```bash
+git add .
+git commit -m "Update Comment"
+git push
+```
 
 ### Alias Config in TS
 ```ts
