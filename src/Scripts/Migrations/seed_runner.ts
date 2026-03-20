@@ -20,7 +20,7 @@ export async function runSeeders(
   if (noErrors) noErrors = await SeedUsers(dataDir, noErrors)
   if (noErrors) noErrors = await SeedModules(dataDir, noErrors, cs)
 
-    if (noErrors) noErrors = await SeedRoles(dataDir, noErrors)
+  if (noErrors) noErrors = await SeedRoles(dataDir, noErrors)
   if (noErrors) noErrors = await seed_role_modules(dataDir, noErrors, cs)
   if (noErrors) noErrors = await seed_role_users(dataDir, noErrors)
 

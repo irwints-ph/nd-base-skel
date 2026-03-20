@@ -1,9 +1,6 @@
 import fs from 'fs'
-// import path from 'path'
-// import { Sequelize } from 'sequelize'
 import { sequelize } from '@Infrastructure/Core/sequelize.ts'
-// import { registerAuditHooks } from "@Infrastructure/Audit/registerAuditHooks.ts";
-// import { InitModels } from "@Infrastructure/Core/InitModels.ts";
+import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
 
 export function readCsvSimple(filePath: string): Array<Record<string, string>> {
   if (!fs.existsSync(filePath)) return []
@@ -12,49 +9,54 @@ export function readCsvSimple(filePath: string): Array<Record<string, string>> {
   if (lines.length === 0) return []
   const headers = lines[0].split(',').map(h => h.trim())
   const rows: Array<Record<string, string>> = []
+
   for (let i = 1; i < lines.length; i++) {
     const cols = lines[i].split(',')
     const obj: Record<string, string> = {}
+
     for (let j = 0; j < headers.length; j++) {
-      obj[headers[j]] = (cols[j] ?? '').trim()
+      const originalKey = headers[j]
+      const dbKey = DatabaseNamingConvention.getName(originalKey) // convert to DB column name
+      obj[dbKey] = (cols[j] ?? '').trim()
     }
+
     rows.push(obj)
   }
+
   return rows
 }
 
 export async function bulkInsertSafe(tableName: string, objects: any[]) {
   if (!objects || objects.length === 0) {
     console.log(`No rows to insert into ${tableName}`)
-    return false;
+    return false
   }
-  // // if(doAudit){
-  //   // Ensure models are initialized
-  //   InitModels(sequelize);
-  //   // ✅ Register hooks for seeder context
-  //   registerAuditHooks(sequelize);
-  // // }
 
-  console.log(`⚡ Seeding ${tableName}...`);
+  console.log(`⚡ Seeding ${tableName}...`)
   const now = new Date()
 
   const objs = objects.map(o => {
-    const processed = { ...o }
+    const processed: Record<string, any> = {}
 
-    // Convert empty strings to null for foreign key fields
-    Object.keys(processed).forEach(key => {
-      if (processed[key] === '' && (key.toLowerCase().includes('id') || key.toLowerCase().includes('parent'))) {
-        processed[key] = null
+    // Convert keys to DB naming convention and handle empty strings
+    Object.keys(o).forEach(key => {
+      const dbKey = DatabaseNamingConvention.getName(key)
+      let value = o[key]
+      if (value === '' && (key.toLowerCase().includes('id') || key.toLowerCase().includes('parent'))) {
+        value = null
       }
+      processed[dbKey] = value
     })
 
-    return {
-      ...processed,
-      CreatedOn: processed.CreatedOn ? new Date(processed.CreatedOn) : now,
-      CreatedBy: processed.CreatedBy ?? 1,
-      UpdatedOn: null,   // <- explicitly null
-      UpdatedBy: null,   // <- explicitly null
-    }
+    // Add audit fields with DB naming
+    processed[DatabaseNamingConvention.getName('CreatedOn')] = processed[DatabaseNamingConvention.getName('CreatedOn')] 
+      ? new Date(processed[DatabaseNamingConvention.getName('CreatedOn')])
+      : now
+    processed[DatabaseNamingConvention.getName('CreatedBy')] = processed[DatabaseNamingConvention.getName('CreatedBy')] ?? 1
+    processed[DatabaseNamingConvention.getName('UpdatedOn')] = null
+    processed[DatabaseNamingConvention.getName('UpdatedBy')] = null
+
+    return processed
   })
 
   // Log each row being inserted
@@ -68,10 +70,10 @@ export async function bulkInsertSafe(tableName: string, objects: any[]) {
   try {
     const qi = sequelize.getQueryInterface()
     await qi.bulkInsert(tableName, objs)
-    console.log(`✅ Inserted ${objs.length} rows into ${tableName}`);
-    return true;
+    console.log(`✅ Inserted ${objs.length} rows into ${tableName}`)
+    return true
   } catch (err) {
-    console.error(`❌ Failed inserting into ${tableName}:`, err);
-    return false;
+    console.error(`❌ Failed inserting into ${tableName}:`, err)
+    return false
   }
 }

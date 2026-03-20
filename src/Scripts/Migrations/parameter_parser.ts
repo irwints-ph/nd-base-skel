@@ -71,9 +71,14 @@ export function parseArgs(argv: string[]): SeedArgs {
         break
 
       case "--no-seed":
-      case "-n":
+      case "-ns":
         args.noSeed = true
         break
+      case "-co":
+        args.createDb = true
+        args.reset = false;
+        args.noSeed = false;
+        break;
 
       case "--cs":
         if (i + 1 < argv.length) args.cs = argv[++i]

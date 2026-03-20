@@ -102,3 +102,46 @@ export const doAudit = true | false;
 - Forgetting to clear context in seeders risks **cross-record contamination**.  
 
 ---
+
+> This will already have audit due to registerAuditHooks but no change by and correlationId
+
+```ts
+  const domainUser:User | null = await repo.getById(ormUser.UserId);
+  if(domainUser){
+    domainUser.addSso(
+      ssokey,          // OneLogin ID
+      1,               // OneLogin type
+      ormUser.UserId   // Created by the sso user loginin
+    );
+    domainUser.validateEmail(email);
+    const updatedOrmUSer = await repo.save(domainUser);          
+    return updatedOrmUSer ? UserDtoMapper.toOrmUserFlatBase(updatedOrmUSer) : null;
+  }
+```
+> To include change by and correlationId, run thru 
+```ts
+import { performRepoAction } from "@Infrastructure/Persistence/Services/RepoActionService.ts";
+
+  const action = async (uow: any) => {
+    repo.session = uow.transaction;// Good for showing log but has error on sqlite for OL Registration
+    const domainUser:User | null = await repo.getById(ormUser.UserId);
+    if(domainUser){
+      domainUser.addSso(
+        ssokey,          // OneLogin ID
+        1,               // OneLogin type
+        ormUser.UserId   // Created by the sso user loginin
+      );
+      domainUser.validateEmail(email);
+      const updatedOrmUSer = await repo.save(domainUser);          
+      return updatedOrmUSer ? UserDtoMapper.toOrmUserFlatBase(updatedOrmUSer) : null;
+    }
+  };
+  const OutDomainUser = await performRepoAction({
+    changedBy: ormUser.Username ?? "",
+    actionName: "LinkSsoEmail",
+    action,
+    // idFields: ["UserId"], - not needed, sincwe this is automatically determined thru registerAuditHooks: Resolve PK fields
+    showlog: false,
+  });
+  return OutDomainUser; //Updated ORM Values
+```

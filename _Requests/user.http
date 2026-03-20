@@ -1,0 +1,141 @@
+
+### home
+GET {{host}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### health
+GET {{host}}/health
+Content-Type: application/json
+
+
+#### login
+POST {{host}}/api/auth/token
+# Content-Type: application/json
+Content-Type: application/x-www-form-urlencoded
+X-Client-ID: {{ClientId}}
+X-Client-Secret: {{ClientSecret}}
+
+username=root
+&password=1
+
+#### login
+POST {{host}}/api/auth/token
+# Content-Type: application/json
+Content-Type: application/x-www-form-urlencoded
+X-Client-ID: {{ClientId}}
+X-Client-Secret: {{ClientSecret}}
+
+username=u4
+&password=@l@mm0T0
+
+#### Get User Info by token
+POST {{host}}/api/users/info
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Get User Routes
+GET {{host}}/api/modules/routes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+GET {{host}}/api/users?page=1&limit=5&sortField=userId&sortDirection=desc
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+#### List user
+GET {{host}}/api/users?page=1&limit=10&sortBy=Profile.Lastname&descending=false
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+#### Search user/for Autocomplete
+GET {{host}}/api/users/search?search=Us
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+#### Show User
+GET {{host}}/api/users/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+#### Create user
+POST {{host}}/api/users
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username" : "createu",
+  "email" : "createu@email.com",
+  "firstname": "Create",
+  "lastname": "User",
+  # "ssoId": "12345"
+  "password": "1"
+}
+
+
+#### Update User
+PUT {{host}}/api/users/6
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username":"jdoe",
+  "email":"jdoe@example.com",
+  "firstname":"John",
+  "lastname":"Doe",
+  "ssoId":null,
+  "begDate":"2025-11-24",
+  "endDate":"9999-12-31"
+}
+###
+{
+  "userId" : 6,
+  "lastname": "Doe",
+  "endDate": "9999-12-31T00:00:00"
+}
+
+
+#### DELETE user
+DELETE  {{host}}/api/users/6
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+#### Request to activate user -Should be for email
+POST {{host}}/api/auth/activate
+Content-Type: application/json
+
+{
+  "email": "u3@email.org"
+}
+
+### Verify activation
+POST {{host}}/api/auth/verify
+Content-Type: application/json
+
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1MUBlbWFpbC5vcmciLCJleHAiOjE3NTUyNTc2MDJ9.JFqW51Qz-0Y_Z5Hcp5BW5fgK2bW0d6bhUKG_jrSdLt0",
+  "passwd": "1"
+}
+
+
+#### Request for OTP for login
+POST {{host}}/api/otp/request
+Content-Type: application/json
+
+{
+  "email": "root@email.org"
+}
+
+#### Login using OTP
+POST {{host}}/api/otp/verify
+Content-Type: application/json
+
+{
+  "email": "root@email.org",
+  "otp": "392551"
+}
+

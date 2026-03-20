@@ -1,3 +1,44 @@
+// import { sequelize } from "@Infrastructure/Core/sequelize.ts"
+// import { Transaction, Model } from "sequelize";
+// import AuditLogs from "@Infrastructure/Persistence/Models/Base/AuditLogs.ts";
+
+// export class AuditHandler {
+//   private pkFields: string[];
+//   private showLog: boolean;
+
+//   constructor(pkFields: string[], showLog: boolean = false) {
+//     this.pkFields = pkFields;
+//     this.showLog = showLog;
+//   }
+
+//   private getPk(instance: Model) {
+//     const keys: Record<string, any> = {};
+//     for (const pk of this.pkFields) {
+//       keys[pk] = (instance as any)[pk];
+//     }
+//     return keys;
+//   }
+
+//   async createAudit(instance: Model, action: string, auditInfo: any) {
+//     if (this.showLog) {
+//       console.log(`→ Audit (after commit): ${instance.constructor.name} ${action}`);
+//     }
+
+//     // 🔹 Use a **new transaction** for SQLite to avoid lock conflicts
+//     await sequelize.transaction(async (tx: Transaction) => {
+//       await AuditLogs.create({
+//         TableName: instance.constructor.name,
+//         Action: action,
+//         KeyValues: JSON.stringify(this.getPk(instance)),
+//         OldValues: null,
+//         NewValues: instance.toJSON(),
+//         ChangedBy: auditInfo.changedBy,
+//         CorrelationId: auditInfo.correlationId,
+//       }, { transaction: tx });
+//     });
+//   }
+// }
+
 // ===================================================================
 // 🧩 src/infrastructure/audit/AuditHandler.ts
 // ===================================================================
@@ -12,7 +53,7 @@ import {
 import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
 
 const AuditLogsTableName = DatabaseNamingConvention.getName("AuditLogs");
-const EXCLUDED = new Set<string>([AuditLogsTableName]);
+export const TABLE_AUDIT_EXCLUDED = new Set<string>([AuditLogsTableName]);
 
 type ActionType = "INSERT" | "UPDATE" | "DELETE";
 
@@ -35,9 +76,10 @@ export class AuditHandler {
     transaction?: Transaction
   ): Promise<void> {
     const tableName = (obj.constructor as any)?.tableName;
-    if (!tableName || EXCLUDED.has(tableName)) return;
+    if (!tableName || TABLE_AUDIT_EXCLUDED.has(tableName)) return;
 
     const dedupeKey = `${tableName}-${obj.get(this.idFields[0])}-${action}`;
+    // if (this.audited.size > 0 && this.audited.has(dedupeKey)) return;
     if (this.audited.has(dedupeKey)) return;
     this.audited.add(dedupeKey);
 
@@ -48,6 +90,7 @@ export class AuditHandler {
     // Skip empty updates
     if (action === "UPDATE" && !oldValues && !newValues) return;
 
+    // console.log(`🔹 Audit: ${tableName} ${action} ${JSON.stringify(keyValues)}`);
     if (this.showlog) {
       console.log(`🔹 Audit: ${tableName} ${action} ${JSON.stringify(keyValues)}`);
       // console.log(`🔹 Audit: ${dedupeKey}`);
@@ -159,9 +202,13 @@ export class AuditHandler {
   // -----------------------------------------------------------------
   // 🔄 EXPANSION (Python parity)
   // -----------------------------------------------------------------
-
   private expandValue(value: any): any {
-    if (!value) return value;
+    if (value === null || value === undefined) return value;
+
+    // ✅ FIX: handle Date properly
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
 
     // Sequelize model
     if (value?.constructor?.tableName) {

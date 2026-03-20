@@ -3,7 +3,7 @@
 // ===================================================================
 import { Sequelize, Model } from "sequelize";
 import { AuditContext } from "./AuditContext.ts";
-import { AuditHandler } from "./AuditHandler.ts";
+import { AuditHandler, TABLE_AUDIT_EXCLUDED } from "./AuditHandler.ts";
 
 export function registerAuditHooks(sequelize: Sequelize) {
   (sequelize as any).__auditHooksRegistered = true;
@@ -15,16 +15,9 @@ export function registerAuditHooks(sequelize: Sequelize) {
   ) => {
     const auditInfo = AuditContext.get();
     const showLog = options?.transaction?.__auditMeta?.showlog;    
-    // // Test Logs
-    // const modelName = instance.constructor.name;
-    // const tableName = (instance.constructor as any).tableName;
-    // console.log(`✅ ${action} → Model: ${modelName}, Table: ${tableName}`);
 
     // ✅ Resolve PK fields
     const pkFields = Object.keys((instance.constructor as any).primaryKeys ?? {});
-      // options?.transaction?.__auditMeta?.idFields ??
-      // Object.keys((instance.constructor as any).primaryKeys ?? {});
-
     const finalPkFields = pkFields.length ? pkFields : ["id"];
 
     // ✅ Create handler per execution
@@ -35,22 +28,48 @@ export function registerAuditHooks(sequelize: Sequelize) {
         instance,
         action,
         auditInfo,
-        options?.transaction
+        options?.transaction, //undefined, //options?.transaction
       );
     } catch (err) {
       console.error("❌ Audit failed:", err);
     }
   };
+  sequelize.addHook("afterCreate", async (instance, options) => {
+    await handle(instance, "INSERT", options);
 
-  sequelize.addHook("afterCreate", (instance, options) =>
-    handle(instance, "INSERT", options)
-  );
+    // const modelName = instance.constructor.name;
+    // const tableName = (instance.constructor as any).tableName;
 
-  sequelize.addHook("afterUpdate", (instance, options) =>
-    handle(instance, "UPDATE", options)
-  );
+    // if (!(!tableName || TABLE_AUDIT_EXCLUDED.has(tableName))) {
+    //   console.log(`→ Audit: ${modelName} INSERT`);
+    // }
+  });  
 
-  sequelize.addHook("afterDestroy", (instance, options) =>
-    handle(instance, "DELETE", options)
-  );
+  sequelize.addHook("afterUpdate", async (instance, options) => {
+    await handle(instance, "UPDATE", options);
+  });
+
+  sequelize.addHook("afterDestroy", async (instance, options) => {
+    await handle(instance, "DELETE", options);
+  });
+
+  // sequelize.addHook("afterCreate", (instance, options) =>
+  //   handle(instance, "INSERT", options)
+  // );
+  //--> Error whe this is used
+  // sequelize.addHook("afterCreate", (instance, options) => {
+  //   handle(instance, "INSERT", options)
+  //   const modelName = instance.constructor.name;
+  //   const tableName = (instance.constructor as any).tableName;
+  //   if (!(!tableName || TABLE_AUDIT_EXCLUDED.has(tableName))){
+  //     console.log(`→ Audit: ${modelName} ${"INSERT"}`);
+  //   }
+  // });
+  // sequelize.addHook("afterUpdate", (instance, options) =>
+  //   handle(instance, "UPDATE", options)
+  // );
+
+  // sequelize.addHook("afterDestroy", (instance, options) =>
+  //   handle(instance, "DELETE", options)
+  // );
 }

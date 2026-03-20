@@ -32,7 +32,7 @@ export class CreateUserHandler {
     await this.handlePostActions(cmd);
 
     // 5️⃣ Return DTO
-    return UserDtoMapper.toDomainUserFlatBase(ormUser);
+    return UserDtoMapper.toOrmUserFlatBase(ormUser);
   }
 
   // -----------------------------------------------------------------
@@ -68,8 +68,7 @@ export class CreateUserHandler {
     return performRepoAction({
       changedBy: cmd.createdName ?? cmd.createdBy.toString(),
       actionName: "CreateUser",
-      // idFields: ["UserId"], // ✅ used by audit hook - Overwritten
-      showlog: true,
+      showlog: false,
 
       action: async (uow) => {
         const repo: IUserRepository = this.userRepoFactory();
@@ -81,10 +80,6 @@ export class CreateUserHandler {
         await this.handleSso(domainUser, cmd);
 
         const saved = await repo.add(domainUser);
-
-        // ❌ REMOVE THIS (hooks will handle audit)
-        // uow.trackNew(saved);
-
         return saved;
       },
     });

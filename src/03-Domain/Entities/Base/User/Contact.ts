@@ -13,6 +13,8 @@ export class Contact {
 
   CreatedBy?: number
   CreatedOn?: Date
+  UpdatedBy?: number | void
+  UpdatedOn?: Date | void
 
   UserId?: number
 

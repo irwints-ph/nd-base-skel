@@ -180,12 +180,10 @@ export class User {
     }
 
     for (const cDto of dto.contacts ?? []) {
-
       if (
         cDto.ContactTypeId &&
         existingContacts.has(cDto.ContactTypeId)
       ) {
-
         const c = existingContacts.get(cDto.ContactTypeId)!
 
         if (cDto.ContactValue)
@@ -196,12 +194,11 @@ export class User {
 
       }
       else {
-
         this.contacts.push(
           new Contact({
             contactTypeId: cDto.ContactTypeId,
             contactValue: cDto.ContactValue,
-            isPrimary: cDto.IsPrimary ?? false
+            isPrimary: cDto.IsPrimary ?? false,
           })
         )
 
@@ -224,20 +221,19 @@ export class User {
       throw new Error("SSO ID is required")
 
     if (this.sso) {
-
       this.sso.updateSso(ssoId, createdBy)
-
     }
     else {
-
       this.sso = new Sso({
         type_id: typeId,
         sso_id: ssoId,
-        created_by: createdBy
+        created_by: createdBy,
+        created_on: AppTime.appNow()
       })
-
     }
-
+    //Also update usermaster data
+    this.updated_by = createdBy;
+    this.updated_on =  AppTime.appNow();
   }
 
   validateEmail(email: string): string {
@@ -260,14 +256,17 @@ export class User {
         c.ContactValue.toLowerCase() === email
       ) {
 
-        if (c.Validated)
-          throw new Error(
-            "Email already exists for user."
-          )
+        if (c.Validated){
+          //do nothng, already validated
+        }
+          // throw new Error(
+          //   "Email already exists for user."
+          // )
 
         else
           c.Validated = true
-
+          c.ValidationDate = AppTime.appNow();
+          
       }
 
     }

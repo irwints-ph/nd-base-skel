@@ -27,8 +27,13 @@ export class UserController extends BaseApiController {
 
   // GET /info
   async userInfo(req: Request, res: Response) {    
-    const currentUser = await this.getCurrentUser(req)
-    return res.json({ success: true, data: currentUser });
+    // const currentUser = await this.getCurrentUser(req)
+    const currentUser = (req as any).currentUser;
+    if(currentUser)
+      return res.json({ success: true, data: currentUser });
+    else{
+      return this.error(res,"User Information not found");
+    }
   }
 
   // GET /search
@@ -70,7 +75,8 @@ export class UserController extends BaseApiController {
   async createUser(req: Request, res: Response) {
     try {
       const userIn:CreateUserCommand = req.body;
-      const currentUser = await this.getCurrentUser(req)
+      // const currentUser = await this.getCurrentUser(req)
+      const currentUser = (req as any).currentUser;
       const localIssuer = `${req.protocol}://${req.get("host")}/api`;
 
       const cmd: CreateUserCommand = {
@@ -105,7 +111,8 @@ export class UserController extends BaseApiController {
     const userId = Number(req.params.userId);
     try {
       const userData = req.body;
-      const currentUser = await this.getCurrentUser(req)
+      // const currentUser = await this.getCurrentUser(req)
+      const currentUser = (req as any).currentUser;
 
       const cmd:UpdateUserCommand = {
         userId: userId,
@@ -138,7 +145,8 @@ export class UserController extends BaseApiController {
     const userId = Number(req.params.userId);
 
     try {
-      const currentUser = await this.getCurrentUser(req)
+      // const currentUser = await this.getCurrentUser(req)
+      const currentUser = (req as any).currentUser;
       if(currentUser?.userId == userId)
         return this.error(res, `Cannot delete own data`);
       const cmd:DeleteUserCommand = {

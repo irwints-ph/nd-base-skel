@@ -1,0 +1,68 @@
+# @host=http://192.168.100.114:3000
+# @host=http://localhost:3000
+
+### 📄 List User Auth
+GET {{host}}/api/modules/routes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 📄 List Modules
+GET {{host}}/api/modules?page=1&limit=5
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 🔎 Search Modules (autocomplete)
+GET {{host}}/api/modules/search?search=menu
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### 📦 Get Module by ID
+GET {{host}}/api/modules/3
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###----------------------------------------
+### ➕ Create Module
+POST {{host}}/api/modules
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "moduleId": 101,
+  "moduleName": "Reporting",
+  "parentId": 1,
+  "menuLevel": 2,
+  "sortOrder": 6,
+  "iconClass": "frmreport",
+  "componentName": "ReportsPage",
+  "feUrl": "/reports",
+  "isParent": false,
+  "isCrud": true,
+  "editComponent": "EditReport",
+  "tranCode": "RP01"
+}
+
+### ✏️ Update Module
+PUT {{host}}/api/modules
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "moduleId": 7,
+  "moduleName": "Advanced Reporting",
+  "parentId": 1,
+  "menuLevel": 2,
+  "sortOrder": 6,
+  "iconClass": "frmreport-advanced",
+  "componentName": "ReportsPage",
+  "feUrl": "/reports/advanced",
+  "isParent": false,
+  "isCrud": true,
+  "editComponent": "EditAdvancedReport",
+  "tranCode": "RP02",
+  "isActive": true 
+}
+
+### ❌ Delete Module
+DELETE {{host}}/api/modules/8
+Authorization: Bearer {{token}}

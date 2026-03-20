@@ -22,15 +22,19 @@ export class RolesController extends BaseApiController {
     super(repo);
   }
 
-  // async searchRoles(req: Request, res: Response) {
-  //   const { search = "" } = req.query;
-  //   const result = await roleQueryService.listRoles({ page: 1, pageSize: 10, search: String(search) });
-  //   return this.successBase(res, result.items, req);
-  // }
+  async searchRoles(req: Request, res: Response) {
+    const { search = "" } = req.query;
+    const result = await roleQueryService.listRoles(
+      1, //page: 
+      10, // pageSize: 
+      String(search) // search: 
+      );
+    return res.json({ success: true, data: result.items });
+  }
 
   async getRoleDetail(req: Request, res: Response) {
     const roleId = Number(req.params.roleId);
-    const currentUser = await this.getCurrentUser(req);
+    // const currentUser = await this.getCurrentUser(req);
 
     const role = await roleQueryService.getRole(roleId);
     if (!role) return this.error(res, "Role not found", 404);
@@ -40,6 +44,7 @@ export class RolesController extends BaseApiController {
 
   // async updateRole(req: Request, res: Response) {
   //   const currentUser = await this.getCurrentUser(req);
+  //   const currentUser = (req as any).currentUser;
   //   const cmd: UpdateRoleCommand = {
   //     roleId: Number(req.params.id),
   //     payload: req.body,
@@ -65,20 +70,20 @@ export class RolesController extends BaseApiController {
   //   return this.successBase(res, result);
   // }
 
-  // async getRoles(req: Request, res: Response) {
-  //   const { page = 1, limit = 10, search = "", column = "", sortBy = "", descending = false } = req.query;
+  async getRoles(req: Request, res: Response) {
+    const { page = 1, limit = 10, search = "", column = "", sortBy = "", descending = false } = req.query;
 
-  //   const result = await roleQueryService.listRoles({
-  //     page: Number(page),
-  //     pageSize: Number(limit),
-  //     search: String(search),
-  //     column: String(column),
-  //     sortBy: String(sortBy),
-  //     descending: Boolean(descending),
-  //   });
-
-  //   return this.success(res, result);
-  // }
+    const result = await roleQueryService.listRoles(
+      Number(page),           //page: 
+      Number(limit),          //pageSize: 
+      String(search),         //search: 
+      String(column),         //column: 
+      String(sortBy),         //sortBy: 
+      Boolean(descending),    //descending: 
+    );
+    //return res.json({ success: true, data: result });
+    return this.success(res, result);
+  }
 
   // async createRole(req: Request, res: Response) {
   //   const currentUser = await this.getCurrentUser(req);

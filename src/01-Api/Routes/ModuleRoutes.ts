@@ -4,8 +4,10 @@
 
 import { Router } from "express";
 import { ModuleController } from "../Controllers/Base/ModuleController.ts";
-import { GetUserRepository } from "@Infrastructure/Dependencies/UserRepoProvider.ts"
 import { routeHandler } from "@Api/Helpers/RouteHandlerFactory.ts";
 
 export const ModuleRoute = Router()
-ModuleRoute.get("/routes", routeHandler(ModuleController, GetUserRepository, "getRoutes"));
+ModuleRoute.get("/routes", routeHandler(ModuleController, "getRoutes"));
+ModuleRoute.get("/search", routeHandler(ModuleController, "searchModules"));
+ModuleRoute.get("/", routeHandler(ModuleController, "getModules"));
+ModuleRoute.get("/:moduleId", routeHandler(ModuleController, "getModuleDetail"));

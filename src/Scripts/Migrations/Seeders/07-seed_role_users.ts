@@ -1,8 +1,9 @@
 import path from 'path'
 import { readCsvSimple, bulkInsertSafe } from './_util.ts'
+import { RoleUserTableName } from "@Infrastructure/Persistence/Models/Constants/DBNames.ts";
 
 export default async function seed_role_users(dataDir: string, noErrors: boolean): Promise<boolean> {
-  const tableName = 'RoleUser';
+  const tableName = RoleUserTableName;
   try {
     const file = path.join(dataDir, 'role_users.csv')
     const rows = readCsvSimple(file)

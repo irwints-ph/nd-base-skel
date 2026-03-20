@@ -1,72 +1,70 @@
 // ===================================================================
 // 🧩 src/02-Application/UseCases/Auth/AuthenticateOLUserUseCase.ts
 // ===================================================================
-import { IUserRepository } from "@Domain/Interfaces/Base/IUserRepository.ts";
 import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
 import { logger } from "@Infrastructure/Core/Logger.ts";
 import { UserDtoMapper } from "@Infrastructure/Persistence/Mappers/Base/UserDtoMapper.ts";
-import { performRepoAction } from "@Infrastructure/Persistence/Services/RepoActionService.ts";
-import { buildUser } from "@Application/Services/Base/UserFactory.ts";
 import { User } from "03-Domain/Entities/Base/User/User.ts";
 import { UserMstr } from "04-Infrastructure/Persistence/Models/Base/index.ts";
+import { CreateOlUserCommand } from "@Application/Commands/Base/Users/CreateOlUserCommand.ts";
+import { CreateOlUserHandler } from "@Application/Handlers/Base/CreateOlUserHandler.ts";
+import { UserCreateFromSso } from "01-Contracts/Base/Users/UserSchemas.ts";
+import { GetUserRepository } from "@Infrastructure/Dependencies/UserRepoProvider.ts";
+import { performRepoAction } from "@Infrastructure/Persistence/Services/RepoActionService.ts";
 
 export class AuthenticateOLUserUseCase {
-  private userRepoFactory: () => IUserRepository;
+  // private userRepoFactory: () => IUserRepository;
+  //Mimic Dependency Injection
+  private userRepoFactory = () => GetUserRepository();
 
-  constructor(userRepoFactory: () => IUserRepository) {
-    this.userRepoFactory = userRepoFactory;
-  }
+  // constructor(userRepoFactory: () => IUserRepository) {
+  //   this.userRepoFactory = userRepoFactory;
+  // }
 
   async execute(token: string, ssokey: string) {
     const repo = this.userRepoFactory();
     const userDomain = await repo.getBySsoId(ssokey, 1);
-
+    //User with the ssoKey found, return this user
     if (userDomain) {
+      // return userDomain;
       return UserDtoMapper.toDomainUserFlatBase(userDomain);
     }
 
     try {
+      //Get OneLogin Details
       const userInfo = await this.fetchOlUserInfo(token);
       const email = userInfo.email;
 
+      //Check if email is existing on DB
       let ormUser:UserMstr | null = await repo.getByEmailOrm(email);
 
+      //Existing: Update the user with the sso and validate email if not validated
       if (ormUser) {
+        //Update user with new sso and validate email
         const action = async (uow: any) => {
-          const repo = this.userRepoFactory();
-          // repo.session = uow.session;
-
-          const ormUserTx:User | null = await repo.getByEmail(email,uow.session);
-
-          await repo.addSso(
-            ormUser!,
-            ssokey,
-            1,
-            ormUserTx?.id ?? -1,
-            uow.session,
-          );
-
-          const domainUser:User | null = await repo.getById(ormUserTx?.id ?? -1);
+          // repo.session = uow.transaction; // Good for showing log but has error on sqlite
+          const domainUser:User | null = await repo.getById(ormUser.UserId);
           if(domainUser){
-            domainUser?.validateEmail(email);
-            await repo.save(domainUser,uow.session);
+            domainUser.addSso(
+              ssokey,          // OneLogin ID
+              1,               // OneLogin type
+              ormUser.UserId   // Created by the sso user loginin
+            );
+            domainUser.validateEmail(email);
+            const updatedOrmUSer = await repo.save(domainUser);
+            return updatedOrmUSer ? UserDtoMapper.toOrmUserFlatBase(updatedOrmUSer) : null;
           }
-
-          return ormUserTx;
         };
-
         const OutDomainUser = await performRepoAction({
           changedBy: ormUser.Username ?? "",
           actionName: "LinkSsoEmail",
           action,
-          idFields: ["UserId"],
           showlog: false,
         });
-
-        return UserDtoMapper.toDomainUserFlatBase(ormUser);
+        return OutDomainUser; //Updated ORM Values
       }
-
-      // Auto create if allowed
+      //------------------------------------------------------------
+      // Not Exisitng - Auto create if allowed
       if (!EnvConfig.oidc.auto_create) {
         logger.error("💡 New Application user, OL Auto create disabled.");
         return null;
@@ -91,40 +89,30 @@ export class AuthenticateOLUserUseCase {
     return await response.json();
   }
 
-  private async createUserWithAudit(userInfo: any, ssokey: string, repo?: IUserRepository) {
-    const createdName = `onelogin-${userInfo.email}`;
-    const domainUser = await buildUser({
-      username: userInfo.preferred_username,
-      password: "", // No password for SSO users
-      firstname: userInfo.given_name,
-      lastname: userInfo.family_name,
-      createdBy: -1,
-      email: userInfo.email,
-      // isEmailValidated: true,
-    });
-    let cuwaOrmUser:UserMstr | null = await repo?.getByEmailOrm(userInfo.email) ?? null;
-    if(cuwaOrmUser !== null){
-      repo?.addSso(
-        cuwaOrmUser,
-        ssokey,
-        1,
-        -1,
-      );
+
+  private async createUserWithAudit(userInfo: any, ssokey: string) {
+    try{
+      const ssoUser: UserCreateFromSso = {
+        ssoId: ssokey,
+        username: userInfo.preferred_username,
+        email: userInfo.email,
+        firstname: userInfo.given_name,
+        lastname: userInfo.family_name,
+        password:  "", // No password for SSO users
+      };
+      const cmd: CreateOlUserCommand = {
+        user: ssoUser,
+        createdBy: -1,
+      };
+
+      const handler = new CreateOlUserHandler();
+
+      const flatUser = await handler.handle(cmd);
+      return flatUser;
     }
-    const action = async (uow: any) => {
-      const repo = this.userRepoFactory();
-      // repo.session = uow.session;
-      return await repo.add(domainUser, uow.session);
-    };
+    catch (err: any) {
+      // return this.error(res, `Faild to create: ${err.message}`)
+    }
 
-    const ormUser = await performRepoAction({
-      changedBy: createdName,
-      actionName: "CreateOlUser",
-      action,
-      idFields: ["UserId"],
-      showlog: false,
-    });
-
-    return UserDtoMapper.toDomainUserFlatBase(ormUser);
   }
 }

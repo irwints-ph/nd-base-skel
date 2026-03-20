@@ -40,7 +40,7 @@ export function showCfgLogs(server:Server, HOST:string, PORT:string | number): v
   // logger.info("🌍 Allowed Hosts: %s", EnvConfig.BACKEND_CORS_ORIGINS);
   logger.info("🌍 Allowed Hosts: %s", EnvConfig.BACKEND_CORS_ORIGINS);
   displayShow(
-    "🔑 OIDC: %s, %s | 🪪 Auto Create: %s",
+    "🔑 OIDC: %s, %s | 🪪  Auto Create: %s",
     EnvConfig.oidc.subdomain,
     EnvConfig.oidc.client_id,
     EnvConfig.oidc.auto_create

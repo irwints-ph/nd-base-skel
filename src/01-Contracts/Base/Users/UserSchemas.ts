@@ -27,11 +27,11 @@ export interface UserSchema extends UserBase {
 }
 
 export interface UserCreateFromSso {
+  ssoId: string
   username: string
   email: string
   firstname: string
   lastname: string
-  mobile?: string
   password?: string
 }
 

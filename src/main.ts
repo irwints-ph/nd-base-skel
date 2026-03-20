@@ -13,9 +13,10 @@ import AuthRoute from "@Api/Controllers/Base/AuthController.ts";
 import { HomeRoute } from "@Api/Routes/HomeRoutes.ts";
 import { UserRoute } from "@Api/Routes/UserRoutes.ts";
 import { ModuleRoute } from "@Api/Routes/ModuleRoutes.ts";
-// import ModuleRoute from "@Api/Controllers/Base/ModulesController.ts";
+import { RoleRoute } from "@Api/Routes/RoleRoutes.ts";
+
+
 // import OtpRoute from "@Api/Controllers/Base/OtpController.ts";
-// import RoleRoute from "@Api/Controllers/Base/RolesController.ts";
 // import RoleModuleRoute from "@Api/Controllers/Base/RoleModulesController.ts";
 // import UserRoleRoute from "@Api/Controllers/Base/RoleUserController.ts";
 import { getPortArg} from "main_functions.ts";
@@ -43,10 +44,11 @@ app.use("/api/auth", AuthRoute);
 app.use("/", HomeRoute);
 app.use("/api/users", UserRoute);
 app.use("/api/modules", ModuleRoute);
-// app.use("/api/otp", OtpRoute);
-// app.use("/api/roles", RoleRoute);
+app.use("/api/roles", RoleRoute);
+
 // app.use("/api/roles/modules", RoleModuleRoute);
 // app.use("/api/users", UserRoleRoute);
+// app.use("/api/otp", OtpRoute);
 
 // Attach JSON error handlers at the end
 app.use(NotFoundHandler);

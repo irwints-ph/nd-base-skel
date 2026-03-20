@@ -4,43 +4,39 @@ import { Request, Response, NextFunction } from "express"
 // import type { Logger, ILogObj } from "tslog"
 import { logger } from "@Infrastructure/Core/Logger.ts";
 import { IUserRepository } from "@Domain/Interfaces/Base/IUserRepository.ts";
-import type { UserFlatBase } from "01-Contracts/Base/Users/UserSchemas.ts"
 
-import { getActiveUser } from "@Infrastructure/Auth/RequestUtils.ts"
-
-
+// Determine current user already done in GlobalInterceptor
+// import type { UserFlatBase } from "01-Contracts/Base/Users/UserSchemas.ts"
+// import { getActiveUser } from "@Infrastructure/Auth/RequestUtils.ts"
 
 export class BaseApiController {
-  // protected readonly logger: Logger<ILogObj>
   protected readonly userRepo: IUserRepository
   protected _request?: Request
 
   constructor(
-    // logger: logger,
     userRepo: IUserRepository
   ) {
-    // this.logger = logger
     this.userRepo = userRepo
   }
 
-  // ----------------------------
-  // Authentication Methods
-  // ----------------------------
-  async getCurrentUser(req: Request): Promise<UserFlatBase | null> {
-    try {
-      return await getActiveUser(req)
-    } catch (err) {
-      return null
-    }
-  }
+  // // ----------------------------
+  // // Authentication Methods
+  // // ----------------------------
+  // async getCurrentUser(req: Request): Promise<UserFlatBase | null> {
+  //   try {
+  //     return await getActiveUser(req)
+  //   } catch (err) {
+  //     return null
+  //   }
+  // }
 
-  async requireCurrentUser(req: Request): Promise<UserFlatBase> {
-    const user = await this.getCurrentUser(req)
-    if (!user) {
-      throw new Error("Unauthorized")
-    }
-    return user
-  }
+  // async requireCurrentUser(req: Request): Promise<UserFlatBase> {
+  //   const user = await this.getCurrentUser(req)
+  //   if (!user) {
+  //     throw new Error("Unauthorized")
+  //   }
+  //   return user
+  // }
 
   // ----------------------------
   // Success Responses
@@ -104,20 +100,20 @@ export class BaseApiController {
     })
   }
 
-  protected requireUserMiddleware() {
-    return async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const currentUser = await this.requireCurrentUser(req)
-        if (!currentUser) {
-          return res.status(401).json({ success: false, message: "Unauthorized" })
-        }
+  // protected requireUserMiddleware() {
+  //   return async (req: Request, res: Response, next: NextFunction) => {
+  //     try {
+  //       const currentUser = await this.requireCurrentUser(req)
+  //       if (!currentUser) {
+  //         return res.status(401).json({ success: false, message: "Unauthorized" })
+  //       }
 
-        // Attach user for downstream handlers
-        (req as any).user = currentUser
-        next()
-      } catch (err) {
-        return res.status(500).json({ success: false, message: "Server error" })
-      }
-    }
-  }  
+  //       // Attach user for downstream handlers
+  //       (req as any).user = currentUser
+  //       next()
+  //     } catch (err) {
+  //       return res.status(500).json({ success: false, message: "Server error" })
+  //     }
+  //   }
+  // }  
 }

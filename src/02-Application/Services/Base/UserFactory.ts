@@ -8,6 +8,7 @@ import { Contact } from "@Domain/Entities/Base/User/Contact.ts";
 import { BcryptPasswordHasher } from "@Infrastructure/Auth/BcryptPasswordHasher.ts";
 import { AppTime } from "@Infrastructure/Core/AppTime.ts";
 import { ContactTypes } from "@Infrastructure/Persistence/Models/Constants/ContactTypes.ts";
+import SsoKey from "04-Infrastructure/Persistence/Models/Base/SsoKey.ts";
 
 export interface BuildUserOptions {
   username: string;
@@ -16,6 +17,7 @@ export interface BuildUserOptions {
   lastname: string;
   createdBy: number;
   email?: string;
+  ssoId?: string | null;
   is_email_validated?: boolean;
   updatedBy?: number | null;
 }
@@ -27,6 +29,7 @@ export async function buildUser({
   lastname,
   createdBy,
   email = "",
+  ssoId = null,
   is_email_validated = false,
   updatedBy = null,
 }: BuildUserOptions): Promise<User> {
@@ -64,11 +67,10 @@ export async function buildUser({
       })
     );
   }
-
   // -----------------------------
   // Build domain user
   // -----------------------------
-  return new User({
+  const domainUser = new User({
     username,
     password_hash: passwordHash,
     created_by: createdBy,
@@ -77,69 +79,15 @@ export async function buildUser({
     updated_by: updatedBy ?? undefined,
     profile,
     contacts,
-    sso: null,
+    // sso: null,
   });
+
+  if(ssoId){
+    domainUser.addSso(
+      ssoId,
+      1,
+      createdBy
+    );
+  }
+  return domainUser;
 }
-
-// // src/Application/Services/Base/UserFactory.ts
-// import { Contact } from "@Domain/Entities/Base/User/Contact.ts";
-// import { User } from "@Domain/Entities/Base/User/User.ts";
-// import { UserProfile } from "@Domain/Entities/Base/User/Profile.ts";
-// import { AppTime } from "@Infrastructure/Core/AppTime.ts";
-// import { ContactTypes } from "@Infrastructure/Persistence/Models/Constants/ContactTypes.ts";
-// import { BcryptPasswordHasher } from "@Infrastructure/Auth/BcryptPasswordHasher.ts";
-
-// export async function buildUser(params: {
-//   username: string;
-//   password: string;
-//   firstname: string;
-//   lastname: string;
-//   createdBy: number;
-//   email?: string;
-//   isEmailValidated?: boolean;
-// }): Promise<User> {
-//   const {
-//     username,
-//     password,
-//     firstname,
-//     lastname,
-//     createdBy,
-//     email = "",
-//     isEmailValidated = false,
-//   } = params;
-
-//   // Hash password
-//   const passwordHasher = new BcryptPasswordHasher();
-//   const passwordHash = await passwordHasher.hash(password);
-
-//   // Build profile entity
-//   const profileEntity = new UserProfile(firstname, lastname, createdBy);
-
-//   // Build contacts
-//   const contacts: Contact[] = [];
-//   if (email) {
-//     contacts.push(
-//       new Contact({
-//         contactTypeId: ContactTypes.Email,
-//         contactValue: email,
-//         validated: isEmailValidated,
-//         isPrimary: true,
-//         createdBy,
-//         createdOn: AppTime.utcNow(),
-//       })
-//     );
-//   }
-
-//   // Build domain user
-//   const domainUser = new User({
-//     username,
-//     passwordHash,
-//     createdBy,
-//     begDate: AppTime.utcNow(),
-//     endDate: AppTime.maxDate(),
-//     profile: profileEntity,
-//     contacts,
-//   });
-
-//   return domainUser; // ✅ PURE DOMAIN OBJECT
-// }

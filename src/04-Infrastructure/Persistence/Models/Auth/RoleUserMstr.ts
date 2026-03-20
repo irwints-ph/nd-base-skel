@@ -1,4 +1,7 @@
-// src/04-Infrastructure/Persistence/Models/Auth/RoleUserMstr.ts
+// ===================================================================
+// 🟢 src/04-Infrastructure/Persistence/Models/Auth/RoleUserMstr.ts
+// ===================================================================
+
 import { DataTypes, Sequelize, ForeignKey } from "sequelize";
 import AuditEntity from "@Infrastructure/Persistence/Models/Base/AuditEntity.ts";
 import type { Models } from "@Infrastructure/Persistence/Models/types.ts";
@@ -37,6 +40,12 @@ export default class RoleUserMstr extends AuditEntity {
         tableName: DatabaseNamingConvention.getName("RoleUser"),
         modelName: "RoleUserMstr",
         timestamps: false,
+        indexes: [
+          {
+            unique: true,
+            fields: [DatabaseNamingConvention.getName('RoleId'), DatabaseNamingConvention.getName('UserId')], // ✅ correct
+          },
+        ]
       }
     );
 

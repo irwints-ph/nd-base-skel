@@ -1,0 +1,28 @@
+@userId=1
+#### Show User Roles
+GET {{host}}/api/users/{{userId}}/roles
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+@roleId=3
+
+#### Add User to Role
+POST {{host}}/api/users/{{userId}}/roles/{{roleId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+#### Delete User from Role
+DELETE {{host}}/api/users/{{userId}}/roles/{{roleId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+#### Search Role/for Autocomplete
+GET {{host}}/api/roles/search?search=ro
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+#### Get Modules for user
+GET {{host}}/api/users/{{userId}}/modules
+Content-Type: application/json
+Authorization: Bearer {{token}}

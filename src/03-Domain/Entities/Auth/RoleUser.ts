@@ -7,6 +7,8 @@ export class RoleUser {
   public UserId: number;
   public CreatedBy: number;
   public IsActive: boolean;
+  public UpdatedBy?: number| null;
+  public UpdatedOn?: Date| null;
 
   // ---------------------------------------------------------
   // Constructor

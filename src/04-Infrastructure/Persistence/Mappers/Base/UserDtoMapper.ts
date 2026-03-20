@@ -18,27 +18,27 @@ export class UserDtoMapper {
   // ------------------------
   // Map Domain User → DTO
   // ------------------------
-  static toDomainUserFlatBase(user: User | UserMstr | UserFlatBase | void): UserFlatBase {
-    if ((user as UserFlatBase).userId !== undefined) {
-      return user as UserFlatBase;
-    }
+  // static toDomainUserFlatBase(user: User | UserMstr | UserFlatBase | void): UserFlatBase {
+  //   if ((user as UserFlatBase).userId !== undefined) {
+  //     return user as UserFlatBase;
+  //   }
+    // const isOrm = user instanceof UserMstr;
 
-    const isOrm = user instanceof UserMstr;
+    // const profile = isOrm ? (user as UserMstr).Profile : (user as User).profile;
+    // const fullname = profile ? `${profile.Firstname} ${profile.Lastname}` : "";
 
-    const profile = isOrm ? (user as UserMstr).Profile : (user as User).profile;
+  static toDomainUserFlatBase(user: User): UserFlatBase {
+
+    const profile = (user as User).profile;
     const fullname = profile ? `${profile.Firstname} ${profile.Lastname}` : "";
 
     // Active flag
     let active: boolean = (user as any).is_active ?? false;
-    // const active = user.BegDate <= now && now <= user.EndDate;
-    // if (typeof active === "function") {
-    //   active = active();
-    // }
 
     // Primary email
     let primaryEmail: string | null = null;
     let emailIsActive = false;
-    const contacts = isOrm ? (user as UserMstr).Contacts : (user as User).contacts;
+    const contacts = (user as User).contacts;
     if (contacts) {
       for (const c of contacts as ContactMstr[]) {
         if (c.IsPrimary) {
@@ -52,51 +52,30 @@ export class UserDtoMapper {
     // SSO
     let ssoId:string | null = "";
     try {
-      const sso = isOrm ? (user as UserMstr).Sso : null; //(user as User).sso;
-      ssoId = sso ? sso.SsoId : "";
+      const sso = (user as User).sso;
+      ssoId = sso ? sso.sso_id : "";
     } catch (err) {
       logger.error("user.Sso: " + String(err));
     }
 
-    if (isOrm) {
-      const u = user as UserMstr;
-      return {
-        userId: u.UserId,
-        username: u.Username,
-        firstname: profile?.Firstname ?? "",
-        lastname: profile?.Lastname ?? "",
-        fullname,
-        email: primaryEmail ?? "",
-        emailIsActive,
-        active,
-        begDate: u.BegDate,
-        endDate: u.EndDate,
-        createdBy: u.CreatedBy,
-        createdOn: u.CreatedOn,
-        updatedBy: u.UpdatedBy,
-        updatedOn: u.UpdatedOn,
-        ssoId,
-      };
-    } else {
-      const u = user as User;
-      return {
-        userId: u.id ?? 0,
-        username: u.username,
-        firstname: profile?.Firstname ?? "",
-        lastname: profile?.Lastname ?? "",
-        fullname,
-        email: primaryEmail ?? "",
-        emailIsActive,
-        active,
-        begDate: u.beg_date,
-        endDate: u.end_date,
-        createdBy: u.created_by,
-        createdOn: u.created_on,
-        updatedBy: u.updated_by,
-        updatedOn: u.updated_on,
-        ssoId,
-      };
-    }
+    const u = user as User;
+    return {
+      userId: u.id ?? 0,
+      username: u.username,
+      firstname: profile?.Firstname ?? "",
+      lastname: profile?.Lastname ?? "",
+      fullname,
+      email: primaryEmail ?? "",
+      emailIsActive,
+      active,
+      begDate: u.beg_date,
+      endDate: u.end_date,
+      createdBy: u.created_by,
+      createdOn: u.created_on,
+      updatedBy: u.updated_by,
+      updatedOn: u.updated_on,
+      ssoId,
+    };
   }
 
   // ------------------------

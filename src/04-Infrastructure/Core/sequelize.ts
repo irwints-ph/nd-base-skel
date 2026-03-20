@@ -6,6 +6,7 @@ import { EnvConfig } from '@Infrastructure/Core/Config.ts'
 import type { DatabaseSettings } from '@Infrastructure/Core/DatabaseSettings.ts'
 import { logger } from '@Infrastructure/Core/Logger.ts'
 import { registerAuditHooks } from "@Infrastructure/Audit/registerAuditHooks.ts";
+import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
 
 /**
  * Create a Sequelize instance based on current settings
@@ -118,14 +119,16 @@ export async function setupDatabase(): Promise<boolean> {
     }
 
     InitModels(sequelize);
-    // Register global audit hooks ONCE (must happen after models are initialized) - needed for api call to ensure audit
-    registerAuditHooks(sequelize);
+    if(EnvConfig.admin.auditEnabled){
+      // Register global audit hooks ONCE (must happen after models are initialized) - needed for api call to ensure audit
+      registerAuditHooks(sequelize);
+    }
 
     await assertTablesExist([
-      "UserMstr",
-      "UserProfile",
-      "ContactMstr",
-      "SsoKeys"
+      DatabaseNamingConvention.getName("UserMstr"),
+      DatabaseNamingConvention.getName("UserProfile"),
+      DatabaseNamingConvention.getName("ContactMstr"),
+      DatabaseNamingConvention.getName("SsoKeys")
     ]);
 
     logger.info('✅ Database schema verified');

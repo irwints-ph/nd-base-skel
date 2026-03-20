@@ -1,0 +1,120 @@
+###
+# @host=http://localhost:3200
+
+###
+GET {{host}}/openapi.json
+Content-Type: application/json
+
+### Get User Routes
+GET {{host}}/api/modules/routes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Delete Module from Role
+DELETE {{host}}/api/roles/modules
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "roleId": 4,
+  "moduleId": 5,
+  "authorization": "YNNNN"
+}
+
+### Get Module from Role
+GET {{host}}/api/roles/modules/1?page=1&limit=10
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Get Module
+GET {{host}}/api/modules/2
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Get Module
+GET {{host}}/api/modules?page=1&limit=10&_=1770842132119
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### home
+GET {{host}}
+Content-Type: application/json
+X-Client-ID: {{ClientId}}
+X-Client-Secret: {{ClientSecret}}
+
+### health
+GET {{host}}/health
+Content-Type: application/json
+
+### Generate client secret
+GET {{host}}/generate-encrypted-client-id
+
+### Generate client secret
+GET {{host}}/generate-decrypted-client-id
+Content-Type: application/json
+
+{
+  "ClientId": """kb9qvUP9DFKlZ3Ky5Z4OGjAwkI6Bnlymev0sMzclX7EoE0fbQlQzOnEc/nm/ZnL7",
+  "ClientSecret": "bv5f6QA6FZ5Xz{wgmiZE]vgn7VzFOsftHKVVTJv[CmekW51/ZBgiy{hI"
+}
+
+### Generate client secret
+GET {{host}}/generate-decrypted-client-id
+Content-Type: application/json
+
+{
+  "ClientId": "{{ClientId}}",
+  "ClientSecret": "{{ClientSecret}}"
+}
+
+#### create One Login user
+POST {{host}}/api/auth/register-ol-user
+Content-Type: application/json
+X-Client-ID: {{ClientId}}
+X-Client-Secret: {{ClientSecret}}
+
+{
+  # "password": "1",
+  "username" : "u2",
+  "email" : "u2@email.org",
+  "firstname": "",
+  "lastname": "",
+}
+
+#### create One Login user
+POST {{host}}/api/auth/register-ol-user
+Content-Type: application/json
+X-Client-ID: {{ClientId}}
+X-Client-Secret: {{ClientSecret}}
+
+#### Forgot Password
+POST {{host}}/api/auth/forgot-password
+Content-Type: application/json
+X-Client-ID: {{ClientId}}
+X-Client-Secret: {{ClientSecret}}
+
+{
+  "email": "jdoe@example.com"
+}
+
+### Verify forgot Password
+POST {{host}}/api/auth/verify-forgot
+Content-Type: application/json
+
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjcmVhdGV1MUBlbWFpbC5jb20iLCJ0eXBlSWQiOiJGb3Jnb3QiLCJleHAiOjE3NTE0NDYxMzcsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCIsImF1ZCI6InRlc3RpbmctdGVzdGluZyJ9.O2WbRoaZ4khDBzPVAs5jsjdAy7BM-mW3RqV3Or0vzZ8"
+}
+
+### Verify forgot Password
+POST {{host}}/api/auth/reset-forgot-pass
+Content-Type: application/json
+
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjcmVhdGV1MUBlbWFpbC5jb20iLCJ0eXBlSWQiOiJGb3Jnb3QiLCJleHAiOjE3NTE0NDYxMzcsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCIsImF1ZCI6InRlc3RpbmctdGVzdGluZyJ9.O2WbRoaZ4khDBzPVAs5jsjdAy7BM-mW3RqV3Or0vzZ8",
+  "newPass": "pass"
+}
+
+### 
+### Verify forgot Password
+POST {{host}}/api/auth/get-pass-policy
+Content-Type: application/json

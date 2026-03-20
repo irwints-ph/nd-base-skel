@@ -19,9 +19,10 @@ export class Module {
   public TranCode?: string;
   public IsAdmin: boolean;
   public IsActive: boolean;
-  public CreatedBy: number;
-  public CreatedOn?: Date;
-  public UpdatedBy?: number;
+  public CreatedBy: number| null;
+  public CreatedOn?: Date| null;
+  public UpdatedBy?: number| null;
+  public UpdatedOn?: Date| null;
 
   // ---------------------------------------------------------
   // Constructor

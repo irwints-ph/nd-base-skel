@@ -1,0 +1,140 @@
+
+# @host=http://localhost:3100
+
+#### List Roles
+GET {{host}}/api/roles?page=1&limit=10
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+#### Search Role/for Autocomplete
+GET {{host}}/api/roles/search?search=ro
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+#### Show Role
+GET {{host}}/api/roles/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+#### Create Role
+POST {{host}}/api/roles
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "roleName": "AdminTwo",
+  "roleDescription": "Administrator role with full access",
+  "parentId": 0
+}
+
+#### Create Role
+POST {{host}}/api/roles
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "roleId":0,
+  "roleName":"Test",
+  "roleDescription":"Test Modules",
+  "parentId":null,
+  "createdBy":10,
+  "isActive":true,
+  "isAdmin":false
+}
+
+#### Update Role
+PUT {{host}}/api/roles
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "roleId": 101,
+  "isActive": false
+  # "roleName": "SuperAdmin",
+  # "roleDescription": "Updated description for Super Admin",
+  # "parentId": 0
+}
+
+#### Update Role
+PUT {{host}}/api/roles
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{"roleId":100,"roleName":"Test","roleDescription":"Test Modules Edit","parentId":null,"updatedBy":1,"isActive":true,"isAdmin":false}
+
+#### DELETE Role
+DELETE {{host}}/api/roles/100
+Authorization: Bearer {{token}}
+
+@roleId=2
+@userId=1
+
+### Show Users in Role
+GET {{host}}/api/users/{{roleId}}/users
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+#### List user Roles
+GET {{host}}/api/users/{{userId}}/roles
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+#### Add User to Role
+POST {{host}}/api/users/{{userId}}/roles/{{roleId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+###
+@roleId=100
+@moduleId=3
+
+#### Role Module
+GET {{host}}/api/roles/modules/99
+Authorization: Bearer {{token}}
+
+###
+GET {{host}}/api/roles/modules/{{roleId}}?page=1&limit=2&_=1751875574446
+Authorization: Bearer {{token}}
+
+#### Add Module to Role
+POST {{host}}/api/roles/modules
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "roleId": 100,
+  "moduleId": 3,
+  "authorization":"YYNNN"
+}
+
+
+
+#### Update Module to Role
+PATCH {{host}}/api/roles/modules
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "roleId": 100,
+  "moduleId": 3,
+  "authorization":"YYYNN"
+}
+
+
+#### Delete Module to Role
+DELETE {{host}}/api/roles/modules
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "roleId": 100,
+  "moduleId": 3
+}
+
+#### Get User Info by token
+POST {{host}}/api/users/info
+Content-Type: application/json
+Authorization: Bearer {{token}}
+

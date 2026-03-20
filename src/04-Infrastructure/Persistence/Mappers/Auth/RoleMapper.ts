@@ -63,14 +63,14 @@ export class RoleMapper {
     return oldValues;
   }
 
-  // static toFlatBase(model: RoleMstr) {
-  //   return {
-  //     roleId: model.RoleId,
-  //     roleName: model.RoleName,
-  //     roleDescription: model.RoleDescription,
-  //     parentId: model.ParentId,
-  //     isActive: model.IsActive,
-  //     isAdmin: model.IsAdmin,
-  //   };
-  // }
+  static toFlatBase(model: RoleMstr) {
+    return {
+      roleId: model.RoleId,
+      roleName: model.RoleName,
+      roleDescription: model.RoleDescription,
+      parentId: model.ParentId,
+      isActive: model.IsActive,
+      isAdmin: model.IsAdmin,
+    };
+  }
 }

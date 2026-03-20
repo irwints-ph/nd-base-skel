@@ -13,6 +13,7 @@ import { IUserRepository } from "@Domain/Interfaces/Base/IUserRepository.ts";
 import UserMapper from "@Infrastructure/Persistence/Mappers/Base/UserMapper.ts";
 import { User } from "@Domain/Entities/Base/User/User.ts";
 import { UserUpdateSchema } from "@Contracts/Base/Users/UserSchemas.ts";
+import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
 
 export class UserRepository implements IUserRepository {
   public session?: Transaction;
@@ -25,22 +26,30 @@ export class UserRepository implements IUserRepository {
     if (ormUser.Profile) ormUser.Profile.UserId = ormUser.UserId;
     if (ormUser.Contacts) ormUser.Contacts.forEach(c => (c.UserId = ormUser.UserId));
     if (ormUser.Sso) ormUser.Sso.UserId = ormUser.UserId;
-
     await ormUser.save({ transaction: this.session });
+
+    // Now UserId is generated - Mimic Trigger
+    if (ormUser.CreatedBy === -1) {
+      ormUser.CreatedBy = ormUser.UserId;
+      await ormUser.save({ transaction: this.session }); // update with correct CreatedBy
+    }    
     if (ormUser.Profile) {
       ormUser.Profile.UserId = ormUser.UserId;
+      ormUser.Profile.CreatedBy = ormUser.CreatedBy;
       await ormUser.Profile.save({ transaction: this.session });
     }
 
     if (ormUser.Contacts) {
       for (const c of ormUser.Contacts) {
         c.UserId = ormUser.UserId;
+        c.CreatedBy = ormUser.CreatedBy;
         await c.save({ transaction: this.session });
       }
     }
 
     if (ormUser.Sso) {
       ormUser.Sso.UserId = ormUser.UserId;
+      ormUser.Sso.CreatedBy = ormUser.CreatedBy;
       await ormUser.Sso.save({ transaction: this.session });
     }
 
@@ -108,28 +117,6 @@ export class UserRepository implements IUserRepository {
     return ormUser;
   }
 
-  // // -------------------------------------------------------------------
-  // // 🔹 DELETE USER
-  // // -------------------------------------------------------------------
-  // async delete(OrmUser: UserMstr): Promise<UserMstr | void> {
-  //   // const ormUser = await UserMstr.findByPk(OrmUser.UserId);
-  //   const ormUser = await UserMstr.findByPk(OrmUser.UserId, {
-  //     include: [
-  //       { model: ContactMstr, as: "Contacts" },
-  //       { model: SsoKey, as: "Sso" },
-  //       { association: "Profile" }
-  //     ],
-  //     transaction: this.session
-  //   });
-
-  //   if (!ormUser) return;
-  //   //For Audit ?
-  //   const domainUser = UserMapper.toDomain(ormUser);
-  //   await UserMapper.updateOrmFromDomain(OrmUser, domainUser);
-  //   await ormUser.destroy({ transaction: this.session });
-  //   return OrmUser;
-  // }
-
   // -------------------------------------------------------------------
   // 🔹 GET BY ID
   // -------------------------------------------------------------------
@@ -179,7 +166,7 @@ export class UserRepository implements IUserRepository {
           where: {
             ContactTypeId: ContactTypes.Email,
             ContactValue: sequelize.where(
-              sequelize.fn("lower", sequelize.col("ContactValue")),
+              sequelize.fn("lower", sequelize.col(DatabaseNamingConvention.getName("ContactValue"))),
               email.toLowerCase()
             )
           }

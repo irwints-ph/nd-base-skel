@@ -8,14 +8,15 @@ import { EnvConfig } from '@Infrastructure/Core/Config.ts'
 
 import { getActiveUser } from "@Infrastructure/Auth/RequestUtils.ts"
 
+//Put only thos that doen't need user detrails /Authorization
 const PUBLIC_PATHS = [
   "/docs",
   "/openapi.json",
   "/favicon.ico",
   "/redoc",
   "/health",
-  "/api/modules/routes",
-  "/api/users/info",
+  "/api/modules/routes",   //Just allow. User details will be set in routeHandler
+  "/api/users/info",       //Allow also from OneLogin. User details will be set in routeHandler
 ];
 
 const PUBLIC_PREFIXES = [
@@ -53,6 +54,8 @@ export async function GlobalInterceptor(
         message: "Unauthorized: No active user",
       });
     }
+    // ✅ attach once to be avaialbe in all request
+    (req as any).currentUser = user;
 
     // Super root bypass
     if (user.userId === EnvConfig.admin.superRoot) {

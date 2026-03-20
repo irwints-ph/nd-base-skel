@@ -115,12 +115,9 @@ export default class UserMapper {
     -------------------------------- */
 
     for (const key of Object.keys(ormUser.get())) {
-
       const dbField =
         DatabaseNamingConvention.getToPascalCase(key);
-
       oldValues[dbField] = (ormUser as any)[dbField];
-
     }
 
     /* --------------------------------
@@ -141,17 +138,13 @@ export default class UserMapper {
     oldValues.contacts = [];
 
     const existingContacts = new Map<number, ContactMstr>();
-
     for (const c of ormUser.Contacts || []) {
-
       existingContacts.set(c.ContactTypeId, c);
-
       oldValues.contacts.push({
         ContactId: c.ContactTypeId,
         ContactValue: c.ContactValue,
         IsPrimary: c.IsPrimary
       });
-
     }
 
     /* --------------------------------
@@ -177,21 +170,24 @@ export default class UserMapper {
     ormUser.UpdatedBy = domainUser.updated_by ?? null;
     ormUser.UpdatedOn = domainUser.updated_on;
 
+    let withChange = false;
     /* --------------------------------
        Profile updates
     -------------------------------- */
-
     if (ormUser.Profile && domainUser.profile) {
-
-      ormUser.Profile.Firstname =
-        domainUser.profile.Firstname;
-
-      ormUser.Profile.Lastname =
-        domainUser.profile.Lastname;
-
-      ormUser.Profile.UpdatedBy = domainUser.updated_by ?? null;
-      ormUser.Profile.UpdatedOn = domainUser.updated_on;
-
+      withChange = false;
+      if(ormUser.Profile.Firstname != domainUser.profile.Firstname){
+        withChange = true;
+        ormUser.Profile.Firstname = domainUser.profile.Firstname;
+      }
+      if(ormUser.Profile.Lastname != domainUser.profile.Lastname){
+        withChange = true;
+        ormUser.Profile.Lastname = domainUser.profile.Lastname;
+      }
+      if(withChange){
+        ormUser.Profile.UpdatedBy = domainUser.updated_by ?? null;
+        ormUser.Profile.UpdatedOn = domainUser.updated_on;
+      }
     }
 
     /* --------------------------------
@@ -199,37 +195,38 @@ export default class UserMapper {
     -------------------------------- */
 
     for (const c of domainUser.contacts || []) {
-
       if (c.ContactTypeId &&
           existingContacts.has(c.ContactTypeId)) {
 
         const ormContact =
           existingContacts.get(c.ContactTypeId)!;
-
+        withChange = false;
+        if(
+          ormContact.ContactValue != c.ContactValue ||
+          ormContact.IsPrimary != c.IsPrimary  ||
+          ormContact.Validated != c.Validated
+        ) withChange = true;
         ormContact.ContactValue = c.ContactValue;
         ormContact.IsPrimary = c.IsPrimary;
         ormContact.Validated = c.Validated;
-
-        ormContact.UpdatedBy = domainUser.updated_by ?? null;
-        ormContact.UpdatedOn = domainUser.updated_on;
+        ormContact.ValidationDate = c.ValidationDate ?? null;
+        if(withChange){
+          ormContact.UpdatedBy = domainUser.updated_by ?? null;
+          ormContact.UpdatedOn = domainUser.updated_on;
+        }
 
       }
       else {
-
         const newContact = ContactMstr.build({
-
           UserId: ormUser.UserId,
           ContactValue: c.ContactValue,
           IsPrimary: c.IsPrimary,
           Validated: c.Validated,
-
+          ValidationDate: c.ValidationDate ?? null,
           CreatedBy: c.CreatedBy,
           CreatedOn: AppTime.utcNow()
-
         });
-
         ormUser.Contacts?.push(newContact);
-
       }
 
     }
@@ -253,9 +250,7 @@ export default class UserMapper {
         });
 
       }
-
     }
-
     return oldValues;
 
   }

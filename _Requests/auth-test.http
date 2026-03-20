@@ -1,0 +1,46 @@
+#### List download history
+GET {{host}}/api/mediadl/download-history
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "page": 1,
+  "pageSize": 10,
+  "searchTerm": "",
+}
+
+#### List dashboard metrics
+GET {{host}}/api/dashboard/metrics
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+#### List cookies blocked
+GET {{host}}/api/cookies/blocked
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+#### Get User Info by token
+POST {{host}}/api/users/info
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### user modules
+GET {{host}}/api/modules/routes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+GET {{host}}/api/users?page=1&limit=5&sortField=userId&sortDirection=desc
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+#### List Roles
+GET {{host}}/api/roles?page=1&limit=10
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+#### List Modules
+GET {{host}}/api/modules?page=1&limit=10
+Content-Type: application/json
+Authorization: Bearer {{token}}
