@@ -18,7 +18,8 @@ dotenv.config({ path: path.resolve(__dirname, "../../../.env") })
 // ==============================
 // Imports AFTER dotenv
 // ==============================
-import { sequelize, createDatabaseIfNotExists } from "../../04-Infrastructure/Core/sequelize.ts"
+import { createDatabaseIfNotExists } from "../../04-Infrastructure/Core/sequelize.ts"
+import { sequelize } from "@Infrastructure/Persistence/AppDBContext.ts";
 import { InitModels } from "04-Infrastructure/Core/InitModels.ts"
 import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts"
 
@@ -107,19 +108,19 @@ async function main() {
     // SEED
     // =========================
     if (!noSeed && (reset || createDb)) {
-      const success = await runSeeders(dataDir, cs)
+      const success = await runSeeders(dataDir, cs);
 
       if (!success) {
-        throw new Error("❌ Seeding failed")
+        throw new Error("❌ Seeding failed");
       }
 
-      console.log("✅ Database seeding complete")
+      console.log("✅ Database seeding complete");
     }
 
-    await sequelize.close()
+    await sequelize.close();
   } catch (err) {
-    console.error("❌ Unhandled error:", err)
-    process.exit(1)
+    console.error("❌ Unhandled error:", err);
+    process.exit(1);
   }
 }
 

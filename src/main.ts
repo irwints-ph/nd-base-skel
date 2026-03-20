@@ -3,11 +3,11 @@
 import express from "express";
 // import cors from "cors";
 import { corsMiddleware } from "@Api/Middleware/cors.middleware.ts"
-import { ErrorHandler, GlobalInterceptor, NotFoundHandler } from "@Api/Middleware/GlobalInterceptor.ts";
+import { ErrorHandler, GlobalInterceptor, NotFoundHandler, timingInterceptor } from "@Api/Middleware/GlobalInterceptor.ts";
 
 import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
 import { logger } from "@Infrastructure/Core/Logger.ts";
-import { setupDatabase, shutdownDatabase } from '@Infrastructure/Core/sequelize.ts'
+import { setupDatabase, shutdownDatabase } from '@Infrastructure/Persistence/AppDBContext.ts'
 
 import AuthRoute from "@Api/Controllers/Base/AuthController.ts";
 import { HomeRoute } from "@Api/Routes/HomeRoutes.ts";
@@ -36,7 +36,7 @@ app.use(corsMiddleware);
 //    Global Middleware
 // -------------------------------- */
 app.use(GlobalInterceptor);
-
+app.use(timingInterceptor);
 /* --------------------------------
    Routes
 -------------------------------- */
@@ -99,9 +99,24 @@ const server = app.listen(PORT, () => {
 // Graceful shutdown
 ["SIGINT", "SIGTERM"].forEach(signal => {
   process.on(signal, async () => {
-    console.log(`🔹 Received ${signal}, shutting down gracefully...`);
-    await shutdownDatabase();   // revert WAL and close Sequelize
-    process.exit(0);
+    console.log(`➜  Received ${signal}, shutting down gracefully...`);
+    
+    try {
+      // Close HTTP server first
+      if (server && typeof server.close === "function") {
+        await new Promise<void>((resolve, reject) => {
+          server.close(err => err ? reject(err) : resolve());
+        });
+        console.log("⚡ HTTP server closed");
+      }
+
+      // Shutdown DB
+      await shutdownDatabase();
+    } catch (err) {
+      console.error("❌ Error during shutdown:", err);
+    } finally {
+      process.exit(0);
+    }
   });
 });
 

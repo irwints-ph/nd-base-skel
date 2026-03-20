@@ -1,7 +1,7 @@
 // ===================================================================
 // 🟢 src/02-Application/Queries/Base/UserQueryService.ts
 // ===================================================================
-import { Op, fn, col, where } from "sequelize";
+import { Op, fn, col, where, Transaction } from "sequelize";
 
 import UserMstr from "@Infrastructure/Persistence/Models/Base/UserMstr.ts";
 import ContactMstr from "@Infrastructure/Persistence/Models/Base/ContactMstr.ts";
@@ -10,6 +10,8 @@ import UserProfile from "@Infrastructure/Persistence/Models/Base/UserProfile.ts"
 import { UserDtoMapper } from "@Infrastructure/Persistence/Mappers/Base/UserDtoMapper.ts";
 import { GenericQueryService } from "@Infrastructure/Persistence/Queries/GenericQueryService.ts";
 import { PaginatedResponse } from "@Contracts/Common/BaseSchema.ts";
+import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
+import { sequelize } from "@Infrastructure/Persistence/AppDBContext.ts";
 
 export class UserQueryService {
   private generic: GenericQueryService<any, any>;
@@ -46,16 +48,23 @@ export class UserQueryService {
       { model: UserProfile, as: "Profile" },
       { model: ContactMstr, as: "Contacts" },
     ];
+    const keyNam = "UserMstr";
+    const conVal = DatabaseNamingConvention.getName("ContactValue");;
+    const usrNam = DatabaseNamingConvention.getName("Username");
+    const fstNam = DatabaseNamingConvention.getName("Firstname");
+    const lstNam = DatabaseNamingConvention.getName("Lastname");
+
     options.subQuery = false;
     options.where = {
       ...options.where,
       [Op.or]: [
         // { "$UserMstr.Username$": { [Op.like]: searchPattern } },
-        // { "$Profile.Firstname$": { [Op.like]: searchPattern } },        
-        where(fn("LOWER", col("UserMstr.Username")), { [Op.like]: searchPattern }),
-        where(fn("LOWER", col("Profile.Firstname")), { [Op.like]: searchPattern }),
-        where(fn("LOWER", col("Profile.Lastname")), { [Op.like]: searchPattern }),
-        where(fn("LOWER", col("Contacts.ContactValue")), { [Op.like]: searchPattern }),
+        // { "$Profile.Firstname$": { [Op.like]: searchPattern } },
+        where(fn("LOWER", col(`${keyNam}.${usrNam}`)), { [Op.like]: searchPattern }),
+        where(fn("LOWER", col(`${"Profile"}.${fstNam}`)), { [Op.like]: searchPattern }),
+        where(fn("LOWER", col(`${"Profile"}.${lstNam}`)), { [Op.like]: searchPattern }),
+        where(fn("LOWER", col(`${"Contacts"}.${conVal}`)), { [Op.like]: searchPattern }),
+        // where(fn("LOWER", col("UserMstr.Username")), { [Op.like]: searchPattern }),
       ],
     };
 
@@ -94,31 +103,38 @@ export class UserQueryService {
       ];
       return options;
     };
-
-    return await this.generic.getAsync(
-      page,
-      pageSize,
-      search,
-      column,
-      sortBy,
-      descending,
-      withJoinsAndIncludes,
-      undefined,
-      access
-    );
+  // 🔹 Wrap in managed transaction
+    return sequelize.transaction(async (tx) => {
+      return await this.generic.getAsync(
+        page,
+        pageSize,
+        search,
+        column,
+        sortBy,
+        descending,
+        withJoinsAndIncludes,
+        undefined,
+        access,
+        tx,
+      );
+    });
   }
 
   // ------------------------
   // Get Single User
   // ------------------------
   async getUser(userId: number) {
-    const user = await UserMstr.findByPk(userId, {
-      include: [
-        { model: UserProfile, as: "Profile" },
-        { model: SsoKey, as: "Sso" },
-        { model: ContactMstr, as: "Contacts" },
-      ],
+    return sequelize.transaction(async (tx: Transaction) => {
+      const user = await UserMstr.findByPk(userId, {
+        include: [
+          { model: UserProfile, as: "Profile" },
+          { model: SsoKey, as: "Sso" },
+          { model: ContactMstr, as: "Contacts" },
+        ],
+        transaction: tx, // ✅ safe connection usage
+      });
+      return user ? UserDtoMapper.toOrmUserFlatBase(user) : null;
     });
-    return user ? UserDtoMapper.toOrmUserFlatBase(user) : null;
+
   }
 }

@@ -2,7 +2,8 @@
 import { Request, Response, NextFunction } from "express";
 // import { IAuthQueryService } from "@Domain/Interfaces/Auth/IAuthQueryService.ts";
 import { AuthQueryService } from "@Application/Queries/Auth/AuthQueryService.ts";
-import { sequelize } from "@Infrastructure/Core/sequelize.ts";
+// import { sequelize } from "@Infrastructure/Core/sequelize.ts";
+import { sequelize } from "@Infrastructure/Persistence/AppDBContext.ts";
 import { logger } from "@Infrastructure/Core/Logger.ts";
 import { EnvConfig } from '@Infrastructure/Core/Config.ts'
 
@@ -137,4 +138,14 @@ export function ErrorHandler(
     success: false,
     error: err.message || "Internal Server Error",
   });
+}
+export async function timingInterceptor(req: Request, res: Response, next: NextFunction) {
+  const start = process.hrtime.bigint(); // high-res timer
+  res.on("finish", () => {
+    const end = process.hrtime.bigint();
+    const durationMs = Number(end - start) / 1_000_000; // convert to ms
+    logger.info(`⏱️  ${req.method} ${req.originalUrl} took ${durationMs.toFixed(2)} ms`);
+  });
+
+  next();
 }

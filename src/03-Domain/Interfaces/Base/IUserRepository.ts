@@ -6,15 +6,15 @@ import UserMstr from "@Infrastructure/Persistence/Models/Base/UserMstr.ts";
 import { Transaction } from "sequelize";
 
 export interface IUserRepository {
-  session?: Transaction;
-  add(user: User): Promise<UserMstr>;
-  delete(user: UserMstr): Promise<UserMstr | void>;
-  getById(userId: number): Promise<User | null>;
-  getByIdOrm(userId: number): Promise<UserMstr | null>;
-  getByEmail(email: string): Promise<User | null>;
-  getByEmailOrm(email: string): Promise<UserMstr | null>;
-  getByUsername(username: string): Promise<User | null>;
-  getBySsoId(ssoKey: string, ssoType: number): Promise<User | null>;
+  // session?: Transaction;
+  add(user: User, tx:Transaction): Promise<UserMstr>;
+  delete(user: UserMstr, tx:Transaction): Promise<UserMstr | void>;
+  getById(userId: number, tx:Transaction): Promise<User | null>;
+  getByIdOrm(userId: number, tx:Transaction): Promise<UserMstr | null>;
+  getByEmail(email: string, tx:Transaction): Promise<User | null>;
+  getByEmailOrm(email: string, tx:Transaction): Promise<UserMstr | null>;
+  getByUsername(username: string, tx:Transaction): Promise<User | null>;
+  getBySsoId(ssoKey: string, ssoType: number, tx:Transaction): Promise<User | null>;
   // getBySsoIdOrm(ssoKey: string, ssoType: number): Promise<UserMstr | null>;
   addSso(
     ormUser: UserMstr,
@@ -23,5 +23,5 @@ export interface IUserRepository {
     createdBy: number,
     tx?: Transaction
   ): Promise<UserMstr | null>;
-  save(user: User): Promise<UserMstr | void>;
+  save(user: User, tx:Transaction): Promise<UserMstr | void>;
 }

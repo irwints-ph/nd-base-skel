@@ -11,7 +11,8 @@ import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
 
 import { Module } from "@Domain/Entities/Auth/Module.ts";
 import { ModuleMapper } from "@Infrastructure/Persistence/Mappers/Auth/ModuleMapper.ts";
-
+import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
+import { Transaction } from "sequelize";
 
 export class ModuleRepository implements IModuleRepository {
   // ----------------------------------------------------
@@ -61,21 +62,28 @@ export class ModuleRepository implements IModuleRepository {
   // ---------------------------------------------------------------------------
   // 🔹 Authorization helpers
   // ---------------------------------------------------------------------------
-  async getUserAccessibleModules(userId: number): Promise<[ModuleMstr, string][]> {
+  async getUserAccessibleModules(
+    userId: number,
+    transaction?: Transaction
+  ): Promise<[ModuleMstr, string][]> {
     if (userId === EnvConfig.admin.superRoot) {
-      const modules = await ModuleMstr.findAll({ where: { IsActive: true } });
+      const modules = await ModuleMstr.findAll({ 
+        where: { IsActive: true },
+        transaction, // ✅ use transaction
+      });
       return modules.map(m => [m, "YYYYY"]);
     }
 
     const userRoles = await RoleUserMstr.findAll({
       where: { UserId: userId },
-      attributes: ["RoleId"],
+      attributes: [DatabaseNamingConvention.getName("RoleId")],
+      transaction, // ✅ use transaction
     });
     let userRoleIds = userRoles.map(r => r.RoleId);
 
     try {
       const repo = new DefaultConfigurationRepository();
-      const defaultRoles = await repo.getDefaultGroupRoles();
+      const defaultRoles = await repo.getDefaultGroupRoles(transaction); // ✅ pass transaction if repo supports it
       userRoleIds = RoleAssignmentPolicy.includeDefaultGroupRoles(userRoleIds, defaultRoles);
     } catch (err) {
       console.error("❌ get_default_group_roles failed:", err);
@@ -86,6 +94,7 @@ export class ModuleRepository implements IModuleRepository {
     const roleModules = await RoleModuleMstr.findAll({
       where: { RoleId: userRoleIds, IsActive: true },
       include: [{ association: "Module" }],
+      transaction, // ✅ use transaction
     });
 
     const directAccess: Record<number, [ModuleMstr, string]> = {};
@@ -103,7 +112,10 @@ export class ModuleRepository implements IModuleRepository {
       }
     }
 
-    const allModules = await ModuleMstr.findAll({ where: { IsActive: true } });
+    const allModules = await ModuleMstr.findAll({ 
+      where: { IsActive: true },
+      transaction, // ✅ use transaction
+    });
     const moduleMap = new Map(allModules.map(m => [m.ModuleId, m]));
 
     const finalModules: Record<number, [ModuleMstr, string]> = {};
@@ -126,6 +138,72 @@ export class ModuleRepository implements IModuleRepository {
 
     return Object.values(finalModules);
   }
+
+  // async getUserAccessibleModules(userId: number): Promise<[ModuleMstr, string][]> {
+  //   if (userId === EnvConfig.admin.superRoot) {
+  //     const modules = await ModuleMstr.findAll({ where: { IsActive: true } });
+  //     return modules.map(m => [m, "YYYYY"]);
+  //   }
+
+  //   const userRoles = await RoleUserMstr.findAll({
+  //     where: { UserId: userId },
+  //     attributes: [DatabaseNamingConvention.getName("RoleId")],
+  //   });
+  //   let userRoleIds = userRoles.map(r => r.RoleId);
+
+  //   try {
+  //     const repo = new DefaultConfigurationRepository();
+  //     const defaultRoles = await repo.getDefaultGroupRoles();
+  //     userRoleIds = RoleAssignmentPolicy.includeDefaultGroupRoles(userRoleIds, defaultRoles);
+  //   } catch (err) {
+  //     console.error("❌ get_default_group_roles failed:", err);
+  //   }
+
+  //   if (!userRoleIds.length) return [];
+
+  //   const roleModules = await RoleModuleMstr.findAll({
+  //     where: { RoleId: userRoleIds, IsActive: true },
+  //     include: [{ association: "Module" }],
+  //   });
+
+  //   const directAccess: Record<number, [ModuleMstr, string]> = {};
+  //   for (const rm of roleModules) {
+  //     const mod = rm.Module as ModuleMstr;
+  //     const modId = rm.ModuleId;
+  //     if (!directAccess[modId]) {
+  //       directAccess[modId] = [mod, rm.Authorization];
+  //     } else {
+  //       const mergedAuth = ModuleRepository.mergeAuthorizations([
+  //         directAccess[modId][1],
+  //         rm.Authorization,
+  //       ]);
+  //       directAccess[modId] = [mod, mergedAuth];
+  //     }
+  //   }
+
+  //   const allModules = await ModuleMstr.findAll({ where: { IsActive: true } });
+  //   const moduleMap = new Map(allModules.map(m => [m.ModuleId, m]));
+
+  //   const finalModules: Record<number, [ModuleMstr, string]> = {};
+
+  //   const addWithParents = (module: ModuleMstr, authorization: string) => {
+  //     if (!finalModules[module.ModuleId]) {
+  //       finalModules[module.ModuleId] = [module, authorization];
+  //     }
+  //     if (module.ParentId) {
+  //       const parentModule = moduleMap.get(module.ParentId);
+  //       if (parentModule && !finalModules[parentModule.ModuleId]) {
+  //         addWithParents(parentModule, "YYYYY");
+  //       }
+  //     }
+  //   };
+
+  //   for (const [mod, auth] of Object.values(directAccess)) {
+  //     addWithParents(mod, auth);
+  //   }
+
+  //   return Object.values(finalModules);
+  // }
 
   static mergeAuthorizations(authList: string[]): string {
     if (!authList.length) return "-----";

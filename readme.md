@@ -103,3 +103,7 @@ npm install sequelize sequelize-typescript pg pg-hstore
 # npm install -D @types/cors
 npm i --save-dev @types/nodemailer
 ```
+
+netstat -ano | findstr :3000
+taskkill /f /pid 28760 
+tasklist /FI "IMAGENAME eq node.exe"

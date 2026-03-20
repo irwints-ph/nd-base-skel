@@ -7,33 +7,32 @@ import { Role } from "@Domain/Entities/Auth/Role.ts";
 import { RoleMapper } from "@Infrastructure/Persistence/Mappers/Auth/RoleMapper.ts";
 
 import { Transaction } from "sequelize";
-import { sequelize } from "../../AppDBContext.ts";
 
 export class RoleRepository implements IRoleRepository {
-  public session?: Transaction;
+  // public session?: Transaction;
 
   // -------------------------------------------------------------------
   // 🔹 GET BY roleId
   // -------------------------------------------------------------------
-  async getByIdOrm(roleId: number): Promise<RoleMstr | null> {
+  async getByIdOrm(roleId: number, tx:Transaction): Promise<RoleMstr | null> {
     return await RoleMstr.findByPk(roleId, {
-      transaction: this.session,
+      transaction: tx, //this.session,
     });
   }
-  async getById(userId: number): Promise<Role | null> {
-    const ormRole = await this.getByIdOrm(userId);
+  async getById(userId: number, tx:Transaction): Promise<Role | null> {
+    const ormRole = await this.getByIdOrm(userId,tx);
     return ormRole ? RoleMapper.toDomain(ormRole) : null;
   }
 
   // -------------------------------------------------------------------
   // 🔹 GET BY USERNAME
   // -------------------------------------------------------------------
-  async getByName(roleName: string): Promise<Role | null> {
+  async getByName(roleName: string, tx:Transaction): Promise<Role | null> {
     // console.log(UserMstr.associations);
     if(roleName){
       const ormRole = await RoleMstr.findOne({
         where: { RoleName: roleName },
-        transaction: this.session,
+        transaction: tx, //this.session,
       });
       return ormRole ? RoleMapper.toDomain(ormRole) : null;
     }
@@ -43,17 +42,19 @@ export class RoleRepository implements IRoleRepository {
   // -------------------------------------------------------------------
   // 🔹 ADD Role
   // -------------------------------------------------------------------
-  async add(domainRole: Role): Promise<RoleMstr> {
+  async add(domainRole: Role, tx:Transaction): Promise<RoleMstr> {
     const ormRole = RoleMapper.toOrm(domainRole);
-    await ormRole.save({ transaction: this.session });
+    await ormRole.save({ 
+      transaction: tx, //this.session 
+    });
     return ormRole;
   }
   // -------------------------------------------------------------------
   // 🔹 UPDATE USER
   // -------------------------------------------------------------------
-  async update(domainRole: Role, updatedBy: number): Promise<RoleMstr | void> {
+  async update(domainRole: Role, updatedBy: number, tx:Transaction): Promise<RoleMstr | void> {
     const ormRole = await RoleMstr.findByPk(domainRole.RoleId, {
-      transaction: this.session,
+      transaction: tx, //this.session,
     });
     if (!ormRole) return;
 
@@ -68,36 +69,42 @@ export class RoleRepository implements IRoleRepository {
     });
 
     await RoleMapper.updateOrmFromDomain(ormRole, dbDomainRole);
-    await ormRole.save({ transaction: this.session });
+    await ormRole.save({ 
+      transaction: tx, //this.session 
+    });
 
     return ormRole;
   }
   // -------------------------------------------------------------------
   // 🔹 DELETE Role
   // -------------------------------------------------------------------
-  async delete(domainRole: Role): Promise<RoleMstr| void> {
+  async delete(domainRole: Role, tx:Transaction): Promise<RoleMstr| void> {
     const ormRole = await RoleMstr.findByPk(domainRole.RoleId, {
-      transaction: this.session
+      transaction: tx, //this.session
     });
 
     if (!ormRole) return;
     //For Audit ?
     const dbDomainRole = RoleMapper.toDomain(ormRole);
     await RoleMapper.updateOrmFromDomain(ormRole, dbDomainRole);
-    await ormRole.destroy({ transaction: this.session });
+    await ormRole.destroy({ 
+      transaction: tx, //this.session 
+    });
     return ormRole;
   }
 
   // -------------------------------------------------------------------
   // 🔹 SAVE DOMAIN USER TO ORM - For existing users
   // -------------------------------------------------------------------
-  async save(domainRole: Role): Promise<RoleMstr | void> {
+  async save(domainRole: Role, tx:Transaction): Promise<RoleMstr | void> {
     const ormRole = await RoleMstr.findByPk(domainRole.RoleId, {
-      transaction: this.session,
+      transaction: tx, //this.session,
     });
     if (!ormRole) return;
     const Oldvalue = RoleMapper.updateOrmFromDomain(ormRole, domainRole);
-    await ormRole.save({ transaction: this.session });
+    await ormRole.save({ 
+      transaction: tx, //this.session 
+    });
 
     return ormRole;
   }

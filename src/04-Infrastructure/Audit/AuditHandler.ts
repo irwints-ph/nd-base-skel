@@ -1,48 +1,6 @@
-// import { sequelize } from "@Infrastructure/Core/sequelize.ts"
-// import { Transaction, Model } from "sequelize";
-// import AuditLogs from "@Infrastructure/Persistence/Models/Base/AuditLogs.ts";
-
-// export class AuditHandler {
-//   private pkFields: string[];
-//   private showLog: boolean;
-
-//   constructor(pkFields: string[], showLog: boolean = false) {
-//     this.pkFields = pkFields;
-//     this.showLog = showLog;
-//   }
-
-//   private getPk(instance: Model) {
-//     const keys: Record<string, any> = {};
-//     for (const pk of this.pkFields) {
-//       keys[pk] = (instance as any)[pk];
-//     }
-//     return keys;
-//   }
-
-//   async createAudit(instance: Model, action: string, auditInfo: any) {
-//     if (this.showLog) {
-//       console.log(`→ Audit (after commit): ${instance.constructor.name} ${action}`);
-//     }
-
-//     // 🔹 Use a **new transaction** for SQLite to avoid lock conflicts
-//     await sequelize.transaction(async (tx: Transaction) => {
-//       await AuditLogs.create({
-//         TableName: instance.constructor.name,
-//         Action: action,
-//         KeyValues: JSON.stringify(this.getPk(instance)),
-//         OldValues: null,
-//         NewValues: instance.toJSON(),
-//         ChangedBy: auditInfo.changedBy,
-//         CorrelationId: auditInfo.correlationId,
-//       }, { transaction: tx });
-//     });
-//   }
-// }
-
 // ===================================================================
 // 🧩 src/infrastructure/audit/AuditHandler.ts
 // ===================================================================
-import { sequelize } from "@Infrastructure/Core/sequelize.ts"
 import { Transaction, Model } from "sequelize";
 import AuditLogs from "@Infrastructure/Persistence/Models/Base/AuditLogs.ts";
 import { AuditInfo } from "./AuditContext.ts";

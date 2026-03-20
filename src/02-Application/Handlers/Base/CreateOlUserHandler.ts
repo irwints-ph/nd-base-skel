@@ -35,10 +35,10 @@ export class CreateOlUserHandler {
       const repo: IUserRepository = this.userRepoFactory();
       // repo.session = uow.transaction;// Good for showing log but has error on sqlite
 
-      if (await repo.getByEmail(cmd.user.email)) {
+      if (await repo.getByEmail(cmd.user.email,uow.transaction)) {
         throw new Error(`${cmd.user.email} already exists`);
       }
-      return await repo.add(domainUser);
+      return await repo.add(domainUser,uow.transaction);
     };
 
     // -----------------------------
@@ -48,7 +48,7 @@ export class CreateOlUserHandler {
       changedBy: cmd.user.username,
       actionName: "CreateOlUser",
       action,
-      showlog: false
+      showlog: true
     });
 
     // -----------------------------

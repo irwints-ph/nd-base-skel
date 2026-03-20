@@ -4,9 +4,11 @@
 import { Op, fn, col, where } from "sequelize";
 import { GenericQueryService } from "@Infrastructure/Persistence/Queries/GenericQueryService.ts";
 import { PaginatedResponse } from "@Contracts/Common/BaseSchema.ts";
+import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
 
 import RoleMstr from "@Infrastructure/Persistence/Models/Auth/RoleMstr.ts";
 import { RoleMapper } from "@Infrastructure/Persistence/Mappers/Auth/RoleMapper.ts";
+import { sequelize } from "@Infrastructure/Persistence/AppDBContext.ts";
 
 export class RoleServiceQuery {
   private generic: GenericQueryService<any, any>;
@@ -35,12 +37,15 @@ export class RoleServiceQuery {
       };
       return options;
     }
-
+    // const keyNam = DatabaseNamingConvention.getName("RoleMstr");
+    const keyNam = "RoleMstr";
+    const rolNam = DatabaseNamingConvention.getName("RoleName");
     options.subQuery = false;
     options.where = {
       ...options.where,
       [Op.or]: [
-        where(fn("LOWER", col("RoleMstr.RoleName")), { [Op.like]: searchPattern }),
+        
+        where(fn("LOWER", col(`${keyNam}.${rolNam}`)), { [Op.like]: searchPattern }),
         // where(fn("LOWER", col("Profile.Firstname")), { [Op.like]: searchPattern }),
       ],
     };
@@ -55,7 +60,7 @@ export class RoleServiceQuery {
     if (sortBy && RoleMstr.rawAttributes[sortBy]) {
       options.order = [[sortBy, descending ? "DESC" : "ASC"]];
     } else {
-      options.order = [["roleId", "DESC"]];
+      options.order = [[DatabaseNamingConvention.getName("roleId"), "DESC"]];
     }
     return options;
   }
@@ -89,26 +94,32 @@ export class RoleServiceQuery {
       ];
       return options;
     };
-
-    return await this.generic.getAsync(
-      page,
-      pageSize,
-      search,
-      column,
-      sortBy,
-      descending,
-      withJoinsAndIncludes,
-      undefined,
-      access
-    );
+  // 🔹 Wrap in managed transaction
+    return sequelize.transaction(async (tx) => {
+      return await this.generic.getAsync(
+        page,
+        pageSize,
+        search,
+        column,
+        sortBy,
+        descending,
+        withJoinsAndIncludes,
+        undefined,
+        access,
+        tx,
+      );
+    });
   }
 
   // ------------------------
   // Get Single User
   // ------------------------
   async getRole(roleId: number) {
-    const user = await RoleMstr.findByPk(roleId, {
+    return sequelize.transaction(async (tx) => {
+      const user = await RoleMstr.findByPk(roleId, {
+        transaction: tx, // ✅ ensures connection is released
+      });
+      return user ? RoleMapper.toFlatBase(user) : null;
     });
-    return user ? RoleMapper.toFlatBase(user) : null;
   }
 }

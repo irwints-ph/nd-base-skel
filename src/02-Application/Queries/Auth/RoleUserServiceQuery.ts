@@ -7,6 +7,7 @@ import { PaginatedResponse } from "@Contracts/Common/BaseSchema.ts";
 
 import RoleUserMstr from "@Infrastructure/Persistence/Models/Auth/RoleUserMstr.ts";
 import { RoleUserMapper } from "@Infrastructure/Persistence/Mappers/Auth/RoleUserMapper.ts";
+import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
 
 export class RoleUserServiceQuery {
   private generic: GenericQueryService<any, any>;
@@ -72,12 +73,12 @@ export class RoleUserServiceQuery {
         {
           [Op.or]: [
             // Role.RoleName
-            where(fn("LOWER", col("Role.RoleName")), {
+            where(fn("LOWER", col(`Role.${DatabaseNamingConvention.getName("RoleName")}`)), {
               [Op.like]: searchPattern,
             }),
 
             // User.Username (adjust if different field)
-            where(fn("LOWER", col("User.Username")), {
+            where(fn("LOWER", col(`User.${DatabaseNamingConvention.getName("Username")}`)), {
               [Op.like]: searchPattern,
             }),
           ],
@@ -95,7 +96,7 @@ export class RoleUserServiceQuery {
     if (sortBy && RoleUserMstr.rawAttributes[sortBy]) {
       options.order = [[sortBy, descending ? "DESC" : "ASC"]];
     } else {
-      options.order = [["roleId", "DESC"]];
+      options.order = [[DatabaseNamingConvention.getName("roleId"), "DESC"]];
     }
     return options;
   }

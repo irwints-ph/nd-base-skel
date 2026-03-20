@@ -13,6 +13,7 @@ import { IUserRepository } from "@Domain/Interfaces/Base/IUserRepository.ts";
 import { CreateUserCommand } from "@Application/Commands/Base/Users/CreateUserCommand.ts";
 import { GetUserRepository } from "@Infrastructure/Dependencies/UserRepoProvider.ts";
 import { getEmailSender } from "@Infrastructure/Dependencies/EmailSender.ts";
+import { Transaction } from "sequelize";
 
 export class CreateUserHandler {
   private userRepoFactory = () => GetUserRepository();
@@ -68,18 +69,18 @@ export class CreateUserHandler {
     return performRepoAction({
       changedBy: cmd.createdName ?? cmd.createdBy.toString(),
       actionName: "CreateUser",
-      showlog: false,
+      showlog: true,
 
       action: async (uow) => {
         const repo: IUserRepository = this.userRepoFactory();
 
-        // attach transaction
-        repo.session = uow.transaction;
+        // // attach transaction
+        // repo.session = uow.transaction;
 
-        await this.ensureUniqueness(repo, cmd);
+        await this.ensureUniqueness(repo, cmd, uow.transaction);
         await this.handleSso(domainUser, cmd);
 
-        const saved = await repo.add(domainUser);
+        const saved = await repo.add(domainUser,uow.transaction);
         return saved;
       },
     });
@@ -88,12 +89,12 @@ export class CreateUserHandler {
   // 🔍 UNIQUENESS CHECKS
   // -----------------------------------------------------------------
 
-  private async ensureUniqueness(repo: IUserRepository, cmd: CreateUserCommand) {
-    if (await repo.getByUsername(cmd.username)) {
+  private async ensureUniqueness(repo: IUserRepository, cmd: CreateUserCommand,tx:Transaction) {
+    if (await repo.getByUsername(cmd.username, tx)) {
       throw new Error(`Username '${cmd.username}' already exists`);
     }
 
-    if (cmd.email && (await repo.getByEmail(cmd.email))) {
+    if (cmd.email && (await repo.getByEmail(cmd.email, tx))) {
       throw new Error(`Email '${cmd.email}' already exists`);
     }
   }

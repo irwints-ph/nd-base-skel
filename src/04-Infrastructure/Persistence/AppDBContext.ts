@@ -1,17 +1,26 @@
-// ===========================================
-// 🧩 Infrastructure/Persistence/AppDBContext.ts
-// ===========================================
+// ==================================================================
+// 🧩 src/04-Infrastructure/Persistence/AppDBContext.ts
+// ==================================================================
 
-import { Sequelize, Options, Model, DataTypes } from "sequelize";
+import { Sequelize, Model, Options } from "sequelize";
+import path from "path";
+// import { v4 as uuidv4 } from "uuid";
 import { EnvConfig } from "../Core/ConfigLoader.ts";
+import { logger } from "../Core/Logger.ts";
+import { InitModels } from "../Core/InitModels.ts";
+import { registerAuditHooks } from "../Audit/registerAuditHooks.ts";
+import { DatabaseNamingConvention } from "../Core/DatabaseNaming.ts";
 
-// -----------------------------
-// Database URL and type
-// -----------------------------
-const dbType = EnvConfig.database.type.toLowerCase();
+/**
+ * Database type from environment config
+ */
+export const dbType = (process.env.DB_TYPE || EnvConfig.database.type).toLowerCase();
 
-let sequelizeOptions: Options = {
-  logging: EnvConfig.database.showSql ? console.log : false,
+/**
+ * Sequelize initialization options
+ */
+const baseOptions: Options = {
+  logging: (process.env.DB_SHOW_SQL || EnvConfig.database.showSql) === "true" ? console.log : false,
   define: {
     underscored: dbType === "postgres" || dbType === "sqlite",
     freezeTableName: false,
@@ -23,73 +32,136 @@ let sequelizeOptions: Options = {
   },
 };
 
-let sequelize: Sequelize;
+/**
+ * Pool config: different for scripts vs API server
+ */
+const isScript =
+  process.argv.some(arg =>
+    arg.toLowerCase().includes("seed") ||
+    arg.toLowerCase().includes("migration")
+  );
 
-switch (dbType) {
-  case "sqlite":
-    sequelize = new Sequelize({
-      dialect: "sqlite",
-      storage: EnvConfig.database.name,
-      ...sequelizeOptions,
-    });
-    break;
-  case "postgres":
-    sequelize = new Sequelize(
-      EnvConfig.database.name,
-      EnvConfig.database.user,
-      EnvConfig.database.password,
-      {
-        host: EnvConfig.database.host,
-        port: EnvConfig.database.port,
-        dialect: "postgres",
-        ...sequelizeOptions,
-      }
-    );
-    break;
-  case "mysql":
-    sequelize = new Sequelize(
-      EnvConfig.database.name,
-      EnvConfig.database.user,
-      EnvConfig.database.password,
-      {
-        host: EnvConfig.database.host,
-        port: EnvConfig.database.port,
-        dialect: "mysql",
-        ...sequelizeOptions,
-      }
-    );
-    break;
-  case "mssql":
-    sequelize = new Sequelize(
-      EnvConfig.database.name,
-      EnvConfig.database.user,
-      EnvConfig.database.password,
-      {
-        host: EnvConfig.database.host,
-        port: EnvConfig.database.port,
-        dialect: "mssql",
-        dialectOptions: {
-          options: {
-            enableArithAbort: true,
-            trustServerCertificate: true,
-          },
-        },
-        ...sequelizeOptions,
-      }
-    );
-    break;
-  default:
-    throw new Error(`Unsupported DB_TYPE: ${dbType}`);
+const pool: any =
+  ["postgres", "mysql", "mariadb", "mssql"].includes(dbType)
+    ? isScript
+      ? {
+          max: Number(process.env.DB_POOL_MAX_SCRIPT) || 3,
+          min: Number(process.env.DB_POOL_MIN_SCRIPT) || 0,
+          idle: Number(process.env.DB_POOL_IDLE_SCRIPT) || 500,
+          acquire: Number(process.env.DB_POOL_ACQUIRE_SCRIPT) || 30000,
+          evict: Number(process.env.DB_POOL_EVICT_SCRIPT) || 500,
+        }
+      : {
+          max: Number(process.env.DB_POOL_MAX) || 10,
+          min: Number(process.env.DB_POOL_MIN) || 2,
+          idle: Number(process.env.DB_POOL_IDLE) || 10000,
+          acquire: Number(process.env.DB_POOL_ACQUIRE) || 30000,
+          evict: Number(process.env.DB_POOL_EVICT) || 5000,
+        }
+    : undefined;
+
+/**
+ * Sequelize instance
+ */
+export const sequelize: Sequelize =
+  dbType === "sqlite"
+    ? new Sequelize({
+        dialect: "sqlite",
+        storage: path.resolve(process.cwd(), process.env.DB_NAME || EnvConfig.database.name),
+        logging: (process.env.DB_SHOW_SQL || EnvConfig.database.showSql) === "true" ? console.log : false,
+      })
+    : new Sequelize(
+        process.env.DB_NAME || EnvConfig.database.name,
+        process.env.DB_USER || EnvConfig.database.user,
+        process.env.DB_PASS || EnvConfig.database.password,
+        {
+          host: process.env.DB_HOST || EnvConfig.database.host,
+          port: Number(process.env.DB_PORT || EnvConfig.database.port),
+          dialect: dbType as any,
+          ...(pool ? { pool } : {}),
+          dialectOptions:
+            dbType === "postgres"
+              ? { statement_timeout: 30000 }
+              : dbType === "mssql"
+              ? { options: { enableArithAbort: true, trustServerCertificate: true } }
+              : undefined,
+          logging: (process.env.DB_SHOW_SQL || EnvConfig.database.showSql) === "true" ? console.log : false,
+        }
+      );
+
+/**
+ * Base model class
+ */
+export class BaseModel extends Model {}
+
+/**
+ * Initialize database connection, models, and audit hooks
+ */
+export async function setupDatabase(): Promise<boolean> {
+  try {
+    await sequelize.authenticate();
+    logger.info("✅ Database connected");
+
+    // Enable WAL for SQLite
+    if (dbType === "sqlite") {
+      await sequelize.query("PRAGMA journal_mode=WAL;");
+      logger.info("✅ SQLite WAL mode enabled");
+    }
+
+    // Initialize models
+    InitModels(sequelize);
+
+    // Register global audit hooks if enabled
+    if ((process.env.AS_AUDIT_ENABLED || EnvConfig.admin.auditEnabled) === "true") {
+      registerAuditHooks(sequelize);
+    }
+
+    // Verify essential tables exist
+    const requiredTables = [
+      DatabaseNamingConvention.getName("UserMstr"),
+      DatabaseNamingConvention.getName("UserProfile"),
+      DatabaseNamingConvention.getName("ContactMstr"),
+      DatabaseNamingConvention.getName("SsoKeys"),
+    ];
+
+    const qi = sequelize.getQueryInterface();
+    const tables = await qi.showAllTables();
+    const existing = tables.map(t => t.toString().toLowerCase());
+    const missing = requiredTables.filter(t => !existing.includes(t.toLowerCase()));
+
+    missing.forEach(t => logger.error(`❌ Missing table: ${t}`));
+
+    if (missing.length) throw new Error(`Missing required tables: ${missing.join(", ")}`);
+
+    logger.info("✅ Database schema verified");
+    return true;
+  } catch (err) {
+    logger.error("❌ Database setup failed:", err);
+    return false;
+  }
 }
 
-// -----------------------------
-// Base class for models
-// -----------------------------
-export class BaseModel extends Model {
-  // Optionally, shared fields like id, createdBy, createdOn, etc. can be added here
-}
+/**
+ * Gracefully shutdown the database
+ */
+export async function shutdownDatabase(): Promise<void> {
+  try {
+    // Revert SQLite WAL mode
+    if (dbType === "sqlite") {
+      await sequelize.query("PRAGMA journal_mode=DELETE;");
+      logger.info("🔹 SQLite reverted to DELETE journal mode");
+    }
 
-// -----------------------------
-// Exports
-// -----------------------------
-export { sequelize, dbType };
+    // Force destroy pooled connections for server DBs
+    const pool: any = (sequelize as any).connectionManager?.pool;
+    if (pool && typeof pool.destroyAllNow === "function") {
+      await pool.destroyAllNow();
+      logger.info("⚡ Force destroyed all DB connections");
+    }
+
+    await sequelize.close();
+    logger.info("✅ Database connection closed");
+  } catch (err) {
+    logger.error("❌ Error during DB shutdown:", err);
+  }
+}

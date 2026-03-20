@@ -16,58 +16,58 @@ import { UserUpdateSchema } from "@Contracts/Base/Users/UserSchemas.ts";
 import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
 
 export class UserRepository implements IUserRepository {
-  public session?: Transaction;
-  // -------------------------------------------------------------------
-  // 🔹 ADD USER
-  // -------------------------------------------------------------------
+  // public session?: Transaction;
   async add(domainUser: User): Promise<UserMstr> {
-    const ormUser = UserMapper.toOrm(domainUser);
-    // const Oldvalue = UserMapper.updateOrmFromDomain(ormUser, domainUser);
-    if (ormUser.Profile) ormUser.Profile.UserId = ormUser.UserId;
-    if (ormUser.Contacts) ormUser.Contacts.forEach(c => (c.UserId = ormUser.UserId));
-    if (ormUser.Sso) ormUser.Sso.UserId = ormUser.UserId;
-    await ormUser.save({ transaction: this.session });
+    return sequelize.transaction(async (tx) => {
+      const ormUser = UserMapper.toOrm(domainUser);
 
-    // Now UserId is generated - Mimic Trigger
-    if (ormUser.CreatedBy === -1) {
-      ormUser.CreatedBy = ormUser.UserId;
-      await ormUser.save({ transaction: this.session }); // update with correct CreatedBy
-    }    
-    if (ormUser.Profile) {
-      ormUser.Profile.UserId = ormUser.UserId;
-      ormUser.Profile.CreatedBy = ormUser.CreatedBy;
-      await ormUser.Profile.save({ transaction: this.session });
-    }
+      if (ormUser.Profile) ormUser.Profile.UserId = ormUser.UserId;
+      if (ormUser.Contacts) ormUser.Contacts.forEach(c => (c.UserId = ormUser.UserId));
+      if (ormUser.Sso) ormUser.Sso.UserId = ormUser.UserId;
 
-    if (ormUser.Contacts) {
-      for (const c of ormUser.Contacts) {
-        c.UserId = ormUser.UserId;
-        c.CreatedBy = ormUser.CreatedBy;
-        await c.save({ transaction: this.session });
+      await ormUser.save({ transaction: tx });
+
+      // Mimic trigger: update CreatedBy if needed
+      if (ormUser.CreatedBy === -1) {
+        ormUser.CreatedBy = ormUser.UserId;
+        await ormUser.save({ transaction: tx });
       }
-    }
 
-    if (ormUser.Sso) {
-      ormUser.Sso.UserId = ormUser.UserId;
-      ormUser.Sso.CreatedBy = ormUser.CreatedBy;
-      await ormUser.Sso.save({ transaction: this.session });
-    }
+      if (ormUser.Profile) {
+        ormUser.Profile.UserId = ormUser.UserId;
+        ormUser.Profile.CreatedBy = ormUser.CreatedBy;
+        await ormUser.Profile.save({ transaction: tx });
+      }
 
-    return ormUser;
-    // return domainUser.withId(ormUser.UserId);
+      if (ormUser.Contacts) {
+        for (const c of ormUser.Contacts) {
+          c.UserId = ormUser.UserId;
+          c.CreatedBy = ormUser.CreatedBy;
+          await c.save({ transaction: tx });
+        }
+      }
+
+      if (ormUser.Sso) {
+        ormUser.Sso.UserId = ormUser.UserId;
+        ormUser.Sso.CreatedBy = ormUser.CreatedBy;
+        await ormUser.Sso.save({ transaction: tx });
+      }
+
+      return ormUser;
+    });
   }
 
   // -------------------------------------------------------------------
   // 🔹 UPDATE USER
   // -------------------------------------------------------------------
-  async updateUser(userData: UserUpdateSchema, updatedBy: number): Promise<UserMstr | null> {
+  async updateUser(userData: UserUpdateSchema, updatedBy: number, tx:Transaction): Promise<UserMstr | null> {
     const ormUser = await UserMstr.findByPk(userData.userId, {
       include: [
         { model: ContactMstr, as: "Contacts" },
         { model: SsoKey, as: "Sso" },
         { association: "Profile" }
       ],
-      transaction: this.session
+      transaction: tx, //this.session
     });
 
     if (!ormUser) return null;
@@ -76,21 +76,23 @@ export class UserRepository implements IUserRepository {
     domainUser.updateFromDto(userData, updatedBy);
 
     await UserMapper.updateOrmFromDomain(ormUser, domainUser);
-    await ormUser.save({ transaction: this.session });
+    await ormUser.save({ 
+      transaction: tx, //this.session 
+    });
 
     return ormUser;
   }
   // -------------------------------------------------------------------
   // 🔹 DELETE USER (with Profile, Contacts, SSO audited)
   // -------------------------------------------------------------------
-  async delete(OrmUser: UserMstr): Promise<UserMstr | void> {
+  async delete(OrmUser: UserMstr, tx:Transaction): Promise<UserMstr | void> {
     const ormUser = await UserMstr.findByPk(OrmUser.UserId, {
       include: [
         { model: ContactMstr, as: "Contacts" },
         { model: SsoKey, as: "Sso" },
         { association: "Profile" }
       ],
-      transaction: this.session
+      transaction: tx, //this.session
     });
 
     if (!ormUser) return;
@@ -98,21 +100,29 @@ export class UserRepository implements IUserRepository {
     // Delete one at a time for auditing, 
     // 🔹 Destroy related entities first so hooks fire
     if (ormUser.Profile) {
-      await ormUser.Profile.destroy({ transaction: this.session });
+      await ormUser.Profile.destroy({ 
+        transaction: tx, //this.session 
+      });
     }
 
     if (ormUser.Contacts) {
       for (const c of ormUser.Contacts) {
-        await c.destroy({ transaction: this.session });
+        await c.destroy({ 
+          transaction: tx, //this.session 
+        });
       }
     }
 
     if (ormUser.Sso) {
-      await ormUser.Sso.destroy({ transaction: this.session });
+      await ormUser.Sso.destroy({ 
+        transaction: tx, //this.session 
+      });
     }
 
     // 🔹 Finally destroy the user itself
-    await ormUser.destroy({ transaction: this.session });
+    await ormUser.destroy({ 
+      transaction: tx, //this.session 
+    });
 
     return ormUser;
   }
@@ -120,20 +130,20 @@ export class UserRepository implements IUserRepository {
   // -------------------------------------------------------------------
   // 🔹 GET BY ID
   // -------------------------------------------------------------------
-  async getByIdOrm(userId: number): Promise<UserMstr | null> {
+  async getByIdOrm(userId: number, tx:Transaction): Promise<UserMstr | null> {
     return UserMstr.findByPk(userId, {
       include: [
         { model: ContactMstr, as: "Contacts" },
         { model: SsoKey, as: "Sso" },
         { association: "Profile" }
       ],
-      transaction: this.session,
+      transaction: tx, //this.session,
     });
   }
-  async getById(userId: number): Promise<User | null> {
+  async getById(userId: number, tx:Transaction): Promise<User | null> {
     const ormUser = await UserMstr.findByPk(userId, {
       include: [{ association: "Profile" }, { model: ContactMstr, as: "Contacts" }, { model: SsoKey, as: "Sso" }],
-      transaction: this.session,
+      transaction: tx, //this.session,
     });
     return ormUser ? UserMapper.toDomain(ormUser) : null;
   }
@@ -141,13 +151,13 @@ export class UserRepository implements IUserRepository {
   // -------------------------------------------------------------------
   // 🔹 GET BY USERNAME
   // -------------------------------------------------------------------
-  async getByUsername(username: string): Promise<User | null> {
+  async getByUsername(username: string, tx:Transaction): Promise<User | null> {
     // console.log(UserMstr.associations);
     if(username){
       const ormUser = await UserMstr.findOne({
         where: { Username: username },
         include: [{ association: "Profile" }, { model: ContactMstr, as: "Contacts" }, { model: SsoKey, as: "Sso" }],
-        transaction: this.session,
+        transaction: tx, //this.session,
       });
       return ormUser ? UserMapper.toDomain(ormUser) : null;
     }
@@ -157,7 +167,7 @@ export class UserRepository implements IUserRepository {
   // -------------------------------------------------------------------
   // 🔹 GET BY EMAIL
   // -------------------------------------------------------------------
-  async getByEmailOrm(email: string): Promise<UserMstr | null> {
+  async getByEmailOrm(email: string, tx:Transaction): Promise<UserMstr | null> {
     const ormUser = await UserMstr.findOne({
       include: [
         {
@@ -174,13 +184,13 @@ export class UserRepository implements IUserRepository {
         { model: SsoKey, as: "Sso" },
         { association: "Profile" }
       ],
-      transaction: this.session,
+      transaction: tx, //this.session,
     });
     return ormUser;
   }
 
-  async getByEmail(email: string): Promise<User | null> {
-    const ormUser = await this.getByEmailOrm(email);
+  async getByEmail(email: string, tx:Transaction): Promise<User | null> {
+    const ormUser = await this.getByEmailOrm(email, tx);
     return ormUser ? UserMapper.toDomain(ormUser) : null;
   }
 
@@ -189,7 +199,8 @@ export class UserRepository implements IUserRepository {
   // -------------------------------------------------------------------
   async getBySsoId(
     ssoKey: string,
-    ssoType: number
+    ssoType: number, 
+    tx:Transaction
   ): Promise<User | null> {
     const ormUser = await UserMstr.findOne({
       include: [
@@ -197,7 +208,7 @@ export class UserRepository implements IUserRepository {
         { model: SsoKey, as: "Sso", where: { SsoId: ssoKey, TypeId: ssoType } },
         { association: "Profile" }
       ],
-      transaction: this.session,
+      transaction: tx, //this.session,
     });
 
     return ormUser ? UserMapper.toDomain(ormUser) : null;
@@ -210,45 +221,56 @@ export class UserRepository implements IUserRepository {
     ormUser: UserMstr,
     ssoId: string,
     typeId: number,
-    createdBy: number
+    createdBy: number, 
+    tx:Transaction
   ): Promise<UserMstr> {
     const domainUser = UserMapper.toDomain(ormUser);
     domainUser.addSso(ssoId, typeId, createdBy);
     await UserMapper.updateOrmFromDomain(ormUser, domainUser);
-    await ormUser.save({ transaction: this.session });
+    await ormUser.save({ 
+      transaction: tx, //this.session 
+    });
     return ormUser;
   }
 
   // -------------------------------------------------------------------
   // 🔹 SAVE DOMAIN USER TO ORM - For existing users
   // -------------------------------------------------------------------
-  async save(domainUser: User): Promise<UserMstr | void> {
+  async save(domainUser: User, tx:Transaction): Promise<UserMstr | void> {
     const ormUser = await UserMstr.findByPk(domainUser.id, {
       include: [
         { model: ContactMstr, as: "Contacts" },
         { model: SsoKey, as: "Sso" },
         { association: "Profile" }
       ],
-      transaction: this.session,
+      transaction: tx, //this.session,
     });
     if (!ormUser) return;
     const Oldvalue = UserMapper.updateOrmFromDomain(ormUser, domainUser);
-    await ormUser.save({ transaction: this.session });
+    await ormUser.save({ 
+      transaction: tx, //this.session 
+    });
     if (ormUser.Profile) {
       ormUser.Profile.UserId = ormUser.UserId;
-      await ormUser.Profile.save({ transaction: this.session });
+      await ormUser.Profile.save({ 
+        transaction: tx, //this.session 
+      });
     }
 
     if (ormUser.Contacts) {
       for (const c of ormUser.Contacts) {
         c.UserId = ormUser.UserId;
-        await c.save({ transaction: this.session });
+        await c.save({ 
+          transaction: tx, //this.session 
+        });
       }
     }
 
     if (ormUser.Sso) {
       ormUser.Sso.UserId = ormUser.UserId;
-      await ormUser.Sso.save({ transaction: this.session });
+      await ormUser.Sso.save({ 
+        transaction: tx, //this.session
+      });
     }
 
     return ormUser;

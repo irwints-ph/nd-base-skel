@@ -41,6 +41,7 @@ export async function seedCsvEntities<T extends Model>({
   fileSuffix,
   changedBy = "SeederScript",
   showLineLog = true,
+  transaction, // 👈 NEW
 }: {
   dbModel: ModelStatic<T>;
   mapToEntity: (row: any, uow?: UnitOfWork) => Promise<T | null>;
@@ -50,6 +51,7 @@ export async function seedCsvEntities<T extends Model>({
   fileSuffix?: string;
   changedBy?: string;
   showLineLog?: boolean;
+  transaction?: Transaction;
 }): Promise<boolean> {
 
   if(doAudit){
@@ -92,7 +94,10 @@ export async function seedCsvEntities<T extends Model>({
   // 🧠 AUDIT CONTEXT (BATCH-SCOPED)
   // ------------------------------------------------------------------
   const runSeeder = async () => {
-    const tx = await sequelize.transaction(); // ✅ manual transaction
+    // const tx = await sequelize.transaction(); // ✅ manual transaction
+    const tx = transaction ?? await sequelize.transaction();
+    const isExternalTx = !!transaction;
+
     const uow = new UnitOfWork(
       sequelize,
       {
@@ -146,14 +151,19 @@ export async function seedCsvEntities<T extends Model>({
         }
       }
 
-      // ✅ NOW THIS IS SAFE
-      // await uow.commit();   // ← audit happens here: Use this if hook is turned off
-      await tx.commit();    // ← actual DB commit: Use this if hook is turned on
-
+      // // ✅ NOW THIS IS SAFE
+      // // await uow.commit();   // ← audit happens here: Use this if hook is turned off
+      // await tx.commit();    // ← actual DB commit: Use this if hook is turned on
+      if (!isExternalTx) {
+        await tx.commit();
+      }
       return true;
     } catch (ex) {
       console.error(`❌ Failed to commit ${dbModel.name}:`, ex);
-      await tx.rollback();
+      // await tx.rollback();
+      if (!isExternalTx) {
+        await tx.rollback();
+      }      
       return false;
     } finally {
       await uow.dispose();

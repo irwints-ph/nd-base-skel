@@ -6,11 +6,12 @@ import { SsoTypeTableName } from "@Infrastructure/Persistence/Models/Constants/D
 import { seedCsvEntities } from "./seederTemplate.ts";
 import { setBaseDir } from "./seederHelper.ts";
 import { UnitOfWork } from "@Application/UoW/UnitOfWork.ts";
+import { Transaction } from "sequelize";
 
 // ------------------------------------------------------------------
 // Seeder function
 // ------------------------------------------------------------------
-export async function seedSsoTypes(dataDir: string, noErrors = true): Promise<boolean> {
+export async function seedSsoTypes(dataDir: string, noErrors = true, transaction?: Transaction): Promise<boolean> {
   if (!noErrors) return false;
 
   setBaseDir(dataDir);

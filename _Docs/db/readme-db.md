@@ -2,12 +2,21 @@
 ```bash
 docker compose -f ./docker-compose.postgres.yml up -d
 ```
+> After change in yml file
+```bash
+docker compose -f _Docs\db\docker-compose.postgres.yml down
+docker compose -f _Docs\db\docker-compose.postgres.yml up -d
+```
 ### Check DB
 ```bash
 SET PGPASSWORD=123
 psql -U postgres -d sample-app-mdl
 psql -U postgres
 #\l
+SELECT pid, state, query FROM pg_stat_activity WHERE state = 'idle in transaction';
+SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle in transaction';
+
+
 ```
 ### Delete
 ```bash

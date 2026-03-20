@@ -16,12 +16,24 @@ import {
 
 import { RoleMstr, ModuleMstr, RoleUserMstr, RoleModuleMstr } from "@Infrastructure/Persistence/Models/Auth/index.ts";
 
+let poolSetting: any = undefined;
+const type = EnvConfig.database.type?.toLowerCase();
+if (type === "postgres") {
+  poolSetting = {
+    max: 5,
+    min: 0,
+    idle: 1000,
+    acquire: 30000,
+    evict: 1000,
+  };
+}  
+
 export const sequelize = new Sequelize(
   EnvConfig.database.connectionString,
   {
     logging: false,
     dialect: EnvConfig.database.type as any,
-    // dialect: EnvConfig.database.dialect as any,
+    ...(poolSetting ? { pool: poolSetting } : {}), // ✅ only apply if defined
   }
 );
 
