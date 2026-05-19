@@ -1,113 +1,415 @@
-### Debug
-```bash
-npx tsx --inspect --watch src/main.ts
+# Clean Architecture + DDD + CQRS (Node.js + Express + Sequelize)
 
-# Debug including start-up. Will start when play of > Run and Debug: Attach is clicked. Re-cick attac on code changes
-node --inspect-brk --watch node_modules/tsx/dist/cli.mjs src/main.ts
-```
-## Debug Seeder - use this so that we have control when the code will start
-```bash
-node --inspect-brk node_modules/tsx/dist/cli.mjs src/Scripts/Migrations/seed_db_cli.ts --create-db
-```
-> Run and Debug: Attach
+A scalable backend boilerplate built with:
 
-### Run
-## Seeder
-```bash
-npx tsx src/main.ts
+- Node.js + Express
+- TypeScript
+- Sequelize ORM
+- Clean Architecture
+- Domain-Driven Design (DDD)
+- CQRS pattern
+- Modular monolith structure
+- Multi-layer separation of concerns
 
-# OR
-npm run dev
-```
-## Seeder
-```bash
-npx tsx src/Scripts/Migrations/seed_db.ts --create-db
-npx tsx src/Scripts/Migrations/seed_db_cli.ts --create-db
-```
-Then run attach
+Designed for enterprise systems, SaaS platforms, and long-term maintainability.
 
-### Add table tobe created
-1. src/04-Infrastructure/Persistence/Models/types.ts
-2. src/04-Infrastructure/Persistence/Models/Base/index.ts
-3. src/Scripts/Migrations/db_setup.ts
-4. src/04-Infrastructure/Core/InitModels.ts
+---
 
+# 🧠 Architecture Overview
 
-```bash
-git update-index --skip-worktree node-app.sqlite3
-git update-index --skip-worktree .vscode/settings.json
-git update-index --skip-worktree user.http
+This project enforces strict separation between HTTP, application logic, domain rules, and persistence.
 
-### Find files on the remore rository 
-git ls-files -v | findstr settings.json
-git ls-files -v | findstr RolesRoutes.ts
+## Write Flow (Commands)
 
-### This will delete files on the repo but not on local
-git rm --cached user.http
-git rm --cached node-app.sqlite3
-git rm --cached .vscode/settings.json
-git rm --cached node-app.sqlite3-journal
-git rm --cached node-app.sqlite3-wal
+```text
+Route
+ → Controller
+   → Command
+     → Handler / Service
+       → Repository
+       → Domain
+       → UnitOfWork / Transaction
+````
 
-```
-### git feature
+---
 
-| Feature                  | `assume-unchanged` | `--no-assume-unchanged`                         | `skip-worktree`         | `--no-skip-worktree`                         | `git rm --cached`                                  |
-| ------------------------ | ------------------ | ----------------------------------------------- | ----------------------- | -------------------------------------------- | -------------------------------------------------- |
-| Ignore local changes     | ✔️                 | ❌                                               | ✔️                      | ❌                                            | ❌ (removes from tracking)                          |
-| Safe for long-term use   | ❌                  | ✅                                               | ✅                       | ✅                                            | ✅ (if you want to remove it permanently from repo) |
-| Used for                 | performance        | revert assumption                               | config/local-only files | revert skip-worktree                         | stop tracking files in repo                        |
-| Stays in repo            | ✔️                 | ✔️                                              | ✔️                      | ✔️                                           | ❌ (removed from repo in next commit)               |
-| Local file kept          | ✔️                 | ✔️                                              | ✔️                      | ✔️                                           | ✔️                                                 |
-| Changes pushed to remote | ❌                  | ✔️                                              | ❌                       | ✔️                                           | ❌                                                  |
-| Revert command           | n/a                | `git update-index --no-assume-unchanged <file>` | n/a                     | `git update-index --no-skip-worktree <file>` | n/a                                                |
+## Read Flow (Queries)
 
-### git update
-```bash
-git add .
-git commit -m "Update Comment"
-git push
+```text
+Route
+ → Controller
+   → QueryService
+     → Sequelize / DB Layer
+     → DTO / Projection Mapper
 ```
 
-### Alias Config in TS
+> Queries NEVER return domain entities.
+
+---
+
+# 🧱 Core Principles
+
+## 1. Domain is Framework Agnostic
+
+The domain layer contains pure business logic only.
+
+🚫 No Express
+🚫 No Sequelize
+🚫 No HTTP
+🚫 No infrastructure concerns
+
+✔ Pure TypeScript classes
+
 ```ts
-{
-  "compilerOptions": {
-    "baseUrl": "src",
-    "paths": {
-      "@Api/*": ["01-Api/*"],
-      "@Application/*": ["02-Application/*"],
-      "@Domain/*": ["03-Domain/*"],
-      "@Infrastructure/*": ["04-Infrastructure/*"]
-    }
+export class User {
+  constructor(
+    public id: string,
+    public username: string,
+    public active: boolean = true
+  ) {}
+
+  deactivate() {
+    this.active = false;
   }
 }
 ```
 
-```bash
-npx ts-node src/Scripts/Migrations/seed_db.ts -- --create-db
-npx ts-node -P tsconfig.json -r tsconfig-paths/register src/Scripts/Migrations/seed_db.ts --create-db
+---
 
+## 2. Strict CQRS Separation
+
+### Commands
+
+* Create / Update / Delete
+* Business rules
+* Transactions
+
+### Queries
+
+* Reads only
+* Optimized SQL/Sequelize queries
+* DTO projections
+
+---
+
+## 3. Thin Controllers
+
+Controllers only orchestrate:
+
+* Request handling
+* Calling services
+* Returning responses
+
+Example:
+
+```ts
+export class UserController {
+  constructor(
+    private readonly userQueryService: UserQueryService
+  ) {}
+
+  async listUsers(req, res) {
+    const result = await this.userQueryService.listUsers({
+      page: Number(req.query.page ?? 1),
+      limit: Number(req.query.limit ?? 10),
+    });
+
+    return res.json(result);
+  }
+}
+```
+
+---
+
+## 4. Infrastructure Isolation
+
+Sequelize lives ONLY in:
+
+```
+04-Infrastructure/Persistence
+```
+
+Domain and Application layers never import Sequelize directly.
+
+---
+
+# 📁 Project Structure
+
+```
+src/
+├── 01-Api
+│   ├── Controllers
+│   │   └── Base
+│   ├── Routes
+│   ├── Middleware
+│   └── Helpers
+│
+├── 01-Contracts
+│   ├── Auth
+│   ├── Base
+│   └── Common
+│
+├── 02-Application
+│   ├── Commands
+│   ├── Handlers
+│   ├── Queries
+│   ├── QueryServices
+│   ├── Services
+│   ├── DTO
+│   ├── UseCases
+│   ├── Interfaces
+│   └── UoW
+│
+├── 03-Domain
+│   ├── Entities
+│   ├── Interfaces
+│   └── Services
+│
+├── 04-Infrastructure
+│   ├── Core
+│   ├── Auth
+│   ├── Persistence
+│   │   ├── Models
+│   │   ├── Repositories
+│   │   ├── Mappers
+│   │   └── Queries
+│   ├── Email
+│   ├── Dependencies
+│   └── Adapters
+│
+├── 05-Test
+├── Scripts
+├── types
+└── main.ts
+```
+
+---
+
+# 🧩 Layer Responsibilities
+
+## API Layer (01-Api)
+
+* Express routes
+* Controllers
+* Middleware
+* Request validation
+
+---
+
+## Contracts (01-Contracts)
+
+* API request/response schemas
+* Versioned DTOs
+* No business logic
+
+---
+
+## Application Layer (02-Application)
+
+* Commands & Handlers
+* Query services
+* Use cases
+* DTO mapping
+* Orchestration logic
+
+---
+
+## Domain Layer (03-Domain)
+
+* Entities
+* Business rules
+* Domain services
+* Interfaces (repositories)
+
+---
+
+## Infrastructure Layer (04-Infrastructure)
+
+* Sequelize models
+* Repository implementations
+* External services (Email, Auth, etc.)
+* DB configuration
+* Adapters
+
+---
+
+# 🧬 Sequelize Usage Rule
+
+Sequelize is strictly confined to:
+
+```
+04-Infrastructure/Persistence/Models
+04-Infrastructure/Persistence/Repositories
+```
+
+Domain layer NEVER touches ORM.
+
+---
+
+# 🔐 Authentication & Authorization
+
+Located in:
+
+```
+04-Infrastructure/Auth
+02-Application/Commands/Auth
+03-Domain/Entities/Auth
+```
+
+Supports:
+
+* JWT authentication
+* Local auth
+* OneLogin (SSO)
+* Role-based access control (RBAC)
+
+---
+
+# 📦 Seeding & Scripts
+
+Database seeding pipeline:
+
+```
+Scripts/Migrations/
+```
+
+Includes:
+
+* DB setup
+* Seed runners
+* CSV-based seeders
+* CLI seeding tools
+
+Run:
+
+```bash
 npm run seed
 npm run seed -- --create-db
 ```
 
-## Debug Seeder
-```bash
-node --inspect-brk node_modules/tsx/dist/cli.mjs src/Scripts/Migrations/seed_db.ts --create-db
-```
-> Run and Debug: Attach
+---
 
-```bash
-npm install sequelize sequelize-typescript pg pg-hstore
-# npm install cors
-# npm install -D @types/cors
-npm i --save-dev @types/nodemailer
+# 🧪 Testing
+
+Located in:
+
+```
+05-Test
 ```
 
-netstat -ano | findstr :3000
-taskkill /f /pid 28760 
-tasklist /FI "IMAGENAME eq node.exe"
+Run tests:
 
-npx jest --config jest.config.cjs src/05-Test/api.test.ts
-npx jest --config jest.config.cjs Button.test.tsx
+```bash
+npm test
+```
+
+---
+
+# 🚀 Getting Started
+
+## Install Dependencies
+
+```bash
+npm install
+```
+
+---
+
+## Run Development Server
+
+```bash
+npm run dev
+```
+
+---
+
+## Build
+
+```bash
+npm run build
+```
+
+---
+
+## Run Seeder
+
+```bash
+npm run seed
+```
+
+---
+
+# 🔄 API Flow Example
+
+### Create User (Command)
+
+```text
+Route → Controller → Command → Handler → Repository → DB
+```
+
+### List Users (Query)
+
+```text
+Route → Controller → QueryService → Sequelize → DTO
+```
+
+---
+
+# 🧠 Design Philosophy
+
+> Routes handle HTTP concerns
+> Controllers orchestrate flow
+> Application executes use cases
+> Domain enforces business rules
+> Infrastructure handles external systems
+
+---
+
+# ⚙️ Key Design Decisions
+
+### Why CQRS?
+
+* Separates read/write complexity
+* Improves scalability
+* Optimizes queries independently
+
+### Why Clean Architecture?
+
+* Framework independence
+* Easier testing
+* Long-term maintainability
+
+### Why Sequelize in Infrastructure?
+
+* Keeps domain pure
+* Enables DB swap (Postgres → Mongo)
+
+---
+
+# 🔮 Future Enhancements
+
+* Event Bus (Domain Events)
+* Outbox Pattern
+* Redis caching layer
+* Background job system (BullMQ)
+* Multi-tenant support
+* Auto route registration
+* Service container / DI framework
+* GraphQL adapter
+
+---
+
+# 📚 Documentation
+
+* `_Docs/audit.md`
+* `_Docs/db/readme-db.md`
+* `readme-developer-guide.md`
+* `readme-run.md`
+
+---
+
+# 📄 License
+
+MIT
+
+

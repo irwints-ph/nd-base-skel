@@ -1,0 +1,395 @@
+BoilerPlate
+|   .editorconfig
+|   .env
+|   .env.dev
+|   .env.test
+|   .gitignore
+|   jest.config.cjs
+|   jest.config.live.cjs
+|   jest.config.mjs
+|   node-app.sqlite3
+|   node-app.sqlite3-shm
+|   node-app.sqlite3-wal
+|   package-lock.json
+|   package.json
+|   pt.cmd
+|   readme-developer-guide.md
+|   readme-run.md
+|   readme.md
+|   scaffold-node-clean.ps1
+|   t.txt
+|   TODO.md
+|   tsconfig.json
+|   
++---.vscode
+|       launch.json
+|       settings.json
+|       
++---src
+|   |   app.ts
+|   |   main.ts
+|   |   mainOld.ts
+|   |   main_cfg_logs.ts
+|   |   main_functions.ts
+|   |   server.ts
+|   |   
+|   +---01-Api
+|   |   +---Controllers
+|   |   |   |   BaseApiController.ts
+|   |   |   |   HomeController.ts
+|   |   |   |   
+|   |   |   \---Base
+|   |   |           AuthController.ts
+|   |   |           ModuleController.ts
+|   |   |           RoleController.ts
+|   |   |           UserController.ts
+|   |   |           
+|   |   +---Helpers
+|   |   |       RouteHandlerFactory.ts
+|   |   |       
+|   |   +---Middleware
+|   |   |       cors.middleware.ts
+|   |   |       GlobalInterceptor.ts
+|   |   |       
+|   |   \---Routes
+|   |           HomeRoutes.ts
+|   |           ModuleRoutes.ts
+|   |           RoleRoutes.ts
+|   |           UserRoutes.ts
+|   |           
+|   +---01-Contracts
+|   |   +---Auth
+|   |   |       LoginSchema.ts
+|   |   |       
+|   |   +---Base
+|   |   |   +---Modules
+|   |   |   |       ModuleSchemas.ts
+|   |   |   |       
+|   |   |   +---roles
+|   |   |   |       RoleSchemas.ts
+|   |   |   |       
+|   |   |   \---Users
+|   |   |           UserCreate.ts
+|   |   |           UserSchemas.ts
+|   |   |           
+|   |   +---Common
+|   |   |       BaseSchema.ts
+|   |   |       
+|   |   \---Config
+|   |           PasswordPolicy.ts
+|   |           
+|   +---02-Application
+|   |   +---Commands
+|   |   |   +---Auth
+|   |   |   |   |   CreateModuleCommandParams.ts
+|   |   |   |   |   VerifyEmailCommand.ts
+|   |   |   |   |   
+|   |   |   |   +---Module
+|   |   |   |   |       BuildModuleService.ts
+|   |   |   |   |       
+|   |   |   |   +---Role
+|   |   |   |   |       CreateRoleService.ts
+|   |   |   |   |       
+|   |   |   |   +---RoleModule
+|   |   |   |   |       BuildRoleModuleService.ts
+|   |   |   |   |       
+|   |   |   |   \---RoleUser
+|   |   |   |           BuildRoleUserService.ts
+|   |   |   |           
+|   |   |   \---Base
+|   |   |       \---Users
+|   |   |               CreateOlUserCommand.ts
+|   |   |               CreateUserCommand.ts
+|   |   |               DeleteUserCommand.ts
+|   |   |               UpdateUserCommand.ts
+|   |   |               
+|   |   +---DTO
+|   |   |   \---Base
+|   |   |           CreateUserDTO.ts
+|   |   |           
+|   |   +---Handlers
+|   |   |   +---Auth
+|   |   |   |       CreateModuleHandler.ts
+|   |   |   |       VerifyEmailHandler.ts
+|   |   |   |       
+|   |   |   \---Base
+|   |   |           CreateOlUserHandler.ts
+|   |   |           CreateUserHandler.ts
+|   |   |           DeleteUserHandler.ts
+|   |   |           RegisterUserHandler.ts
+|   |   |           UpdateUserHandler.ts
+|   |   |           
+|   |   +---Interfaces
+|   |   |   \---Services
+|   |   |           IEmailSenderService.ts
+|   |   |           
+|   |   +---Queries
+|   |   |   +---Auth
+|   |   |   |       AuthQueryService.ts
+|   |   |   |       ModuleServiceQuery.ts
+|   |   |   |       RoleServiceQuery.ts
+|   |   |   |       RoleUserServiceQuery.ts
+|   |   |   |       
+|   |   |   \---Base
+|   |   |           DefaultGroupRoleService.ts
+|   |   |           UserQueryService.ts
+|   |   |           
+|   |   +---Security
+|   |   |       IPasswordHasher.ts
+|   |   |       
+|   |   +---Services
+|   |   |   |   HealthService.ts
+|   |   |   |   
+|   |   |   +---Auth
+|   |   |   |       ModuleFactory.ts
+|   |   |   |       
+|   |   |   \---Base
+|   |   |           UserFactory.ts
+|   |   |           
+|   |   +---UoW
+|   |   |       UnitOfWork.ts
+|   |   |       
+|   |   \---UseCases
+|   |       \---Auth
+|   |               AuthenticateOLUserUseCase.ts
+|   |               
+|   +---03-Domain
+|   |   +---Entities
+|   |   |   +---Auth
+|   |   |   |       Module.ts
+|   |   |   |       Role.ts
+|   |   |   |       RoleModule.ts
+|   |   |   |       RoleUser.ts
+|   |   |   |       
+|   |   |   \---Base
+|   |   |       |   AuditLog.ts
+|   |   |       |   DefaultConfiguration.ts
+|   |   |       |   Otp.ts
+|   |   |       |   
+|   |   |       \---User
+|   |   |               Contact.ts
+|   |   |               Profile.ts
+|   |   |               Sso.ts
+|   |   |               User.ts
+|   |   |               UserUpdateInfo.ts
+|   |   |               
+|   |   +---Interfaces
+|   |   |   +---Auth
+|   |   |   |       IModuleRepository.ts
+|   |   |   |       IRoleRepository.ts
+|   |   |   |       
+|   |   |   \---Base
+|   |   |           IDefaultConfigurationRepository.ts
+|   |   |           IUserRepository.ts
+|   |   |           
+|   |   \---Services
+|   |           PasswordPolicyService.ts
+|   |           RoleAssignmentPolicy.ts
+|   |           
+|   +---04-Infrastructure
+|   |   |   Dependencies.ts
+|   |   |   
+|   |   +---Adapters
+|   |   |       OneLoginAdapter.ts
+|   |   |       
+|   |   +---Audit
+|   |   |       AuditContext.ts
+|   |   |       AuditHandler.ts
+|   |   |       registerAuditHooks.ts
+|   |   |       
+|   |   +---Auth
+|   |   |   |   AuthDependency.ts
+|   |   |   |   BcryptPasswordHasher.ts
+|   |   |   |   JwtAuthService.ts
+|   |   |   |   JwtTokenService.ts
+|   |   |   |   LocalAuth.ts
+|   |   |   |   OLAuth.ts
+|   |   |   |   OneLoginService.ts
+|   |   |   |   PasswordValidator.ts
+|   |   |   |   RequestUtils.ts
+|   |   |   |   TokenUtil.ts
+|   |   |   |   
+|   |   |   \---errors
+|   |   |           UnauthorizedError.ts
+|   |   |           
+|   |   +---Core
+|   |   |   |   AdminSettings.ts
+|   |   |   |   AppTime.ts
+|   |   |   |   Config.ts
+|   |   |   |   ConfigLoader.ts
+|   |   |   |   DatabaseNaming.ts
+|   |   |   |   DatabaseSettings.ts
+|   |   |   |   DBForeignKeyRules.ts
+|   |   |   |   InitModels.ts
+|   |   |   |   JWTSettings.ts
+|   |   |   |   Logger.ts
+|   |   |   |   OIDCSettings.ts
+|   |   |   |   PasswordPolicySettings.ts
+|   |   |   |   sequelize.ts
+|   |   |   |   Serialization.ts
+|   |   |   |   
+|   |   |   \---http
+|   |   |           FetchClient.ts
+|   |   |           
+|   |   +---Dependencies
+|   |   |       EmailSender.ts
+|   |   |       RoleRepoProvider.ts
+|   |   |       UserRepoProvider.ts
+|   |   |       
+|   |   +---Email
+|   |   |   |   EmailSenderService.ts
+|   |   |   |   EmailServiceConsole.ts
+|   |   |   |   EmailServiceFactory.ts
+|   |   |   |   EmailServiceSMTP.ts
+|   |   |   |   IEmailService.ts
+|   |   |   |   
+|   |   |   \---Templates
+|   |   |           otpEmailTemplate.txt
+|   |   |           VerificationEmailTemplate.html
+|   |   |           
+|   |   +---Helpers
+|   |   |       SystemInfoHelper.ts
+|   |   |       TemplateLoader.ts
+|   |   |       Utils.ts
+|   |   |       
+|   |   \---Persistence
+|   |       |   AppDBContext.ts
+|   |       |   
+|   |       +---Dependencies
+|   |       |       db.ts
+|   |       |       
+|   |       +---Mappers
+|   |       |   +---Auth
+|   |       |   |       ModuleMapper.ts
+|   |       |   |       RoleMapper.ts
+|   |       |   |       RoleModuleMapper.ts
+|   |       |   |       RoleUserMapper.ts
+|   |       |   |       
+|   |       |   \---Base
+|   |       |           ContactMapper.ts
+|   |       |           SsoKeyMapper.ts
+|   |       |           UserDtoMapper.ts
+|   |       |           UserMapper.ts
+|   |       |           UserProfileMapper.ts
+|   |       |           
+|   |       +---Models
+|   |       |   |   types.ts
+|   |       |   |   
+|   |       |   +---Auth
+|   |       |   |       index.ts
+|   |       |   |       ModuleMstr.ts
+|   |       |   |       RoleModuleMstr.ts
+|   |       |   |       RoleMstr.ts
+|   |       |   |       RoleUserMstr.ts
+|   |       |   |       
+|   |       |   +---Base
+|   |       |   |       ApiClient.ts
+|   |       |   |       AuditEntity.ts
+|   |       |   |       AuditLogs.ts
+|   |       |   |       ContactMstr.ts
+|   |       |   |       ContactType.ts
+|   |       |   |       DefaultConfigurationMstr.ts
+|   |       |   |       index.ts
+|   |       |   |       Otps.ts
+|   |       |   |       SsoKey.ts
+|   |       |   |       SsoType.ts
+|   |       |   |       UserMstr.ts
+|   |       |   |       UserProfile.ts
+|   |       |   |       
+|   |       |   \---Constants
+|   |       |           ContactTypes.ts
+|   |       |           DBNames.ts
+|   |       |           UUIDColumn.ts
+|   |       |           
+|   |       +---Queries
+|   |       |       GenericQueryService.ts
+|   |       |       
+|   |       +---Repositories
+|   |       |   |   ModuleRepository-x.ts
+|   |       |   |   
+|   |       |   +---Auth
+|   |       |   |       ModuleRepository.ts
+|   |       |   |       RoleRepository.ts
+|   |       |   |       
+|   |       |   \---Base
+|   |       |           DefaultConfigurationRepository.ts
+|   |       |           UserRepository.ts
+|   |       |           
+|   |       \---Services
+|   |               RepoActionService.ts
+|   |               
+|   +---05-Test
+|   |   |   readme.md
+|   |   |   setup.ts
+|   |   |   test_cu.test.ts
+|   |   |   
+|   |   \---utils
+|   |           common.ts
+|   |           httpClient.ts
+|   |           
+|   +---Scripts
+|   |   +---DataSeed
+|   |   |       contact_types.csv
+|   |   |       modules-eReceipt.csv
+|   |   |       modules-eventC.csv
+|   |   |       modules-mdl.csv
+|   |   |       modules.csv
+|   |   |       roles copy.csv
+|   |   |       roles.csv
+|   |   |       role_modules-eReceipt.csv
+|   |   |       role_modules-eventC.csv
+|   |   |       role_modules-mdl.csv
+|   |   |       role_modules.csv
+|   |   |       role_users.csv
+|   |   |       sso_types.csv
+|   |   |       users.csv
+|   |   |       
+|   |   \---Migrations
+|   |       |   db_setup.ts
+|   |       |   parameter_parser.ts
+|   |       |   seed_db.ts
+|   |       |   seed_db_cli.ts
+|   |       |   seed_runner.ts
+|   |       |   
+|   |       \---Seeders
+|   |               01-SeedSsoTypes.ts
+|   |               02-SeedContactTypes.ts
+|   |               03-CreateUserSeedMap.ts
+|   |               03-SeedUsers.ts
+|   |               04-SeedModules.ts
+|   |               05-SeedRoles.ts
+|   |               06-seed_role_modules.ts
+|   |               07-seed_role_users.ts
+|   |               create_module_seed_map.ts
+|   |               create_user_seed_map.ts
+|   |               seederHelper.ts
+|   |               seederTemplate.ts
+|   |               seederUtils.ts
+|   |               _util.ts
+|   |               
+|   \---types
+|           express.d.ts
+|           
++---_Docs
+|   |   audit.md
+|   |   README-Audit.md
+|   |   
+|   +---db
+|   |       docker-compose.postgres.yml
+|   |       readme-db.md
+|   |       
+|   \---oldTests
+|           api.test.ts
+|           Button.test.tsx
+|           Button.tsx
+|           loadSettings.ts
+|           path.test.ts
+|           
+\---_Requests
+        auth-test.http
+        module-mstr.http
+        roles.http
+        tester.http
+        user-roles.http
+        user.http
+        
