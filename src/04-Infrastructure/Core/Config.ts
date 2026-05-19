@@ -20,7 +20,7 @@ function loadEnvironment(): string {
     const envFile = `.env.${envName}`;
     try {
       dotenv.config({ path: envFile, override: true });
-      console.log(`[config] Loaded: ${envFile}`);
+      // console.log(`[config] Loaded: ${envFile}`);
     } catch {
       console.log(`[config] No environment file found: ${envFile}`);
     }

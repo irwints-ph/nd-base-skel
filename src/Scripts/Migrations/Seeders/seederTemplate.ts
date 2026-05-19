@@ -1,19 +1,16 @@
 // ===================================================================
 // 🧩 src/scripts/migrations/seeders/seederTemplate.ts
 // ===================================================================
-
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { Model, ModelStatic, Transaction } from "sequelize";
 
-import { sequelize } from "@Infrastructure/Persistence/AppDBContext.ts";
+import { sequelize, DatabaseConfig } from "@Infrastructure/Persistence/AppDBContext.ts";
 import { AuditContext, AuditInfo } from "@Infrastructure/Audit/AuditContext.ts";
 import { UnitOfWork } from "@Application/UoW/UnitOfWork.ts";
 import { getPrimaryKeyFields } from "./seederUtils.ts";
-
 import { registerAuditHooks } from "@Infrastructure/Audit/registerAuditHooks.ts";
 import { InitModels } from "@Infrastructure/Core/InitModels.ts";
-
 import {
   setBaseDir,
   readCsv,
@@ -26,8 +23,7 @@ import {
 // 🔧 CONFIG
 // ------------------------------------------------------------------
 export const doAudit = false;
-const showAuditLogs = doAudit ? true : doAudit; //true or false middle
-
+const showAuditLogs = doAudit ? true : false;
 
 // ------------------------------------------------------------------
 // 🧱 MAIN SEED FUNCTION
@@ -41,7 +37,7 @@ export async function seedCsvEntities<T extends Model>({
   fileSuffix,
   changedBy = "SeederScript",
   showLineLog = true,
-  transaction, // 👈 NEW
+  transaction, // optional external transaction
 }: {
   dbModel: ModelStatic<T>;
   mapToEntity: (row: any, uow?: UnitOfWork) => Promise<T | null>;
@@ -54,10 +50,9 @@ export async function seedCsvEntities<T extends Model>({
   transaction?: Transaction;
 }): Promise<boolean> {
 
-  if(doAudit){
-    // Ensure models are initialized
+  // Initialize models and audit hooks if needed
+  if (doAudit) {
     InitModels(sequelize);
-    // ✅ Register hooks for seeder context
     registerAuditHooks(sequelize);
   }
 
@@ -80,10 +75,10 @@ export async function seedCsvEntities<T extends Model>({
 
   console.log(`⚡ Seeding ${tableName} from ${fullPath}`);
 
-  // ✅ Await readCsv and handle null/empty
   const records = await readCsv(dbModel, csvFile);
   if (!records || records.length === 0) {
-    console.warn(`⚠️ No records found in CSV: ${fullPath}`);
+    console.log("Current working directory:", process.cwd());
+    console.warn(`⚠️  No records found in CSV: ${fullPath}`);
     return false;
   }
 
@@ -91,19 +86,17 @@ export async function seedCsvEntities<T extends Model>({
   let failCount = 0;
 
   // ------------------------------------------------------------------
-  // 🧠 AUDIT CONTEXT (BATCH-SCOPED)
+  // 🧠 TRANSACTION HANDLING
   // ------------------------------------------------------------------
   const runSeeder = async () => {
-    // const tx = await sequelize.transaction(); // ✅ manual transaction
-    const tx = transaction ?? await sequelize.transaction();
+    // For SQLite in-memory: always use single transaction
+    const isInMemory = DatabaseConfig.isInMemory && DatabaseConfig.type === "sqlite";
+    const tx = transaction ?? (isInMemory ? await sequelize.transaction() : await sequelize.transaction());
     const isExternalTx = !!transaction;
 
     const uow = new UnitOfWork(
       sequelize,
-      {
-        idFields,
-        showlog: showAuditLogs,
-      },
+      { idFields, showlog: showAuditLogs },
       tx
     );
 
@@ -111,9 +104,7 @@ export async function seedCsvEntities<T extends Model>({
       for (const row of records) {
         let entity: T | null = null;
 
-        // -----------------------------
-        // MAP ROW → ENTITY
-        // -----------------------------
+        // Map row → entity
         try {
           entity = await mapToEntity(row, uow);
         } catch (ex) {
@@ -122,28 +113,11 @@ export async function seedCsvEntities<T extends Model>({
           continue;
         }
 
-        // -----------------------------
-        // ADD TO SESSION
-        // -----------------------------
+        // Add entity to DB
         try {
-          if (entity) {
-            await entity.save({ transaction: tx });
-
-            // ✅ important for audit tracking
-            uow.trackNew?.(entity);
-          }
-
-          if (showLineLog) {
-            logEntityInsert(entity, dbModel.name, row);
-          }
-          // if (showAuditLogs) {
-          //   const keyValues: Record<string, any> = {};
-          //   for (const field of idFields ?? []) {
-          //     keyValues[field] = entity?.get(field);
-          //   }
-          //   console.log(`🔹 Audit: ${tableName} Insert ${JSON.stringify(keyValues)}`);
-          // }
-
+          if (entity) await entity.save({ transaction: tx });
+          if (showLineLog) logEntityInsert(entity, dbModel.name, row);
+          // uow.trackNew?.(entity);
           successCount++;
         } catch (ex) {
           failCount++;
@@ -151,19 +125,16 @@ export async function seedCsvEntities<T extends Model>({
         }
       }
 
-      // // ✅ NOW THIS IS SAFE
-      // // await uow.commit();   // ← audit happens here: Use this if hook is turned off
-      // await tx.commit();    // ← actual DB commit: Use this if hook is turned on
       if (!isExternalTx) {
         await tx.commit();
       }
+
       return true;
     } catch (ex) {
       console.error(`❌ Failed to commit ${dbModel.name}:`, ex);
-      // await tx.rollback();
       if (!isExternalTx) {
         await tx.rollback();
-      }      
+      }
       return false;
     } finally {
       await uow.dispose();
@@ -171,7 +142,7 @@ export async function seedCsvEntities<T extends Model>({
   };
 
   // ------------------------------------------------------------------
-  // 🚀 EXECUTION (WITH OR WITHOUT AUDIT)
+  // 🚀 RUN WITH OR WITHOUT AUDIT CONTEXT
   // ------------------------------------------------------------------
   let result: boolean;
   if (doAudit) {
@@ -179,9 +150,7 @@ export async function seedCsvEntities<T extends Model>({
       changedBy,
       correlationId: `SEED-${uuidv4()}`,
     };
-
     result = await AuditContext.run(auditInfo, runSeeder);
-
   } else {
     result = await runSeeder();
   }

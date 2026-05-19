@@ -8,7 +8,7 @@ import { performRepoAction } from "@Infrastructure/Persistence/Services/RepoActi
 import { CreateOlUserCommand } from "@Application/Commands/Base/Users/CreateOlUserCommand.ts";
 import { GetUserRepository } from "@Infrastructure/Dependencies/UserRepoProvider.ts";
 import { IUserRepository } from "@Domain/Interfaces/Base/IUserRepository.ts";
-import { UnitOfWork } from "02-Application/UoW/UnitOfWork.ts";
+import { UnitOfWork } from "@Application/UoW/UnitOfWork.ts";
 
 export class CreateOlUserHandler {
   private userRepoFactory = () => GetUserRepository();

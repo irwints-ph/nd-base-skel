@@ -4,13 +4,14 @@
 import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
 import { logger } from "@Infrastructure/Core/Logger.ts";
 import { UserDtoMapper } from "@Infrastructure/Persistence/Mappers/Base/UserDtoMapper.ts";
-import { User } from "03-Domain/Entities/Base/User/User.ts";
-import { UserMstr } from "04-Infrastructure/Persistence/Models/Base/index.ts";
+import { User } from "@Domain/Entities/Base/User/User.ts";
+import { UserMstr } from "@Infrastructure/Persistence/Models/Base/index.ts";
 import { CreateOlUserCommand } from "@Application/Commands/Base/Users/CreateOlUserCommand.ts";
 import { CreateOlUserHandler } from "@Application/Handlers/Base/CreateOlUserHandler.ts";
-import { UserCreateFromSso } from "01-Contracts/Base/Users/UserSchemas.ts";
+import { UserCreateFromSso } from "@Contracts/Base/Users/UserSchemas.ts";
 import { GetUserRepository } from "@Infrastructure/Dependencies/UserRepoProvider.ts";
 import { performRepoAction } from "@Infrastructure/Persistence/Services/RepoActionService.ts";
+import { UnitOfWork } from "@Application/UoW/UnitOfWork.ts";
 
 export class AuthenticateOLUserUseCase {
   // private userRepoFactory: () => IUserRepository;
@@ -21,9 +22,9 @@ export class AuthenticateOLUserUseCase {
   //   this.userRepoFactory = userRepoFactory;
   // }
 
-  async execute(token: string, ssokey: string) {
+  async execute(token: string, ssokey: string,uow: UnitOfWork) {
     const repo = this.userRepoFactory();
-    const userDomain = await repo.getBySsoId(ssokey, 1);
+    const userDomain = await repo.getBySsoId(ssokey, 1,uow.transaction);
     //User with the ssoKey found, return this user
     if (userDomain) {
       // return userDomain;
@@ -36,14 +37,14 @@ export class AuthenticateOLUserUseCase {
       const email = userInfo.email;
 
       //Check if email is existing on DB
-      let ormUser:UserMstr | null = await repo.getByEmailOrm(email);
+      let ormUser:UserMstr | null = await repo.getByEmailOrm(email,uow.transaction);
 
       //Existing: Update the user with the sso and validate email if not validated
       if (ormUser) {
         //Update user with new sso and validate email
         const action = async (uow: any) => {
           // repo.session = uow.transaction; // Good for showing log but has error on sqlite
-          const domainUser:User | null = await repo.getById(ormUser.UserId);
+          const domainUser:User | null = await repo.getById(ormUser.UserId,uow.transaction);
           if(domainUser){
             domainUser.addSso(
               ssokey,          // OneLogin ID
@@ -51,7 +52,7 @@ export class AuthenticateOLUserUseCase {
               ormUser.UserId   // Created by the sso user loginin
             );
             domainUser.validateEmail(email);
-            const updatedOrmUSer = await repo.save(domainUser);
+            const updatedOrmUSer = await repo.save(domainUser,uow.transaction);
             return updatedOrmUSer ? UserDtoMapper.toOrmUserFlatBase(updatedOrmUSer) : null;
           }
         };

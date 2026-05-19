@@ -11,6 +11,7 @@ import { getActiveUser } from "@Infrastructure/Auth/RequestUtils.ts"
 
 //Put only thos that doen't need user detrails /Authorization
 const PUBLIC_PATHS = [
+  "/",
   "/docs",
   "/openapi.json",
   "/favicon.ico",
@@ -120,6 +121,7 @@ export async function GlobalInterceptor(
 
 // 404 handler
 export function NotFoundHandler(req: Request, res: Response) {
+  console.log("❗ NotFoundHandler hit:", req.method, req.originalUrl);  
   res.status(404).json({
     success: false,
     error: `Cannot ${req.method} ${req.originalUrl}`,
@@ -139,6 +141,7 @@ export function ErrorHandler(
     error: err.message || "Internal Server Error",
   });
 }
+
 export async function timingInterceptor(req: Request, res: Response, next: NextFunction) {
   const start = process.hrtime.bigint(); // high-res timer
   res.on("finish", () => {

@@ -1,61 +1,67 @@
 // src/scripts/migrations/seed_db.ts
-import path from "path"
-import fs from "fs"
-import { fileURLToPath } from "url"
-import dotenv from "dotenv"
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import dotenv from "dotenv";
 
-import { parseArgs, printHelp, isEmptyArgs } from "./parameter_parser.ts"
-import { runSeeders } from "./seed_runner.ts"
+import { runSeeders } from "./seed_runner.ts";
 
 // ==============================
 // Load dotenv FIRST
 // ==============================
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const seederFile = fileURLToPath(import.meta.url);
+const seederDir = path.dirname(seederFile);
 
-dotenv.config({ path: path.resolve(__dirname, "../../../.env") })
+dotenv.config({ path: path.resolve(seederDir, "../../../.env") });
 
 // ==============================
 // Imports AFTER dotenv
 // ==============================
-import { createDatabaseIfNotExists } from "../../04-Infrastructure/Core/sequelize.ts"
+import { createDatabaseIfNotExists } from "@Infrastructure/Core/sequelize.ts";
 import { sequelize } from "@Infrastructure/Persistence/AppDBContext.ts";
-import { InitModels } from "04-Infrastructure/Core/InitModels.ts"
-import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts"
+import { InitModels } from "@Infrastructure/Core/InitModels.ts";
+import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
 
 // ==============================
 // Helpers
 // ==============================
 function deleteSqliteFile(dbName: string) {
-  if (!dbName || dbName === ":memory:") return
+  if (!dbName || dbName === ":memory:") return;
 
   if (fs.existsSync(dbName)) {
-    console.log(`🗑 Deleting SQLite DB file: ${dbName}`)
-    fs.unlinkSync(dbName)
+    console.log(`🗑 Deleting SQLite DB file: ${dbName}`);
+    fs.unlinkSync(dbName);
   }
 }
 
 // ==============================
-// Main
+// 🔥 NEW: Programmatic API (for Jest)
 // ==============================
-async function main() {
-  const args = parseArgs(process.argv)
+export async function seedDatabase(options: {
+  createDb?: boolean;
+  dropDbOnly?: boolean;
+  reset?: boolean;
+  dataDir: string;
+  noSeed?: boolean;
+  cs?: string;
+}) {
+  const {
+    createDb = false,
+    dropDbOnly = false,
+    reset = false,
+    dataDir,
+    noSeed = false,
+    cs,
+  } = options;
 
-  if (args.help || isEmptyArgs(args)) {
-    printHelp()
-    return
-  }
+  console.log(`Using data dir: ${dataDir}`);
+  if (cs) console.log(`CSV suffix: ${cs}`);
 
-  const { createDb, dropDbOnly, reset, dataDir, noSeed, cs } = args
-
-  console.log(`Using data dir: ${dataDir}`)
-  if (cs) console.log(`CSV suffix: ${cs}`)
-
-  const dbSettings = EnvConfig.database
-  const isSqlite = dbSettings.type === "sqlite"
-
+  const dbSettings = EnvConfig.database;
+  const isSqlite = dbSettings.type === "sqlite";
+  console.log("dbSettings.type", dbSettings.type,"In-Momory", dbSettings.isInMemory);
   if (reset && EnvConfig.ENVIRONMENT === "production") {
-    throw new Error("❌ --reset is disabled in production")
+    throw new Error("❌ --reset is disabled in production");
   }
 
   try {
@@ -63,45 +69,45 @@ async function main() {
     // RESET
     // =========================
     if (reset) {
-      console.log("🔁 Resetting database...")
+      console.log("🔁 Resetting database...", dbSettings.type,"In-Momory", dbSettings.isInMemory);
 
       if (isSqlite) {
-        deleteSqliteFile(dbSettings.name)
+        deleteSqliteFile(dbSettings.name);
       } else {
-        await sequelize.getQueryInterface().dropAllTables()
+        await sequelize.getQueryInterface().dropAllTables();
       }
 
-      await createDatabaseIfNotExists(dbSettings)
-      InitModels(sequelize)
+      await createDatabaseIfNotExists(dbSettings);
+      InitModels(sequelize);
 
-      await sequelize.authenticate()
-      await sequelize.sync({ force: true })
+      await sequelize.authenticate();
+      await sequelize.sync({ force: true });
 
-      console.log("✅ Database recreated")
+      console.log("✅ Database recreated");
     }
 
     // =========================
     // DROP ONLY
     // =========================
     if (dropDbOnly && !reset) {
-      await sequelize.getQueryInterface().dropAllTables()
-      console.log("✅ Dropped all tables")
-      return
+      await sequelize.getQueryInterface().dropAllTables();
+      console.log("✅ Dropped all tables");
+      return;
     }
 
     // =========================
     // CREATE
     // =========================
     if (createDb && !reset) {
-      await sequelize.getQueryInterface().dropAllTables()
+      await sequelize.getQueryInterface().dropAllTables();
 
-      await createDatabaseIfNotExists(dbSettings)
-      InitModels(sequelize)
+      await createDatabaseIfNotExists(dbSettings);
+      InitModels(sequelize);
 
-      await sequelize.authenticate()
-      await sequelize.sync({ alter: true })
+      await sequelize.authenticate();
+      await sequelize.sync({ alter: true });
 
-      console.log("✅ Database schema synced")
+      console.log("✅ Database schema synced");
     }
 
     // =========================
@@ -116,17 +122,12 @@ async function main() {
 
       console.log("✅ Database seeding complete");
     }
-
-    await sequelize.close();
+    if(!dbSettings.isInMemory){
+      await sequelize.close();
+      console.log("✅ seeed_db: sequelize.close");
+    }
   } catch (err) {
     console.error("❌ Unhandled error:", err);
-    process.exit(1);
+    throw err; // ❗ important for Jest
   }
 }
-
-// ==============================
-// Run
-// ==============================
-main()
-
-export default main

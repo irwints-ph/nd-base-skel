@@ -8,7 +8,7 @@ import { Contact } from "@Domain/Entities/Base/User/Contact.ts";
 import { BcryptPasswordHasher } from "@Infrastructure/Auth/BcryptPasswordHasher.ts";
 import { AppTime } from "@Infrastructure/Core/AppTime.ts";
 import { ContactTypes } from "@Infrastructure/Persistence/Models/Constants/ContactTypes.ts";
-import SsoKey from "04-Infrastructure/Persistence/Models/Base/SsoKey.ts";
+import SsoKey from "@Infrastructure/Persistence/Models/Base/SsoKey.ts";
 
 export interface BuildUserOptions {
   username: string;

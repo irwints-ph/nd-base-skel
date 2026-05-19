@@ -95,6 +95,11 @@ export class Utils {
     const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv)
     decipher.setAutoPadding(true) // ✅ Let Node handle PKCS7 padding automatically
 
+    console.log("KEY:", key.toString("base64"))
+    console.log("IV:", iv.toString("base64"))
+    console.log("CIPHER:", encrypted.toString("base64"))
+    console.log("FULL:", Buffer.concat([iv, encrypted]).toString("base64"))
+    
     let decrypted = decipher.update(encrypted)
     decrypted = Buffer.concat([decrypted, decipher.final()])
 

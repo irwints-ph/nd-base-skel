@@ -34,6 +34,7 @@ export class GetHealthUseCase {
     try {
       const dialect = this.db.getDialect();
       const dbConfig: any = this.db.config;
+      const dbHostname = EnvConfig.database.host ?? "";
       displayName = dbConfig.database ?? EnvConfig.database.name;
 
       // ---------------------------
@@ -64,7 +65,7 @@ export class GetHealthUseCase {
         }
 
         if (schemaName) {
-          displayName = `${displayName} (${schemaName})`;
+          displayName = `${displayName} (${schemaName}) ${dbHostname}`;
         }
       });
 

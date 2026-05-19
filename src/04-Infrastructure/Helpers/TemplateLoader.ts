@@ -9,13 +9,14 @@ import { createLogger } from "@Infrastructure/Core/Logger.ts";
 
 const logger = createLogger("TemplateLoader");
 // Recreate __dirname in ESM
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const templateLoaderFilename = fileURLToPath(import.meta.url);
+// const templateLoaderFilename = __filename;
+const templateLoaderDirname = path.dirname(templateLoaderFilename);
 
 export class TemplateLoader {
   static loadTemplate(templateFile: string): string | null {
     // Directory path for templates
-    const templateDir = path.resolve(__dirname, "../Email/Templates");
+    const templateDir = path.resolve(templateLoaderDirname, "../Email/Templates");
 
     // Build the full path of the template
     const templateFull = path.join(templateDir, templateFile);

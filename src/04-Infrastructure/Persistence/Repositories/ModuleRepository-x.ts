@@ -28,6 +28,7 @@ export class ModuleRepositoryX {
     return module;
   }  
   async save_x(data: Module): Promise<Module> {
+    console.log("ModuleRepository-x in BuildModuleService");
     const tx = await sequelize.transaction();
 
     try {

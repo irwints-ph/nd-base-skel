@@ -7,7 +7,7 @@ node --inspect-brk --watch node_modules/tsx/dist/cli.mjs src/main.ts
 ```
 ## Debug Seeder - use this so that we have control when the code will start
 ```bash
-node --inspect-brk node_modules/tsx/dist/cli.mjs src/Scripts/Migrations/seed_db.ts --create-db
+node --inspect-brk node_modules/tsx/dist/cli.mjs src/Scripts/Migrations/seed_db_cli.ts --create-db
 ```
 > Run and Debug: Attach
 
@@ -22,6 +22,7 @@ npm run dev
 ## Seeder
 ```bash
 npx tsx src/Scripts/Migrations/seed_db.ts --create-db
+npx tsx src/Scripts/Migrations/seed_db_cli.ts --create-db
 ```
 Then run attach
 
@@ -107,3 +108,6 @@ npm i --save-dev @types/nodemailer
 netstat -ano | findstr :3000
 taskkill /f /pid 28760 
 tasklist /FI "IMAGENAME eq node.exe"
+
+npx jest --config jest.config.cjs src/05-Test/api.test.ts
+npx jest --config jest.config.cjs Button.test.tsx

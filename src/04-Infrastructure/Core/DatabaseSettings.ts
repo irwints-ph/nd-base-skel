@@ -14,9 +14,18 @@ export class DatabaseSettings {
   public password: string;
   public dbSchema?: string;
   public showSql: boolean;
+  private rawType: string;
+  public isInMemory: boolean = false;
 
   constructor() {
-    this.type = (process.env.DB_TYPE as Dialect) || "sqlite";
+    this.rawType = (process.env.DB_TYPE || "sqlite").toLowerCase();
+
+    // Detect special modes
+    this.isInMemory = this.rawType === "sqlite-memory";
+
+    // Map to real Sequelize dialect
+    this.type = this.isInMemory ? "sqlite" : (this.rawType as Dialect);    
+    // this.type = (process.env.DB_TYPE as Dialect) || "sqlite";
     this.name = process.env.DB_NAME || "app.sqlite3";
     this.host = process.env.DB_HOST || "localhost";
     this.port = parseInt(process.env.DB_PORT || "5432", 10);
@@ -61,7 +70,8 @@ export class DatabaseSettings {
         };
       }
     } else {
-      options.storage = this.name; // sqlite file
+      // options.storage = this.name; // sqlite file
+      options.storage = this.isInMemory ? ":memory:" : this.name;
     }
 
     return options;

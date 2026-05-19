@@ -3,6 +3,9 @@ module.exports = {
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
+  // transform: {
+  //   '^.+\\.ts$': ['ts-jest', { useESM: true }],
+  // },  
   transform: {
     '^.+\\.ts$': ['ts-jest', {
       useESM: true,
@@ -27,6 +30,12 @@ module.exports = {
   // Path mapping for Jest (mirrors tsconfig.json paths)
   // Allows imports like "@/domain/models/constants/ContactTypes" in tests
   moduleNameMapper: {
+    "^@Api/(.*)$": "<rootDir>/src/01-Api/$1",
+    "^@Contracts/(.*)$": "<rootDir>/src/01-Contracts/$1",
+    "^@Application/(.*)$": "<rootDir>/src/02-Application/$1",
+    "^@Infrastructure/(.*)$": "<rootDir>/src/04-Infrastructure/$1",
+    "^@Domain/(.*)$": "<rootDir>/src/03-Domain/$1",
+    "^@Tests/(.*)$": "<rootDir>/tests/$1",
     '^@/(.*)': '<rootDir>/src/$1'
   }
 };

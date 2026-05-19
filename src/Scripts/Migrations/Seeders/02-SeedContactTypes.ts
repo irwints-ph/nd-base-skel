@@ -15,7 +15,6 @@ export default async function SeedContactTypes(
   dataDir: string,
   noErrors: boolean,
   fileSuffix?: string, 
-  transaction?: Transaction
 ): Promise<boolean> {
   if (!noErrors) return false;
 

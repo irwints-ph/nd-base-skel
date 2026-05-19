@@ -11,7 +11,7 @@ import { Transaction } from "sequelize";
 // ------------------------------------------------------------------
 // Seeder function
 // ------------------------------------------------------------------
-export async function seedSsoTypes(dataDir: string, noErrors = true, transaction?: Transaction): Promise<boolean> {
+export async function seedSsoTypes(dataDir: string, noErrors = true): Promise<boolean> {
   if (!noErrors) return false;
 
   setBaseDir(dataDir);

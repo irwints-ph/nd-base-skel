@@ -1,10 +1,13 @@
 import path from 'path'
 import { readCsvSimple, bulkInsertSafe } from './_util.ts'
 import { RoleModuleTableName } from "@Infrastructure/Persistence/Models/Constants/DBNames.ts";
-import { Transaction } from "sequelize";
 
-export default async function seed_role_modules(dataDir: string, noErrors: boolean, fileSuffix?: string, 
-  transaction?: Transaction): Promise<boolean> {
+
+export default async function seed_role_modules(
+  dataDir: string, 
+  noErrors: boolean, 
+  fileSuffix?: string
+): Promise<boolean> {
   const tableName = RoleModuleTableName;
   try {
     const fileName = fileSuffix ? `role_modules-${fileSuffix}.csv` : 'role_modules.csv'

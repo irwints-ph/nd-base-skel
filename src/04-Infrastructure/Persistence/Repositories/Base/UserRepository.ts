@@ -17,44 +17,41 @@ import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts
 
 export class UserRepository implements IUserRepository {
   // public session?: Transaction;
-  async add(domainUser: User): Promise<UserMstr> {
-    return sequelize.transaction(async (tx) => {
-      const ormUser = UserMapper.toOrm(domainUser);
+  async add(domainUser: User, transaction?: Transaction): Promise<UserMstr> {
+    const ormUser = UserMapper.toOrm(domainUser);
 
-      if (ormUser.Profile) ormUser.Profile.UserId = ormUser.UserId;
-      if (ormUser.Contacts) ormUser.Contacts.forEach(c => (c.UserId = ormUser.UserId));
-      if (ormUser.Sso) ormUser.Sso.UserId = ormUser.UserId;
+    if (ormUser.Profile) ormUser.Profile.UserId = ormUser.UserId;
+    if (ormUser.Contacts) ormUser.Contacts.forEach(c => (c.UserId = ormUser.UserId));
+    if (ormUser.Sso) ormUser.Sso.UserId = ormUser.UserId;
 
-      await ormUser.save({ transaction: tx });
+    await ormUser.save({ transaction });
 
-      // Mimic trigger: update CreatedBy if needed
-      if (ormUser.CreatedBy === -1) {
-        ormUser.CreatedBy = ormUser.UserId;
-        await ormUser.save({ transaction: tx });
+    if (ormUser.CreatedBy === -1) {
+      ormUser.CreatedBy = ormUser.UserId;
+      await ormUser.save({ transaction });
+    }
+
+    if (ormUser.Profile) {
+      ormUser.Profile.UserId = ormUser.UserId;
+      ormUser.Profile.CreatedBy = ormUser.CreatedBy;
+      await ormUser.Profile.save({ transaction });
+    }
+
+    if (ormUser.Contacts) {
+      for (const c of ormUser.Contacts) {
+        c.UserId = ormUser.UserId;
+        c.CreatedBy = ormUser.CreatedBy;
+        await c.save({ transaction });
       }
+    }
 
-      if (ormUser.Profile) {
-        ormUser.Profile.UserId = ormUser.UserId;
-        ormUser.Profile.CreatedBy = ormUser.CreatedBy;
-        await ormUser.Profile.save({ transaction: tx });
-      }
+    if (ormUser.Sso) {
+      ormUser.Sso.UserId = ormUser.UserId;
+      ormUser.Sso.CreatedBy = ormUser.CreatedBy;
+      await ormUser.Sso.save({ transaction });
+    }
 
-      if (ormUser.Contacts) {
-        for (const c of ormUser.Contacts) {
-          c.UserId = ormUser.UserId;
-          c.CreatedBy = ormUser.CreatedBy;
-          await c.save({ transaction: tx });
-        }
-      }
-
-      if (ormUser.Sso) {
-        ormUser.Sso.UserId = ormUser.UserId;
-        ormUser.Sso.CreatedBy = ormUser.CreatedBy;
-        await ormUser.Sso.save({ transaction: tx });
-      }
-
-      return ormUser;
-    });
+    return ormUser;
   }
 
   // -------------------------------------------------------------------

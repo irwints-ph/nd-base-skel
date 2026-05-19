@@ -5,6 +5,7 @@ import { Request } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { GetLocalUser } from "@Infrastructure/Auth/LocalAuth.ts";
 import { GetOLUser, OLIssuer } from "@Infrastructure/Auth/OLAuth.ts";
+import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
 
 export function getBearerToken(req: Request): string | null {
   const token = req.query.token as string | undefined;
@@ -41,14 +42,19 @@ export async function getActiveUser(req: Request): Promise<any | null> {
     return null;
   }
 
-  const issuer = payload.iss;
-  const localIssuer = `${req.protocol}://${req.get("host")}`;
+  const issuer = payload.iss?.trim();
+  // const localIssuer = `${req.protocol}://${req.get("host")}`;
+  const localIssuer = EnvConfig.jwt.JWT_ISSUER;
 
+  // console.log(issuer,localIssuer, issuer === localIssuer);
   if (issuer === localIssuer) {
+    // console.log("local");
     return await GetLocalUser(token);
   } else if (issuer === OLIssuer) {
+    // console.log("onelogin");
     return await GetOLUser(token);
   } else {
+    // console.log("none");
     return null;
   }
 }

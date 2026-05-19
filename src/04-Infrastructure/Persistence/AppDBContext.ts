@@ -1,10 +1,8 @@
 // ==================================================================
 // 🧩 src/04-Infrastructure/Persistence/AppDBContext.ts
 // ==================================================================
-
 import { Sequelize, Model, Options } from "sequelize";
 import path from "path";
-// import { v4 as uuidv4 } from "uuid";
 import { EnvConfig } from "../Core/ConfigLoader.ts";
 import { logger } from "../Core/Logger.ts";
 import { InitModels } from "../Core/InitModels.ts";
@@ -14,7 +12,8 @@ import { DatabaseNamingConvention } from "../Core/DatabaseNaming.ts";
 /**
  * Database type from environment config
  */
-export const dbType = (process.env.DB_TYPE || EnvConfig.database.type).toLowerCase();
+export const dbType = (EnvConfig.database.type || process.env.DB_TYPE ).toLowerCase();
+export const DatabaseConfig = EnvConfig.database;
 
 /**
  * Sequelize initialization options
@@ -42,14 +41,16 @@ const isScript =
   );
 
 const pool: any =
-  ["postgres", "mysql", "mariadb", "mssql"].includes(dbType)
+  dbType === "sqlite" && DatabaseConfig.isInMemory
+    ? { max: 1, min: 1, idle: 0 } // single connection for in-memory
+    : ["postgres", "mysql", "mariadb", "mssql"].includes(dbType)
     ? isScript
       ? {
           max: Number(process.env.DB_POOL_MAX_SCRIPT) || 3,
           min: Number(process.env.DB_POOL_MIN_SCRIPT) || 0,
           idle: Number(process.env.DB_POOL_IDLE_SCRIPT) || 500,
           acquire: Number(process.env.DB_POOL_ACQUIRE_SCRIPT) || 30000,
-          evict: Number(process.env.DB_POOL_EVICT_SCRIPT) || 500,
+          evict: Number(process.env.DB_POOL_EVICT) || 500,
         }
       : {
           max: Number(process.env.DB_POOL_MAX) || 10,
@@ -59,17 +60,31 @@ const pool: any =
           evict: Number(process.env.DB_POOL_EVICT) || 5000,
         }
     : undefined;
-
 /**
  * Sequelize instance
  */
 export const sequelize: Sequelize =
+  // dbType === "sqlite"
+  //   ? new Sequelize({
+  //       dialect: "sqlite",
+  //       storage: path.resolve(process.cwd(), process.env.DB_NAME || EnvConfig.database.name),
+  //       logging: (process.env.DB_SHOW_SQL || EnvConfig.database.showSql) === "true" ? console.log : false,
+  //     })
   dbType === "sqlite"
     ? new Sequelize({
         dialect: "sqlite",
-        storage: path.resolve(process.cwd(), process.env.DB_NAME || EnvConfig.database.name),
-        logging: (process.env.DB_SHOW_SQL || EnvConfig.database.showSql) === "true" ? console.log : false,
-      })
+        storage: DatabaseConfig.isInMemory
+          ? ":memory:" // 🔥 THIS is the key change
+          : path.resolve(
+              process.cwd(),
+              process.env.DB_NAME || EnvConfig.database.name
+            ),
+        logging:
+          (process.env.DB_SHOW_SQL || EnvConfig.database.showSql) === "true"
+            ? console.log
+            : false,
+        pool: pool, // 🔑 pass the pool here!
+      })      
     : new Sequelize(
         process.env.DB_NAME || EnvConfig.database.name,
         process.env.DB_USER || EnvConfig.database.user,
@@ -101,12 +116,15 @@ export async function setupDatabase(): Promise<boolean> {
   try {
     await sequelize.authenticate();
     logger.info("✅ Database connected");
-
-    // Enable WAL for SQLite
-    if (dbType === "sqlite") {
+    if (dbType === "sqlite" && !DatabaseConfig.isInMemory) {
       await sequelize.query("PRAGMA journal_mode=WAL;");
       logger.info("✅ SQLite WAL mode enabled");
     }
+    // // Enable WAL for SQLite
+    // if (dbType === "sqlite") {
+    //   await sequelize.query("PRAGMA journal_mode=WAL;");
+    //   logger.info("✅ SQLite WAL mode enabled");
+    // }
 
     // Initialize models
     InitModels(sequelize);
@@ -115,6 +133,7 @@ export async function setupDatabase(): Promise<boolean> {
     if ((process.env.AS_AUDIT_ENABLED || EnvConfig.admin.auditEnabled) === "true") {
       registerAuditHooks(sequelize);
     }
+    logger.info(`🛢️  Type: ${EnvConfig.database.type} | Name: ${EnvConfig.database.name} | Show SQL: ${EnvConfig.database.showSql}| InMemory: ${EnvConfig.database.isInMemory}`);
 
     // Verify essential tables exist
     const requiredTables = [
@@ -154,12 +173,14 @@ export async function shutdownDatabase(): Promise<void> {
 
     // Force destroy pooled connections for server DBs
     const pool: any = (sequelize as any).connectionManager?.pool;
+    
     if (pool && typeof pool.destroyAllNow === "function") {
       await pool.destroyAllNow();
       logger.info("⚡ Force destroyed all DB connections");
     }
 
     await sequelize.close();
+    console.log("✅ DB Context: Database connection closed");
     logger.info("✅ Database connection closed");
   } catch (err) {
     logger.error("❌ Error during DB shutdown:", err);

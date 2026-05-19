@@ -9,7 +9,6 @@ import { mapCreateUserSeed } from "./03-CreateUserSeedMap.ts";
 import { UnitOfWork } from "@Application/UoW/UnitOfWork.ts";
 import { User } from "@Domain/Entities/Base/User/User.ts";
 import UserMstr from "@Infrastructure/Persistence/Models/Base/UserMstr.ts";
-import { Transaction } from "sequelize";
 
 // ------------------------------------------------------------------
 // Seeder
@@ -18,7 +17,6 @@ export async function SeedUsers(
   dataDir: string,
   noErrors = true,
   fileSuffix?: string, 
-  transaction?: Transaction
 ): Promise<boolean> {
 
   if (!noErrors) return false;
@@ -56,13 +54,14 @@ export async function SeedUsers(
     const repo = new UserRepository();
     // repo.session = uow.transaction;
 
-    const ormUser = await repo.add(domainUser,uow.transaction);
+    const ormUser = await repo.add(domainUser, uow.transaction);
 
     // -----------------------------
     // LOGGING
     // -----------------------------
     console.log(
       ` → Insert User: username=${domainUser.username}, ` +
+      `userId=${ormUser.UserId ?? "N/A"}, ` +
       `name=${domainUser.profile?.fullname ?? "N/A"}, ` +
       `email=${domainUser.getPrimaryEmail?.() ?? dto.email}`
     );

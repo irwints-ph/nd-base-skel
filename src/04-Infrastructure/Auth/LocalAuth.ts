@@ -16,22 +16,22 @@ const ALGORITHM = EnvConfig.jwt.JWT_ALGORITHMS  as jwt.Algorithm;
 export async function GetLocalUser(token: string) {
   try {
     const payload = jwt.verify(token, SECRET_KEY, { algorithms: [ALGORITHM] }) as JwtPayload;
+    // console.log("userId",payload.sub);
     const userId = payload.sub;
     if (!userId) {
-      throw new Error("Could not validate credentials");
+      throw new Error(`Could not validate credentials ${payload.sub}`);
     }
+    console.log("called GetDbAsync LocalAuth.ts");
     const db = await GetDbAsync();
     const userRepo = new UserRepository();
 
-    // const db = await getDbAsync();
-    // const userRepo = new UserRepository(db);
     const userDomain:User | null = await userRepo.getById(Number(userId), db);
     if (!userDomain) {
       throw new Error("User not found");
     }
     return UserDtoMapper.toDomainUserFlatBase(userDomain);
   } catch (err) {
-    throw new Error("Could not validate credentials");
+    throw new Error(`Could not validate credentials ${err}`);
   }
 }
 

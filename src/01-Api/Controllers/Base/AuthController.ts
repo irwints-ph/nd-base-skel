@@ -6,7 +6,7 @@ import { Router, Request, Response } from "express";
 
 import { JwtTokenService } from "@Infrastructure/Auth/JwtTokenService.ts";
 import { authenticateUser } from "@Infrastructure/Auth/JwtAuthService.ts";
-import { GetDbAsync } from "04-Infrastructure/Persistence/Dependencies/db.ts";
+import { GetDbAsync } from "@Infrastructure/Persistence/Dependencies/db.ts";
 // import { GetUserRepository } from "@Infrastructure/Dependencies/UserRepoProvider.ts";
 
 import RegisterUserHandler from "@Application/Handlers/Base/RegisterUserHandler.ts";
@@ -44,6 +44,7 @@ AuthRoute.post("/token", async (req: Request, res: Response) => {
     });
 
   }
+  console.log("called GetDbAsync AuthController")
   const db = await GetDbAsync();
   // const userRepo = GetUserRepository();
 
