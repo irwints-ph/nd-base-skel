@@ -11,8 +11,14 @@ export interface CreateUserCommand {
   email?: string;
   isEmailValidated?: boolean;
   ssoId?: string;
-  sendVerificationEmail?: boolean;
+  sendVerificationEmail?: boolean | false;
   verificationToken?: string | null;
+  createdName?: string | null;
+  actionName?: string | "CreateUser";
+  isRegister?: boolean | false;
+  fullname: string | null;
   issuer?: string | null;
-  createdName?: string| null;
+  appLogo?: string | null;
+  appLame?: string | null;
+  
 }

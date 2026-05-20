@@ -4,6 +4,7 @@
 
 import { getEmailService } from "@Infrastructure/Email/EmailServiceFactory.ts";
 import { EmailSenderService } from "@Infrastructure/Email/EmailSenderService.ts";
+import { IEmailSenderService } from "02-Application/Interfaces/Services/IEmailSenderService.ts";
 
 /**
  * Provides an EmailSenderService with the correct underlying provider

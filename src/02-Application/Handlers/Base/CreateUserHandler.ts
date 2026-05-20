@@ -1,8 +1,8 @@
 // ===================================================================
-// 🟢 CreateUserHandler.ts (Refactored)
+// 🟢 CreateUserHandler.ts (Refactored with TokenMailer flow)
 // ===================================================================
 
-import { IEmailSenderService } from "@Application/Interfaces/Services/IEmailSenderService.ts";
+import { Transaction } from "sequelize";
 import { buildUser } from "@Application/Services/Base/UserFactory.ts";
 import { PasswordPolicyService } from "@Domain/Services/PasswordPolicyService.ts";
 import { OneLoginAdapter } from "@Infrastructure/Adapters/OneLoginAdapter.ts";
@@ -13,33 +13,31 @@ import { IUserRepository } from "@Domain/Interfaces/Base/IUserRepository.ts";
 import { CreateUserCommand } from "@Application/Commands/Base/Users/CreateUserCommand.ts";
 import { GetUserRepository } from "@Infrastructure/Dependencies/UserRepoProvider.ts";
 import { getEmailSender } from "@Infrastructure/Dependencies/EmailSender.ts";
-import { Transaction } from "sequelize";
+import { TokenMailer } from "@Contracts/Common/TokenMailer.ts";
 
 export class CreateUserHandler {
   private userRepoFactory = () => GetUserRepository();
   private emailSender = () => getEmailSender();
 
   async handle(cmd: CreateUserCommand) {
-    // 1️⃣ Validate
     this.validatePassword(cmd.password);
 
-    // 2️⃣ Build domain
     const domainUser = await this.buildDomainUser(cmd);
 
-    // 3️⃣ Persist
     const ormUser = await this.persistUser(cmd, domainUser);
 
-    // 4️⃣ Post פעולה (email)
-    await this.handlePostActions(cmd);
+    await this.handlePostActions(cmd, domainUser);
 
-    // 5️⃣ Return DTO
+    if (!ormUser) {
+      throw new Error("User creation failed");
+    }
+
     return UserDtoMapper.toOrmUserFlatBase(ormUser);
   }
 
-  // -----------------------------------------------------------------
+  // -------------------------------------------------
   // 🔐 VALIDATION
-  // -----------------------------------------------------------------
-
+  // -------------------------------------------------
   private validatePassword(password: string) {
     const { valid, errors } = PasswordPolicyService.validate(password);
     if (!valid) {
@@ -47,10 +45,9 @@ export class CreateUserHandler {
     }
   }
 
-  // -----------------------------------------------------------------
-  // 🧱 DOMAIN CREATION
-  // -----------------------------------------------------------------
-
+  // -------------------------------------------------
+  // 🧱 DOMAIN
+  // -------------------------------------------------
   private async buildDomainUser(cmd: CreateUserCommand) {
     return buildUser({
       username: cmd.username,
@@ -62,34 +59,35 @@ export class CreateUserHandler {
     });
   }
 
-  // -----------------------------------------------------------------
-  // 💾 PERSISTENCE (UoW)
-  // -----------------------------------------------------------------
+  // -------------------------------------------------
+  // 💾 PERSISTENCE
+  // -------------------------------------------------
   private async persistUser(cmd: CreateUserCommand, domainUser: any) {
     return performRepoAction({
-      changedBy: cmd.createdName ?? cmd.createdBy.toString(),
+      changedBy: cmd.createdName ?? String(cmd.createdBy),
       actionName: "CreateUser",
       showlog: true,
 
       action: async (uow) => {
-        const repo: IUserRepository = this.userRepoFactory();
+        const repo = this.userRepoFactory();
+        const tx = uow.transaction;
 
-        // // attach transaction
-        // repo.session = uow.transaction;
-
-        await this.ensureUniqueness(repo, cmd, uow.transaction);
+        await this.ensureUniqueness(repo, cmd, tx);
         await this.handleSso(domainUser, cmd);
 
-        const saved = await repo.add(domainUser,uow.transaction);
-        return saved;
+        return await repo.add(domainUser, tx);
       },
     });
   }
-  // -----------------------------------------------------------------
-  // 🔍 UNIQUENESS CHECKS
-  // -----------------------------------------------------------------
 
-  private async ensureUniqueness(repo: IUserRepository, cmd: CreateUserCommand,tx:Transaction) {
+  // -------------------------------------------------
+  // 🔍 UNIQUENESS
+  // -------------------------------------------------
+  private async ensureUniqueness(
+    repo: IUserRepository,
+    cmd: CreateUserCommand,
+    tx: Transaction
+  ) {
     if (await repo.getByUsername(cmd.username, tx)) {
       throw new Error(`Username '${cmd.username}' already exists`);
     }
@@ -99,10 +97,9 @@ export class CreateUserHandler {
     }
   }
 
-  // -----------------------------------------------------------------
-  // 🔐 SSO HANDLING
-  // -----------------------------------------------------------------
-
+  // -------------------------------------------------
+  // 🔐 SSO
+  // -------------------------------------------------
   private async handleSso(domainUser: any, cmd: CreateUserCommand) {
     if (!cmd.ssoId) return;
 
@@ -114,7 +111,6 @@ export class CreateUserHandler {
 
     const ssoId = result.message ?? "";
 
-    // Encapsulated assignment
     if (domainUser.sso) {
       domainUser.sso.sso_id = ssoId;
     } else {
@@ -125,12 +121,13 @@ export class CreateUserHandler {
     }
   }
 
-  // -----------------------------------------------------------------
-  // 📧 POST ACTIONS
-  // -----------------------------------------------------------------
-
-  private async handlePostActions(cmd: CreateUserCommand) {
-    if (!(cmd.sendVerificationEmail ?? true)) return;
+  // -------------------------------------------------
+  // 📧 EMAIL (TokenMailer flow - READY FOR FUTURE EXTENSION)
+  // -------------------------------------------------
+  private async handlePostActions(cmd: CreateUserCommand, domainUser: any) {
+    const sendEmail = Boolean(cmd.sendVerificationEmail === true);
+    // if (!sendEmail) return;
+    if (sendEmail !== true) return;
 
     const { token } = JwtTokenService.createVerificationToken(
       cmd.email!,
@@ -146,12 +143,21 @@ export class CreateUserHandler {
       throw new Error("Verification token is required.");
     }
 
-    const emailer: IEmailSenderService = this.emailSender();
-
-    await emailer.sendVerificationEmailAsync(
-      cmd.email ?? "",
+    const mail: TokenMailer = {
+      email: cmd.email!,
       token,
-      cmd.issuer
-    );
+      local_issuer: cmd.issuer,
+      fullname: `${cmd.firstname ?? ""} ${cmd.lastname ?? ""}`.trim(),
+      app_logo: domainUser?.app_logo,
+      app_name: domainUser?.app_name,
+    };
+
+    const emailer = this.emailSender();
+
+    // 🔥 CURRENT: still uses old signature
+    await emailer.sendVerificationEmailAsync(mail);
+
+    // 👉 FUTURE UPGRADE (recommended):
+    // await emailer.sendVerificationEmailAsync(mail);
   }
 }

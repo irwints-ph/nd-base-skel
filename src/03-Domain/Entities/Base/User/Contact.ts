@@ -3,55 +3,75 @@
 // ==================================================================
 
 export class Contact {
+  // ---------------------------------------------------------
+  // 🧱 Identity (NEW - matches surrogate PK)
+  // ---------------------------------------------------------
+  Id?: number
 
+  // ---------------------------------------------------------
+  // 🔗 Core fields
+  // ---------------------------------------------------------
   ContactTypeId: number
   ContactValue: string
   IsPrimary: boolean
 
   Validated: boolean
-  ValidationDate?: Date
+  ValidationDate?: Date | null
 
-  CreatedBy?: number
-  CreatedOn?: Date
-  UpdatedBy?: number | void
-  UpdatedOn?: Date | void
-
+  // ---------------------------------------------------------
+  // 🔗 Relationship
+  // ---------------------------------------------------------
   UserId?: number
 
-  constructor({
-    contactTypeId,
-    contactValue,
-    isPrimary,
-    validated = false,
-    validationDate,
-    createdBy,
-    createdOn,
-    userId
-  }: {
+  // ---------------------------------------------------------
+  // 🧾 Audit
+  // ---------------------------------------------------------
+  CreatedBy?: number
+  CreatedOn?: Date
+  UpdatedBy?: number
+  UpdatedOn?: Date
+
+  constructor(params: {
+    id?: number
     contactTypeId: number
     contactValue: string
-    isPrimary: boolean
+    isPrimary?: boolean
     validated?: boolean
-    validationDate?: Date
+    validationDate?: Date | null
+    userId?: number
+
     createdBy?: number
     createdOn?: Date
-    userId?: number
   }) {
+    this.Id = params.id
 
-    this.ContactTypeId = contactTypeId
-    this.ContactValue = contactValue
-    this.IsPrimary = isPrimary
+    this.ContactTypeId = params.contactTypeId
+    this.ContactValue = params.contactValue
 
-    this.Validated = validated
-    this.ValidationDate = validationDate
+    this.IsPrimary = params.isPrimary ?? false
+    this.Validated = params.validated ?? false
+    this.ValidationDate = params.validationDate ?? null
 
-    this.CreatedBy = createdBy
-    this.CreatedOn = createdOn
+    this.UserId = params.userId
 
-    if (userId !== undefined) {
-      this.UserId = userId
-    }
-
+    this.CreatedBy = params.createdBy
+    this.CreatedOn = params.createdOn
   }
 
+  // ---------------------------------------------------------
+  // 🧠 Domain helpers (optional but useful)
+  // ---------------------------------------------------------
+
+  markAsPrimary() {
+    this.IsPrimary = true
+  }
+
+  markAsValidated(date: Date = new Date()) {
+    this.Validated = true
+    this.ValidationDate = date
+  }
+
+  get isValid(): boolean {
+    return this.Validated === true
+  }
 }

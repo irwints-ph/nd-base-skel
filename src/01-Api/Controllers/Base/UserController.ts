@@ -87,6 +87,7 @@ export class UserController extends BaseApiController {
         password: userIn.password,
         firstname: userIn.firstname,
         lastname: userIn.lastname,
+        fullname: userIn.firstname + ' ' + userIn.lastname, 
         createdBy: currentUser?.userId ?? -1,
         email: userIn.email || "",
         isEmailValidated: userIn.isEmailValidated || false,

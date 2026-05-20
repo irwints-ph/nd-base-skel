@@ -1,55 +1,57 @@
-// src/04-Infrastructure/Persistence/Mappers/Base/UserMapper.ts
+// ===================================================================
+// 🧩 UserMapper.ts (REFINED)
+// ===================================================================
 
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
 import { AppTime } from "@Infrastructure/Core/AppTime.ts";
+import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
 
 import UserMstr from "@Infrastructure/Persistence/Models/Base/UserMstr.ts";
 import ContactMstr from "@Infrastructure/Persistence/Models/Base/ContactMstr.ts";
 import SsoKey from "@Infrastructure/Persistence/Models/Base/SsoKey.ts";
 
 import { User } from "@Domain/Entities/Base/User/User.ts";
-import { UserProfile as DomainProfile} from "@Domain/Entities/Base/User/Profile.ts";
 import { Contact as DomainContact } from "@Domain/Entities/Base/User/Contact.ts";
 import { Sso as DomainSso } from "@Domain/Entities/Base/User/Sso.ts";
+import { UserProfile as DomainProfile } from "@Domain/Entities/Base/User/Profile.ts";
 
 import UserProfileMapper from "./UserProfileMapper.ts";
-import ContactMapper  from "./ContactMapper.ts";
+import ContactMapper from "./ContactMapper.ts";
 import SsoKeyMapper from "./SsoKeyMapper.ts";
 
 export default class UserMapper {
 
+  // =========================================================
+  // 🔹 ORM → DOMAIN
+  // =========================================================
   static toDomain(model: UserMstr): User {
 
-    let profile: DomainProfile | null = null;
-
-    if (model.Profile) {
-      profile = new DomainProfile(
-        model.Profile.Firstname,
-        model.Profile.Lastname,
-        model.Profile.CreatedBy ?? undefined
-      );
-    }
-
-    const contacts: DomainContact[] = model.Contacts
-      ? model.Contacts.map(c =>
-          new DomainContact({
-            contactTypeId: c.ContactTypeId,
-            contactValue: c.ContactValue,
-            isPrimary: c.IsPrimary,
-            validated: c.Validated
-          })
+    const profile: DomainProfile | null = model.Profile
+      ? new DomainProfile(
+          model.Profile.Firstname,
+          model.Profile.Lastname,
+          model.Profile.CreatedBy ?? undefined
         )
-      : [];
+      : null;
 
-    let sso: DomainSso | null = null;
+    const contacts: DomainContact[] =
+      model.Contacts?.map(c =>
+        new DomainContact({
+          contactTypeId: c.ContactTypeId,
+          contactValue: c.ContactValue,
+          isPrimary: c.IsPrimary,
+          validated: c.Validated,
+          validationDate: c.ValidationDate ?? null,
+          userId: c.UserId
+        })
+      ) ?? [];
 
-    if (model.Sso) {
-      sso = new DomainSso({
-        type_id: model.Sso.TypeId,
-        sso_id: model.Sso.SsoId ?? "",
-        created_by: model.Sso.CreatedBy ?? undefined,
-      });
-    }
+    const sso: DomainSso | null = model.Sso
+      ? new DomainSso({
+          type_id: model.Sso.TypeId,
+          sso_id: model.Sso?.SsoId ?? "",
+          created_by: model.Sso.CreatedBy ?? undefined,
+        })
+      : null;
 
     return new User({
       user_id: model.UserId,
@@ -65,20 +67,20 @@ export default class UserMapper {
       contacts,
       sso
     });
-
   }
 
+  // =========================================================
+  // 🔹 DOMAIN → ORM
+  // =========================================================
   static toOrm(domain: User): UserMstr {
 
     const orm = UserMstr.build({
-
       Username: domain.username,
       Password: domain.password_hash,
       BegDate: domain.beg_date,
       EndDate: domain.end_date,
       CreatedBy: domain.created_by,
       CreatedOn: AppTime.utcNow(),
-
     });
 
     if (domain.profile) {
@@ -100,159 +102,126 @@ export default class UserMapper {
     }
 
     return orm;
-
   }
 
+  // =========================================================
+  // 🔹 UPDATE ORM FROM DOMAIN (FIXED - CLEAN + SAFE)
+  // =========================================================
   static updateOrmFromDomain(
     ormUser: UserMstr,
     domainUser: User
   ): Record<string, any> {
 
-    const oldValues: Record<string, any> = {};
+    const oldValues: Record<string, any> = {
+      profile: null,
+      contacts: [],
+      sso: null,
+    };
 
-    /* --------------------------------
-       Capture old scalar values
-    -------------------------------- */
+    // -------------------------
+    // USER SCALARS
+    // -------------------------
+    oldValues.username = ormUser.Username;
 
-    for (const key of Object.keys(ormUser.get())) {
-      const dbField =
-        DatabaseNamingConvention.getToPascalCase(key);
-      oldValues[dbField] = (ormUser as any)[dbField];
-    }
+    ormUser.Username = domainUser.username;
+    ormUser.UpdatedBy = domainUser.updated_by ?? null;
+    ormUser.UpdatedOn = AppTime.utcNow();
 
-    /* --------------------------------
-       Profile snapshot
-    -------------------------------- */
+    // -------------------------
+    // PROFILE
+    // -------------------------
+    if (ormUser.Profile && domainUser.profile) {
 
-    if (ormUser.Profile) {
       oldValues.profile = {
         Firstname: ormUser.Profile.Firstname,
-        Lastname: ormUser.Profile.Lastname
+        Lastname: ormUser.Profile.Lastname,
       };
+
+      ormUser.Profile.Firstname = domainUser.profile.Firstname;
+      ormUser.Profile.Lastname = domainUser.profile.Lastname;
+      ormUser.Profile.UpdatedBy = domainUser.updated_by ?? null;
+      ormUser.Profile.UpdatedOn = AppTime.utcNow();
     }
 
-    /* --------------------------------
-       Contacts snapshot
-    -------------------------------- */
-
-    oldValues.contacts = [];
-
+    // -------------------------
+    // CONTACTS (FIXED: USE Id, NOT ContactTypeId)
+    // -------------------------
     const existingContacts = new Map<number, ContactMstr>();
-    for (const c of ormUser.Contacts || []) {
-      existingContacts.set(c.ContactTypeId, c);
+
+    for (const c of ormUser.Contacts ?? []) {
+      existingContacts.set(c.Id, c);
+
       oldValues.contacts.push({
-        ContactId: c.ContactTypeId,
+        Id: c.Id,
         ContactValue: c.ContactValue,
-        IsPrimary: c.IsPrimary
+        IsPrimary: c.IsPrimary,
+        Validated: c.Validated,
       });
     }
 
-    /* --------------------------------
-       SSO snapshot
-    -------------------------------- */
+    ormUser.Contacts = ormUser.Contacts ?? [];
 
-    if (ormUser.Sso) {
-      oldValues.sso = {
-        Sso: ormUser.Sso
-      };
-    }
+    for (const c of domainUser.contacts ?? []) {
 
-    /* --------------------------------
-       Apply domain updates
-    -------------------------------- */
+      // 🔥 FIX: use Contact.Id if exists
+      const existing = c.Id ? existingContacts.get(c.Id) : undefined;
 
-    domainUser.updated_on = AppTime.utcNow();
+      if (existing) {
 
-    if (domainUser.username) {
-      ormUser.Username = domainUser.username;
-    }
+        existing.ContactValue = c.ContactValue;
+        existing.IsPrimary = c.IsPrimary;
+        existing.Validated = c.Validated;
+        existing.ValidationDate = c.ValidationDate ?? null;
+        existing.UpdatedBy = domainUser.updated_by ?? null;
+        existing.UpdatedOn = AppTime.utcNow();
 
-    ormUser.UpdatedBy = domainUser.updated_by ?? null;
-    ormUser.UpdatedOn = domainUser.updated_on;
+      } else {
 
-    let withChange = false;
-    /* --------------------------------
-       Profile updates
-    -------------------------------- */
-    if (ormUser.Profile && domainUser.profile) {
-      withChange = false;
-      if(ormUser.Profile.Firstname != domainUser.profile.Firstname){
-        withChange = true;
-        ormUser.Profile.Firstname = domainUser.profile.Firstname;
-      }
-      if(ormUser.Profile.Lastname != domainUser.profile.Lastname){
-        withChange = true;
-        ormUser.Profile.Lastname = domainUser.profile.Lastname;
-      }
-      if(withChange){
-        ormUser.Profile.UpdatedBy = domainUser.updated_by ?? null;
-        ormUser.Profile.UpdatedOn = domainUser.updated_on;
-      }
-    }
-
-    /* --------------------------------
-       Contacts updates
-    -------------------------------- */
-
-    for (const c of domainUser.contacts || []) {
-      if (c.ContactTypeId &&
-          existingContacts.has(c.ContactTypeId)) {
-
-        const ormContact =
-          existingContacts.get(c.ContactTypeId)!;
-        withChange = false;
-        if(
-          ormContact.ContactValue != c.ContactValue ||
-          ormContact.IsPrimary != c.IsPrimary  ||
-          ormContact.Validated != c.Validated
-        ) withChange = true;
-        ormContact.ContactValue = c.ContactValue;
-        ormContact.IsPrimary = c.IsPrimary;
-        ormContact.Validated = c.Validated;
-        ormContact.ValidationDate = c.ValidationDate ?? null;
-        if(withChange){
-          ormContact.UpdatedBy = domainUser.updated_by ?? null;
-          ormContact.UpdatedOn = domainUser.updated_on;
-        }
-
-      }
-      else {
         const newContact = ContactMstr.build({
           UserId: ormUser.UserId,
+          ContactTypeId: c.ContactTypeId,
           ContactValue: c.ContactValue,
           IsPrimary: c.IsPrimary,
           Validated: c.Validated,
           ValidationDate: c.ValidationDate ?? null,
           CreatedBy: c.CreatedBy,
-          CreatedOn: AppTime.utcNow()
+          CreatedOn: AppTime.utcNow(),
         });
-        ormUser.Contacts?.push(newContact);
-      }
 
+        ormUser.Contacts.push(newContact);
+      }
     }
 
-    /* --------------------------------
-       SSO updates
-    -------------------------------- */
+    // -------------------------
+    // SSO (FIXED naming consistency)
+    // -------------------------
     if (domainUser.sso) {
+
+      oldValues.sso = ormUser.Sso
+        ? {
+            SsoId: ormUser.Sso.SsoId,
+            TypeId: ormUser.Sso.TypeId,
+          }
+        : null;
+
       if (ormUser.Sso) {
-        ormUser.Sso.SsoId = domainUser.sso.sso_id
-        ormUser.Sso.TypeId = domainUser.sso.type_id
-        ormUser.Sso.UpdatedBy = domainUser.sso.created_by ?? null
-        ormUser.Sso.UpdatedOn = AppTime.utcNow()        
-      }
-      else {
+
+        ormUser.Sso.SsoId = domainUser.sso.sso_id;
+        ormUser.Sso.TypeId = domainUser.sso.type_id;
+        ormUser.Sso.UpdatedBy = domainUser.sso.created_by ?? null;
+        ormUser.Sso.UpdatedOn = AppTime.utcNow();
+
+      } else {
+
         ormUser.Sso = SsoKey.build({
           SsoId: domainUser.sso.sso_id,
           TypeId: domainUser.sso.type_id,
-          CreatedBy: domainUser.sso?.created_by ?? null,
-          CreatedOn: AppTime.utcNow()
+          CreatedBy: domainUser.sso.created_by ?? null,
+          CreatedOn: AppTime.utcNow(),
         });
-
       }
     }
+
     return oldValues;
-
   }
-
 }

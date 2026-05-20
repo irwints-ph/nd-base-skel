@@ -2,7 +2,7 @@
 // 🧩 App/Infrastructure/Persistence/Repositories/Base/UserRepository.ts
 // ===================================================================
 
-import { Op, Transaction } from "sequelize";
+import { Transaction } from "sequelize";
 import { sequelize } from "../../AppDBContext.ts";
 
 import UserMstr from "@Infrastructure/Persistence/Models/Base/UserMstr.ts";

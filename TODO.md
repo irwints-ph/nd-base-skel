@@ -12,3 +12,14 @@
 ### Task
 - [ ] Make repository stateless to help with postgres issue
 
+### Erros/Missin
+- [ ] /api/auth/activate does not exist. FE Calls this on user creation
+- [X] Email not yet wired during user creation
+- [X] Additional Email option to write to file
+- [ ] Edit user issue
+- [ ] User Roles not working
+- [ ] User Module Access not working
+- [ ] Check Full Role functionality
+- [ ] Batch file for table creation and api run
+
+
