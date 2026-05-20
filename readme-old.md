@@ -111,3 +111,9 @@ tasklist /FI "IMAGENAME eq node.exe"
 
 npx jest --config jest.config.cjs src/05-Test/api.test.ts
 npx jest --config jest.config.cjs Button.test.tsx
+
+
+git rm --cached .env
+
+.env
+.env.*

@@ -43,8 +43,8 @@ export async function getActiveUser(req: Request): Promise<any | null> {
   }
 
   const issuer = payload.iss?.trim();
-  // const localIssuer = `${req.protocol}://${req.get("host")}`;
-  const localIssuer = EnvConfig.jwt.JWT_ISSUER;
+  const localIssuer = `${req.protocol}://${req.get("host")}`;
+  // const localIssuer = EnvConfig.jwt.JWT_ISSUER;
 
   // console.log(issuer,localIssuer, issuer === localIssuer);
   if (issuer === localIssuer) {

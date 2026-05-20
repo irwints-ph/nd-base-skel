@@ -14,6 +14,7 @@ import { UpdateUserHandler } from "@Application/Handlers/Base/UpdateUserHandler.
 import { DeleteUserHandler } from "@Application/Handlers/Base/DeleteUserHandler.ts";
 
 import { UserQueryService } from "@Application/Queries/Base/UserQueryService.ts";
+import { getActiveUser } from "@Infrastructure/Auth/RequestUtils.ts";
 
 const userService = new UserQueryService();
 
@@ -28,11 +29,13 @@ export class UserController extends BaseApiController {
   // GET /info
   async userInfo(req: Request, res: Response) {    
     // const currentUser = await this.getCurrentUser(req)
-    const currentUser = (req as any).currentUser;
+    const currentUser = (req as any).currentUser; 
     if(currentUser)
       return res.json({ success: true, data: currentUser });
-    else{
-      return this.error(res,"User Information not found");
+    else {
+      const currentUser = getActiveUser(req);
+      if(currentUser) return res.json({ success: true, data: currentUser });
+      else return this.error(res,"User Information not found");
     }
   }
 
@@ -161,7 +164,7 @@ export class UserController extends BaseApiController {
       return this.success(
         res,        
         result,
-        `Deleted user ${result.username} (${userId})`
+        `Deleted user ${result?.username} (${userId})`
       )
       // return res.json({ success: true, data: result });
     } catch (err: any) {
