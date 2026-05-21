@@ -20,6 +20,6 @@
 - [ ] User Roles not working
 - [ ] User Module Access not working
 - [ ] Check Full Role functionality
-- [ ] Batch file for table creation and api run
+- [X] Batch file for table creation and api run
 
 

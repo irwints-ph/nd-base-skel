@@ -69,7 +69,7 @@ export async function seedDatabase(options: {
     // RESET
     // =========================
     if (reset) {
-      console.log("🔁 Resetting database...", dbSettings.type,"In-Momory", dbSettings.isInMemory);
+      console.log("🔁 Resetting database...", dbSettings.type, "On", dbSettings.host, dbSettings.name, "In-Memory:", dbSettings.isInMemory);
 
       if (isSqlite) {
         deleteSqliteFile(dbSettings.name);

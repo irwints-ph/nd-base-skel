@@ -27,4 +27,3 @@ export function getPortArg(argv: string[]): number | undefined {
 
   return undefined
 }
-

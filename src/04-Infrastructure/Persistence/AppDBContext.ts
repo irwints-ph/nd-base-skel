@@ -120,6 +120,7 @@ export async function setupDatabase(): Promise<boolean> {
       await sequelize.query("PRAGMA journal_mode=WAL;");
       logger.info("✅ SQLite WAL mode enabled");
     }
+    // DatabaseConfig.debugSummary();
     // // Enable WAL for SQLite
     // if (dbType === "sqlite") {
     //   await sequelize.query("PRAGMA journal_mode=WAL;");

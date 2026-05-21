@@ -8,6 +8,8 @@ node --inspect-brk --watch node_modules/tsx/dist/cli.mjs src/main.ts
 ## Debug Seeder - use this so that we have control when the code will start
 ```bash
 node --inspect-brk node_modules/tsx/dist/cli.mjs src/Scripts/Migrations/seed_db_cli.ts --create-db
+
+npx tsx --inspect src/Scripts/Migrations/seed_db_cli.ts --create-db
 ```
 > Run and Debug: Attach
 
