@@ -2,15 +2,15 @@
 // 🟢 src/02-Application/Queries/Auth/ModuleServiceQuery.ts
 // ===================================================================
 import { Op, fn, col, where } from "sequelize";
-import { GenericQueryService } from "@Infrastructure/Persistence/Queries/GenericQueryService.ts";
-import { PaginatedResponse } from "@Contracts/Common/BaseSchema.ts";
+import { GenericQueryService } from "#Infrastructure/Persistence/Queries/GenericQueryService.ts";
+import { PaginatedResponse } from "#Contracts/Common/BaseSchema.ts";
 
-import ModuleMstr from "@Infrastructure/Persistence/Models/Auth/ModuleMstr.ts";
-import { ModuleMapper } from "@Infrastructure/Persistence/Mappers/Auth/ModuleMapper.ts";
-import { ModuleRepository } from "@Infrastructure/Persistence/Repositories/Auth/ModuleRepository.ts";
+import ModuleMstr from "#Infrastructure/Persistence/Models/Auth/ModuleMstr.ts";
+import { ModuleMapper } from "#Infrastructure/Persistence/Mappers/Auth/ModuleMapper.ts";
+import { ModuleRepository } from "#Infrastructure/Persistence/Repositories/Auth/ModuleRepository.ts";
 import type { UserFlatBase } from "01-Contracts/Base/Users/UserSchemas.ts"
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
-import { sequelize } from "@Infrastructure/Persistence/AppDBContext.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
+import { sequelize } from "#Infrastructure/Persistence/AppDBContext.ts";
 
 const moduleRepo = new ModuleRepository();
 export class ModuleServiceQuery {

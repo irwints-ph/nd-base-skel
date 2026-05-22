@@ -1,4 +1,4 @@
-// import { sequelize } from "@Infrastructure/Persistence/AppDBContext.ts"
+// import { sequelize } from "#Infrastructure/Persistence/AppDBContext.ts"
 import { seedSsoTypes } from "./Seeders/01-SeedSsoTypes.ts";
 import SeedContactTypes from "./Seeders/02-SeedContactTypes.ts";
 import { SeedUsers } from "./Seeders/03-SeedUsers.ts";

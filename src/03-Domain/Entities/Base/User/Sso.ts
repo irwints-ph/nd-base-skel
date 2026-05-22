@@ -3,7 +3,7 @@
 // ==================================================================
 
 
-import { AppTime } from "@Infrastructure/Core/AppTime.ts";
+import { AppTime } from "#Infrastructure/Core/AppTime.ts";
 
 export class Sso {
   type_id: number

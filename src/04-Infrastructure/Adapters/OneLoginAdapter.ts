@@ -1,7 +1,7 @@
 // ===================================================================
 // 🧩 src/Infrastructure/Adapters/OneLoginAdapter.ts
 // ===================================================================
-import { OneLoginService } from "@Infrastructure/Auth/OneLoginService.ts";
+import { OneLoginService } from "#Infrastructure/Auth/OneLoginService.ts";
 
 export class OneLoginAdapter {
   static async createUser(userDto: any) {

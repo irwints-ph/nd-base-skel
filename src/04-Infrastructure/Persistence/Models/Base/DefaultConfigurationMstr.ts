@@ -1,8 +1,8 @@
 // src/infrastructure/persistence/models/base/DefaultConfigurationMstr.ts
 import { DataTypes, Model, Optional, Sequelize } from "sequelize";
-// import sequelize from "../../../db"; // your Sequelize instance
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts"
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts"
 import { DfltCfgMstrTableName } from "../Constants/DBNames.ts";
+import AuditEntity from "./AuditEntity.ts";
 
 // Attributes interface
 export interface DefaultConfigurationMstrAttributes {
@@ -86,12 +86,15 @@ export default class DefaultConfigurationMstr
           defaultValue: 1,
           field: DatabaseNamingConvention.getName("IsActive"),
         },
+        // audit fields (unchanged)
+        ...AuditEntity.auditFields(),
       },
       {
         sequelize,
         tableName: DfltCfgMstrTableName,
         modelName: "DefaultConfigurationMstr",
-        timestamps: true, // if AuditEntity had createdAt/updatedAt
+        timestamps: false, // if AuditEntity had createdAt/updatedAt
+        underscored: false,
       }
     );
     return DefaultConfigurationMstr;

@@ -1,11 +1,11 @@
 // =========================================================
 // 🧩 src/04-Infrastructure/Persistence/Mappers/Auth/ModuleMapper.ts
 // =========================================================
-import ModuleMstr from '@Infrastructure/Persistence/Models/Auth/ModuleMstr.ts';
-import { Module } from '@Domain/Entities/Auth/Module.ts';
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
-import { AppTime } from "@Infrastructure/Core/AppTime.ts";
-import { ModuleFlatBase } from '@Contracts/Base/Modules/ModuleSchemas.ts';
+import ModuleMstr from "#Infrastructure/Persistence/Models/Auth/ModuleMstr.ts";
+import { Module } from "#Domain/Entities/Auth/Module.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
+import { AppTime } from "#Infrastructure/Core/AppTime.ts";
+import { ModuleFlatBase } from "#Contracts/Base/Modules/ModuleSchemas.ts";
 
 export class ModuleMapper {
   // -------------------------

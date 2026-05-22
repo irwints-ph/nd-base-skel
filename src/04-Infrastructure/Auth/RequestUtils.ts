@@ -3,9 +3,9 @@
 // ===================================================================
 import { Request } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { GetLocalUser } from "@Infrastructure/Auth/LocalAuth.ts";
-import { GetOLUser, OLIssuer } from "@Infrastructure/Auth/OLAuth.ts";
-import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
+import { GetLocalUser } from "#Infrastructure/Auth/LocalAuth.ts";
+import { GetOLUser, OLIssuer } from "#Infrastructure/Auth/OLAuth.ts";
+import { EnvConfig } from "#Infrastructure/Core/ConfigLoader.ts";
 
 export function getBearerToken(req: Request): string | null {
   const token = req.query.token as string | undefined;

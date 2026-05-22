@@ -2,17 +2,17 @@
 // 🧩 UserMapper.ts (REFINED)
 // ===================================================================
 
-import { AppTime } from "@Infrastructure/Core/AppTime.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
+import { AppTime } from "#Infrastructure/Core/AppTime.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
 
-import UserMstr from "@Infrastructure/Persistence/Models/Base/UserMstr.ts";
-import ContactMstr from "@Infrastructure/Persistence/Models/Base/ContactMstr.ts";
-import SsoKey from "@Infrastructure/Persistence/Models/Base/SsoKey.ts";
+import UserMstr from "#Infrastructure/Persistence/Models/Base/UserMstr.ts";
+import ContactMstr from "#Infrastructure/Persistence/Models/Base/ContactMstr.ts";
+import SsoKey from "#Infrastructure/Persistence/Models/Base/SsoKey.ts";
 
-import { User } from "@Domain/Entities/Base/User/User.ts";
-import { Contact as DomainContact } from "@Domain/Entities/Base/User/Contact.ts";
-import { Sso as DomainSso } from "@Domain/Entities/Base/User/Sso.ts";
-import { UserProfile as DomainProfile } from "@Domain/Entities/Base/User/Profile.ts";
+import { User } from "#Domain/Entities/Base/User/User.ts";
+import { Contact as DomainContact } from "#Domain/Entities/Base/User/Contact.ts";
+import { Sso as DomainSso } from "#Domain/Entities/Base/User/Sso.ts";
+import { UserProfile as DomainProfile } from "#Domain/Entities/Base/User/Profile.ts";
 
 import UserProfileMapper from "./UserProfileMapper.ts";
 import ContactMapper from "./ContactMapper.ts";
@@ -36,12 +36,17 @@ export default class UserMapper {
     const contacts: DomainContact[] =
       model.Contacts?.map(c =>
         new DomainContact({
+          id: c.Id,
           contactTypeId: c.ContactTypeId,
           contactValue: c.ContactValue,
           isPrimary: c.IsPrimary,
           validated: c.Validated,
           validationDate: c.ValidationDate ?? null,
-          userId: c.UserId
+          userId: c.UserId,
+          createdBy: c.CreatedBy ?? undefined,
+          createdOn: c.CreatedOn ?? undefined,
+          updatedBy: c.UpdatedBy ?? undefined,
+          updatedOn: c.UpdatedOn ?? undefined,
         })
       ) ?? [];
 
@@ -65,7 +70,13 @@ export default class UserMapper {
       updated_on: model.UpdatedOn ?? undefined,
       profile,
       contacts,
-      sso
+      sso,
+      must_change_password: model.MustChangePassword ?? undefined,
+      failed_attempts: model.FailedAttempts ?? undefined,
+      is_locked: model.IsLocked ?? undefined,
+      password_last_changed: model.PasswordLastChanged ?? undefined,
+      // password_history: (model.PasswordHistory?.split(",") if model.PasswordHistory else []),
+
     });
   }
 

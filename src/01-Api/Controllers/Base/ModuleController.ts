@@ -2,16 +2,16 @@
 import { Request, Response, Router } from "express";
 
 import { BaseApiController } from "../BaseApiController.ts";
-import { IUserRepository } from "@Domain/Interfaces/Base/IUserRepository.ts";
-import { ModuleServiceQuery } from "@Application/Queries/Auth/ModuleServiceQuery.ts";
-// import { CreateModuleCommand } from "@Application/Commands/Auth/Modules/CreateModuleCommand.ts";
-// import { UpdateModuleCommand } from "@Application/Commands/Auth/Modules/UpdateModuleCommand.ts";
-// import { DeleteModuleCommand } from "@Application/Commands/Auth/Modules/DeleteModuleCommand.ts";
-// import { CreateModuleHandler } from "@Application/Handlers/Auth//Modules/CreateModuleHandler.ts";
-// import { UpdateModuleHandler } from "@Application/Handlers/Auth//Modules/UpdateModuleHandler.ts";
-// import { DeleteModuleHandler } from "@Application/Handlers/Auth//Modules/DeleteModuleHandler.ts";
+import { IUserRepository } from "#Domain/Interfaces/Base/IUserRepository.ts";
+import { ModuleServiceQuery } from "#Application/Queries/Auth/ModuleServiceQuery.ts";
+// import { CreateModuleCommand } from "#Application/Commands/Auth/Modules/CreateModuleCommand.ts";
+// import { UpdateModuleCommand } from "#Application/Commands/Auth/Modules/UpdateModuleCommand.ts";
+// import { DeleteModuleCommand } from "#Application/Commands/Auth/Modules/DeleteModuleCommand.ts";
+// import { CreateModuleHandler } from "#Application/Handlers/Auth//Modules/CreateModuleHandler.ts";
+// import { UpdateModuleHandler } from "#Application/Handlers/Auth//Modules/UpdateModuleHandler.ts";
+// import { DeleteModuleHandler } from "#Application/Handlers/Auth//Modules/DeleteModuleHandler.ts";
 
-// import { ModuleRepository } from "@Infrastructure/Persistence/Repositories/Auth/ModuleRepository.ts";
+// import { ModuleRepository } from "#Infrastructure/Persistence/Repositories/Auth/ModuleRepository.ts";
 
 // const router = Router();
 

@@ -1,7 +1,7 @@
 // src/04-Infrastructure/Persistence/Models/Base/AuditLogs.ts
 
 import { DataTypes, Sequelize, Model } from "sequelize";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
 
 export type AuditActions = "INSERT" | "UPDATE" | "DELETE";
 export interface IAuditLogsAttributes {

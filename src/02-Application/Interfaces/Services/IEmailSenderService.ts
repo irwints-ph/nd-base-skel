@@ -1,7 +1,7 @@
 // ===================================================================
 // 📩 src/Application/Interfaces/Services/IEmailSenderService.ts
 // ===================================================================
-import { TokenMailer } from "@Contracts/Common/TokenMailer.ts";
+import { TokenMailer } from "#Contracts/Common/TokenMailer.ts";
 
 /**
  * Python-aligned contract for email sender service.

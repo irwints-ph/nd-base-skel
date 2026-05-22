@@ -2,8 +2,8 @@
 // 📩 src/04-Infrastructure/Email/EmailServiceFile.ts
 // ==================================================================
 
-import { IEmailService } from "@Infrastructure/Email/IEmailService.ts";
-import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
+import { IEmailService } from "#Infrastructure/Email/IEmailService.ts";
+import { EnvConfig } from "#Infrastructure/Core/ConfigLoader.ts";
 import fs from "fs";
 import path from "path";
 

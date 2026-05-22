@@ -1,8 +1,8 @@
 import { Server } from "http";
-import { logger } from "@Infrastructure/Core/Logger.ts";
-import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
+import { logger } from "#Infrastructure/Core/Logger.ts";
+import { EnvConfig } from "#Infrastructure/Core/ConfigLoader.ts";
 import { getLocalNetworkIPs } from "./main_functions.ts";
-import { sequelize } from "@Infrastructure/Persistence/AppDBContext.ts"; // ✅ import sequelize
+import { sequelize } from "#Infrastructure/Persistence/AppDBContext.ts"; // ✅ import sequelize
 
 export function showCfgLogs(server: Server, HOST: string, PORT: string | number): void {
   const addressInfo = server.address();

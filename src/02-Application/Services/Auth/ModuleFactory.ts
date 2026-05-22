@@ -2,8 +2,8 @@
 // 🧩 App/Application/Services/Auth/ModuleFactory.ts
 // =========================================================
 
-import { Module } from '@Domain/Entities/Auth/Module.ts';
-import { AppTime } from '@Infrastructure/Core/AppTime.ts';
+import { Module } from "#Domain/Entities/Auth/Module.ts";
+import { AppTime } from "#Infrastructure/Core/AppTime.ts";
 
 export interface BuildModuleParams {
   moduleId: number;

@@ -1,6 +1,6 @@
 // src/04-Infrastructure/Persistence/Models/Base/Otp.ts
 import { Model, DataTypes, Sequelize } from "sequelize";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
 
 export default class Otp extends Model {
   declare Id: number;

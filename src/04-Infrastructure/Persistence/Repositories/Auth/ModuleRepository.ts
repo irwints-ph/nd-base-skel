@@ -1,17 +1,17 @@
 // ===================================================================
 // 🧩 src/04-Infrastructure/Persistence/Repositories/ModuleRepository.ts
 // ===================================================================
-import { IModuleRepository } from "@Domain/Interfaces/Auth/IModuleRepository.ts";
-import ModuleMstr from "@Infrastructure/Persistence/Models/Auth/ModuleMstr.ts";
-import RoleUserMstr from "@Infrastructure/Persistence/Models/Auth/RoleUserMstr.ts";
-import RoleModuleMstr from "@Infrastructure/Persistence/Models/Auth/RoleModuleMstr.ts";
-import { DefaultConfigurationRepository } from "@Infrastructure/Persistence/Repositories/Base/DefaultConfigurationRepository.ts";
-import { RoleAssignmentPolicy } from "@Domain/Services/RoleAssignmentPolicy.ts";
-import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
+import { IModuleRepository } from "#Domain/Interfaces/Auth/IModuleRepository.ts";
+import ModuleMstr from "#Infrastructure/Persistence/Models/Auth/ModuleMstr.ts";
+import RoleUserMstr from "#Infrastructure/Persistence/Models/Auth/RoleUserMstr.ts";
+import RoleModuleMstr from "#Infrastructure/Persistence/Models/Auth/RoleModuleMstr.ts";
+import { DefaultConfigurationRepository } from "#Infrastructure/Persistence/Repositories/Base/DefaultConfigurationRepository.ts";
+import { RoleAssignmentPolicy } from "#Domain/Services/RoleAssignmentPolicy.ts";
+import { EnvConfig } from "#Infrastructure/Core/ConfigLoader.ts";
 
-import { Module } from "@Domain/Entities/Auth/Module.ts";
-import { ModuleMapper } from "@Infrastructure/Persistence/Mappers/Auth/ModuleMapper.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
+import { Module } from "#Domain/Entities/Auth/Module.ts";
+import { ModuleMapper } from "#Infrastructure/Persistence/Mappers/Auth/ModuleMapper.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
 import { Transaction } from "sequelize";
 
 export class ModuleRepository implements IModuleRepository {

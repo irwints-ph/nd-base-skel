@@ -17,10 +17,10 @@ dotenv.config({ path: path.resolve(seederDir, "../../../.env") });
 // ==============================
 // Imports AFTER dotenv
 // ==============================
-import { createDatabaseIfNotExists } from "@Infrastructure/Core/sequelize.ts";
-import { sequelize } from "@Infrastructure/Persistence/AppDBContext.ts";
-import { InitModels } from "@Infrastructure/Core/InitModels.ts";
-import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
+import { createDatabaseIfNotExists } from "#Infrastructure/Core/sequelize.ts";
+import { sequelize } from "#Infrastructure/Persistence/AppDBContext.ts";
+import { InitModels } from "#Infrastructure/Core/InitModels.ts";
+import { EnvConfig } from "#Infrastructure/Core/ConfigLoader.ts";
 
 // ==============================
 // Helpers

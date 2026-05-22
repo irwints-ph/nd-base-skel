@@ -1,6 +1,6 @@
 // src/infrastructure/repositories/base/DefaultConfigurationRepository.ts
-import DefaultConfigurationMstr  from "@Infrastructure/Persistence/Models/Base/DefaultConfigurationMstr.ts";
-import { IDefaultConfigurationRepository } from "@Domain/Interfaces/Base/IDefaultConfigurationRepository.ts";
+import DefaultConfigurationMstr  from "#Infrastructure/Persistence/Models/Base/DefaultConfigurationMstr.ts";
+import { IDefaultConfigurationRepository } from "#Domain/Interfaces/Base/IDefaultConfigurationRepository.ts";
 import { Transaction } from "sequelize";
 export class DefaultConfigurationRepository implements IDefaultConfigurationRepository {
   constructor() {

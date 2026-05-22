@@ -29,8 +29,8 @@ import type { Express } from "express";
 // import request from "supertest";
 import { createApp } from "../app.ts";
 import { seedDatabase } from "../Scripts/Migrations/seed_db.ts";
-import { sequelize } from "@Infrastructure/Persistence/AppDBContext.ts";
-import { jest } from "@jest/globals";
+import { sequelize } from "#Infrastructure/Persistence/AppDBContext.ts";
+import { jest } from "#jest/globals";
 // import request, { SuperTest, Test } from "supertest";
 import request from "supertest";
 
@@ -91,18 +91,18 @@ afterAll(async () => {
 // // -------------------------------------------------
 // // 🔥 Mock middleware / services
 // // -------------------------------------------------
-// jest.unstable_mockModule("@Infrastructure/Auth/RequestUtils.ts", async () => ({
+// jest.unstable_mockModule("#Infrastructure/Auth/RequestUtils.ts", async () => ({
 //   getActiveUser: async () => ({
 //     id: "fake-user",
 //     name: "Test User",
 //   }),
 // }));
 
-jest.unstable_mockModule("@Application/Queries/Auth/AuthQueryService.ts", async () => ({
+jest.unstable_mockModule("#Application/Queries/Auth/AuthQueryService.ts", async () => ({
   getAuthorizedModulesByUser: async () => [{ name: "FakeModule" }],
 }));
 
-// jest.unstable_mockModule("@Infrastructure/Persistence/AppDBContext", () => ({
+// jest.unstable_mockModule("#Infrastructure/Persistence/AppDBContext", () => ({
 //   setupDatabase: async () => true,
 //   shutdownDatabase: async () => {},
 // }));

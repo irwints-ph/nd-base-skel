@@ -3,7 +3,7 @@
 // ===================================================================
 
 import crypto from "crypto";
-// import { aesEncrypt, aesDecrypt } from "@Infrastructure/Lib/CryptoLib.ts";
+// import { aesEncrypt, aesDecrypt } from "#Infrastructure/Lib/CryptoLib.ts";
 
 const BLOCK_SIZE = 16
 const KEY_SIZE = 32

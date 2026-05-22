@@ -1,9 +1,9 @@
 // src/infrastructure/persistence/mappers/auth/RoleMapper.ts
-import RoleMstr from '@Infrastructure/Persistence/Models/Auth/RoleMstr.ts';
-import { Role } from "@Domain/Entities/Auth/Role.ts";
+import RoleMstr from "#Infrastructure/Persistence/Models/Auth/RoleMstr.ts";
+import { Role } from "#Domain/Entities/Auth/Role.ts";
 
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
-import { AppTime } from "@Infrastructure/Core/AppTime.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
+import { AppTime } from "#Infrastructure/Core/AppTime.ts";
 
 export class RoleMapper {
   static toDomain(model: RoleMstr): Role {

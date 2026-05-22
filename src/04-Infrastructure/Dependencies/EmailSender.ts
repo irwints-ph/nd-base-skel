@@ -2,8 +2,8 @@
 // 📩 src/04-Infrastructure/Dependencies/EmailSender.ts
 // ==================================================================
 
-import { getEmailService } from "@Infrastructure/Email/EmailServiceFactory.ts";
-import { EmailSenderService } from "@Infrastructure/Email/EmailSenderService.ts";
+import { getEmailService } from "#Infrastructure/Email/EmailServiceFactory.ts";
+import { EmailSenderService } from "#Infrastructure/Email/EmailSenderService.ts";
 import { IEmailSenderService } from "02-Application/Interfaces/Services/IEmailSenderService.ts";
 
 /**

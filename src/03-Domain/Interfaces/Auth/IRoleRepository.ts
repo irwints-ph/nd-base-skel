@@ -1,6 +1,6 @@
 // src/domain/interfaces/auth/IRoleRepository.ts
 import { Role } from "../../Entities/Auth/Role.ts";
-import RoleMstr from "@Infrastructure/Persistence/Models/Auth/RoleMstr.ts";
+import RoleMstr from "#Infrastructure/Persistence/Models/Auth/RoleMstr.ts";
 import { Transaction } from "sequelize";
 
 export interface IRoleRepository {

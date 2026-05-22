@@ -6,12 +6,12 @@ import { Request, Response } from "express";
 import os from "os";
 
 import { BaseApiController } from "./BaseApiController.ts"
-// import { logger } from "@Infrastructure/Core/Logger.ts";
-import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
-import { sequelize } from "@Infrastructure/Persistence/AppDBContext.ts";
-import { Utils } from "@Infrastructure/Helpers/Utils.ts";
-import { getSystemInfo } from "@Infrastructure/Helpers/SystemInfoHelper.ts";
-import { GetHealthUseCase } from "@Application/Services/HealthService.ts";
+// import { logger } from "#Infrastructure/Core/Logger.ts";
+import { EnvConfig } from "#Infrastructure/Core/ConfigLoader.ts";
+import { sequelize } from "#Infrastructure/Persistence/AppDBContext.ts";
+import { Utils } from "#Infrastructure/Helpers/Utils.ts";
+import { getSystemInfo } from "#Infrastructure/Helpers/SystemInfoHelper.ts";
+import { GetHealthUseCase } from "#Application/Services/HealthService.ts";
 import { IUserRepository } from "03-Domain/Interfaces/Base/IUserRepository.ts";
 // import { ILogObj, Logger } from "tslog";
 

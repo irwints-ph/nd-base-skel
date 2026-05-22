@@ -1,91 +1,62 @@
 // ===================================================================
-// 🧩 App/Infrastructure/Persistence/Repositories/Base/UserRepository.ts
+// 🧩 UserRepository.ts (Python-equivalent architecture)
 // ===================================================================
-
-import { Transaction } from "sequelize";
+import { col, fn, Op, where, Transaction, Sequelize } from "sequelize";
+import UserMstr from "#Infrastructure/Persistence/Models/Base/UserMstr.ts";
+import ContactMstr from "#Infrastructure/Persistence/Models/Base/ContactMstr.ts";
+import SsoKey from "#Infrastructure/Persistence/Models/Base/SsoKey.ts";
+import { ContactTypes } from "#Infrastructure/Persistence/Models/Constants/ContactTypes.ts";
+import { IUserRepository } from "#Domain/Interfaces/Base/IUserRepository.ts";
+import { User } from "#Domain/Entities/Base/User/User.ts";
+import { UserUpdateSchema } from "#Contracts/Base/Users/UserSchemas.ts";
+import UserMapper from "#Infrastructure/Persistence/Mappers/Base/UserMapper.ts";
 import { sequelize } from "../../AppDBContext.ts";
 
-import UserMstr from "@Infrastructure/Persistence/Models/Base/UserMstr.ts";
-import ContactMstr from "@Infrastructure/Persistence/Models/Base/ContactMstr.ts";
-import SsoKey from "@Infrastructure/Persistence/Models/Base/SsoKey.ts";
-
-import { ContactTypes } from "@Infrastructure/Persistence/Models/Constants/ContactTypes.ts";
-import { IUserRepository } from "@Domain/Interfaces/Base/IUserRepository.ts";
-
-import UserMapper from "@Infrastructure/Persistence/Mappers/Base/UserMapper.ts";
-import { User } from "@Domain/Entities/Base/User/User.ts";
-import { UserUpdateSchema } from "@Contracts/Base/Users/UserSchemas.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
+// ================================================================
+// 🔁 shared include (like SQLAlchemy joinedload/selectinload)
+// ================================================================
+const USER_INCLUDE = [
+  { association: "Profile" },
+  { model: ContactMstr, as: "Contacts" },
+  { model: SsoKey, as: "Sso" },
+];
 
 export class UserRepository implements IUserRepository {
-
-  // -------------------------------------------------------------------
-  // 🔹 ADD USER
-  // -------------------------------------------------------------------
-  async add(
-    domainUser: User,
-    transaction?: Transaction
-  ): Promise<UserMstr> {
+  // ==============================================================
+  // 🟢 CREATE USER (Python: create)
+  // ==============================================================
+  async create(domainUser: User, tx?: Transaction): Promise<User> {
+    domainUser.changePassword(domainUser.password_hash);
 
     const ormUser = UserMapper.toOrm(domainUser);
 
-    if (ormUser.Profile)
-      ormUser.Profile.UserId = ormUser.UserId;
+    await ormUser.save({ transaction: tx });
 
-    if (ormUser.Contacts)
-      ormUser.Contacts.forEach(c => (c.UserId = ormUser.UserId));
-
-    if (ormUser.Sso)
-      ormUser.Sso.UserId = ormUser.UserId;
-
-    await ormUser.save({ transaction });
-
-    if (ormUser.CreatedBy === -1) {
-      ormUser.CreatedBy = ormUser.UserId;
-      await ormUser.save({ transaction });
-    }
-
-    if (ormUser.Profile) {
-      ormUser.Profile.UserId = ormUser.UserId;
-      ormUser.Profile.CreatedBy = ormUser.CreatedBy;
-
-      await ormUser.Profile.save({ transaction });
-    }
-
-    if (ormUser.Contacts) {
+    // refresh generated ID
+    const userId = ormUser.UserId;
+    if (ormUser.Profile) ormUser.Profile.UserId = userId;
+    if (ormUser.Sso) ormUser.Sso.UserId = userId;
+    if (ormUser.Contacts?.length) {
       for (const c of ormUser.Contacts) {
-        c.UserId = ormUser.UserId;
-        c.CreatedBy = ormUser.CreatedBy;
-
-        await c.save({ transaction });
+        c.UserId = userId;
       }
     }
 
-    if (ormUser.Sso) {
-      ormUser.Sso.UserId = ormUser.UserId;
-      ormUser.Sso.CreatedBy = ormUser.CreatedBy;
-
-      await ormUser.Sso.save({ transaction });
-    }
-
-    return ormUser;
+    await this.saveRelations(ormUser, tx);
+    domainUser.id = userId;
+    return domainUser;
   }
 
-  // -------------------------------------------------------------------
-  // 🔹 UPDATE USER
-  // -------------------------------------------------------------------
+  // ==============================================================
+  // 🟡 UPDATE USER (Python: update_user)
+  // ==============================================================
   async updateUser(
-    userData: UserUpdateSchema,
+    dto: UserUpdateSchema,
     updatedBy: number,
-    tx?: Transaction
+    tx?: Transaction,
   ): Promise<UserMstr | null> {
-
-    const ormUser = await UserMstr.findByPk(userData.userId, {
-      include: [
-        { model: ContactMstr, as: "Contacts" },
-        { model: SsoKey, as: "Sso" },
-        { association: "Profile" }
-      ],
+    const ormUser = await UserMstr.findByPk(dto.userId, {
+      include: USER_INCLUDE,
       transaction: tx,
     });
 
@@ -93,301 +64,173 @@ export class UserRepository implements IUserRepository {
 
     const domainUser = UserMapper.toDomain(ormUser);
 
-    domainUser.updateFromDto(userData, updatedBy);
+    domainUser.updateFromDto(dto, updatedBy);
 
-    await UserMapper.updateOrmFromDomain(
-      ormUser,
-      domainUser
-    );
+    UserMapper.updateOrmFromDomain(ormUser, domainUser);
 
-    await ormUser.save({
-      transaction: tx,
-    });
+    await ormUser.save({ transaction: tx });
 
     return ormUser;
   }
 
-  // -------------------------------------------------------------------
-  // 🔹 DELETE USER
-  // -------------------------------------------------------------------
-  async delete(
-    OrmUser: UserMstr,
-    tx?: Transaction
-  ): Promise<UserMstr | void> {
-
-    const ormUser = await UserMstr.findByPk(OrmUser.UserId, {
-      include: [
-        { model: ContactMstr, as: "Contacts" },
-        { model: SsoKey, as: "Sso" },
-        { association: "Profile" }
-      ],
+  // ==============================================================
+  // 🔴 DELETE USER (Python: delete)
+  // ==============================================================
+  async delete(domainUser: User, tx?: Transaction): Promise<void> {
+    const ormUser = await UserMstr.findByPk(domainUser.id, {
       transaction: tx,
     });
 
     if (!ormUser) return;
 
-    if (ormUser.Profile) {
-      await ormUser.Profile.destroy({
-        transaction: tx,
-      });
-    }
-
-    if (ormUser.Contacts) {
-      for (const c of ormUser.Contacts) {
-        await c.destroy({
-          transaction: tx,
-        });
-      }
-    }
-
-    if (ormUser.Sso) {
-      await ormUser.Sso.destroy({
-        transaction: tx,
-      });
-    }
-
-    await ormUser.destroy({
-      transaction: tx,
-    });
-
-    return ormUser;
+    await ormUser.destroy({ transaction: tx });
   }
 
-  // -------------------------------------------------------------------
-  // 🔹 GET BY ID ORM
-  // -------------------------------------------------------------------
-  async getByIdOrm(
-    userId: number,
-    tx?: Transaction
-  ): Promise<UserMstr | null> {
-
+  // ==============================================================
+  // 🔵 GET BY ID ORM (Python: get_by_id_orm)
+  // ==============================================================
+  async getByIdOrm(userId: number, tx?: Transaction): Promise<UserMstr | null> {
     return UserMstr.findByPk(userId, {
-      include: [
-        { model: ContactMstr, as: "Contacts" },
-        { model: SsoKey, as: "Sso" },
-        { association: "Profile" }
-      ],
+      include: USER_INCLUDE,
       transaction: tx,
     });
   }
 
-  // -------------------------------------------------------------------
-  // 🔹 GET BY ID
-  // -------------------------------------------------------------------
-  async getById(
-    userId: number,
-    tx?: Transaction
-  ): Promise<User | null> {
-
-    const ormUser = await UserMstr.findByPk(userId, {
-      include: [
-        { association: "Profile" },
-        { model: ContactMstr, as: "Contacts" },
-        { model: SsoKey, as: "Sso" }
-      ],
-      transaction: tx,
-    });
-
-    return ormUser
-      ? UserMapper.toDomain(ormUser)
-      : null;
+  // ==============================================================
+  // 🔵 GET BY ID DOMAIN
+  // ==============================================================
+  async getById(userId: number, tx?: Transaction): Promise<User | null> {
+    const orm = await this.getByIdOrm(userId, tx);
+    return orm ? UserMapper.toDomain(orm) : null;
   }
 
-  // -------------------------------------------------------------------
-  // 🔹 GET BY USERNAME
-  // -------------------------------------------------------------------
-  async getByUsername(
-    username: string,
-    tx?: Transaction
-  ): Promise<User | null> {
-
-    if (!username) return null;
-
-    const ormUser = await UserMstr.findOne({
-      where: {
-        Username: username
-      },
-      include: [
-        { association: "Profile" },
-        { model: ContactMstr, as: "Contacts" },
-        { model: SsoKey, as: "Sso" }
-      ],
-      transaction: tx,
-    });
-
-    return ormUser
-      ? UserMapper.toDomain(ormUser)
-      : null;
-  }
-
-  // -------------------------------------------------------------------
-  // 🔹 GET BY EMAIL ORM
-  // -------------------------------------------------------------------
-  async getByEmailOrm(
-    email: string,
-    tx?: Transaction
-  ): Promise<UserMstr | null> {
-
+  // ==============================================================
+  // 🟣 GET BY EMAIL ORM (Python equivalent)
+  // ==============================================================
+  async getByEmailOrm(email: string, tx?: Transaction): Promise<UserMstr | null> {
+    const lower = email.toLowerCase();
     const ormUser = await UserMstr.findOne({
       include: [
         {
           model: ContactMstr,
           as: "Contacts",
-          where: {
-            ContactTypeId: ContactTypes.Email,
-            ContactValue: sequelize.where(
-              sequelize.fn(
-                "lower",
-                sequelize.col(
-                  DatabaseNamingConvention.getName("ContactValue")
-                )
-              ),
-              email.toLowerCase()
-            )
-          }
+          required: true,
+          where: Sequelize.where(
+            Sequelize.fn("lower", Sequelize.col("ContactValue")),
+            lower
+          ),
         },
+        { association: "Profile" },
         { model: SsoKey, as: "Sso" },
-        { association: "Profile" }
       ],
       transaction: tx,
-    });
-
+    });    
     return ormUser;
   }
 
-  // -------------------------------------------------------------------
-  // 🔹 GET BY EMAIL
-  // -------------------------------------------------------------------
-  async getByEmail(
-    email: string,
-    tx?: Transaction
-  ): Promise<User | null> {
-
-    const ormUser = await this.getByEmailOrm(
-      email,
-      tx
-    );
-
-    return ormUser
-      ? UserMapper.toDomain(ormUser)
-      : null;
+  async getByEmail(email: string, tx?: Transaction): Promise<User | null> {
+    const orm = await this.getByEmailOrm(email, tx);
+    return orm ? UserMapper.toDomain(orm) : null;
   }
 
-  // -------------------------------------------------------------------
-  // 🔹 GET BY SSO
-  // -------------------------------------------------------------------
+  // ==============================================================
+  // 🟢 SAVE DOMAIN USER (Python: save)
+  // ==============================================================
+  async save(domainUser: User, tx?: Transaction): Promise<void> {
+    const ormUser = await UserMstr.findByPk(domainUser.id, {
+      include: USER_INCLUDE,
+      transaction: tx,
+    });
+
+    if (!ormUser) return;
+
+    UserMapper.updateOrmFromDomain(ormUser, domainUser);
+
+    await ormUser.save({ transaction: tx });
+    if (ormUser.Profile) {
+      console.log("Saving profile...", ormUser.Profile.toJSON());
+      await ormUser.Profile.save({ transaction: tx });
+    }
+
+    if (ormUser.Contacts) {
+      console.log("Saving contacts...", ormUser.Contacts.map((c) => c.toJSON()));
+      for (const contact of ormUser.Contacts) {
+        await contact.save({ transaction: tx });
+      }
+    }
+    if (ormUser.Sso) {
+      ormUser.Sso.UserId = ormUser.UserId; // ensure FK is set
+      console.log("Saving SSO...", ormUser.Sso.toJSON());
+      await ormUser.Sso.save({ transaction: tx });
+    }
+  }
+
+  // ==============================================================
+  // 🔐 PASSWORD OPERATIONS (Python-style domain delegation)
+  // ==============================================================
+  async changePassword(userId: number, newHash: string, tx?: Transaction): Promise<void> {
+    const ormUser = await this.getByIdOrm(userId, tx);
+    if (!ormUser) return;
+
+    const domainUser = UserMapper.toDomain(ormUser);
+
+    domainUser.changePassword(newHash);
+    domainUser.unlock();
+    domainUser.recordFailedLogin(); // resets internally via changePassword logic
+
+    UserMapper.updateOrmFromDomain(ormUser, domainUser);
+
+    await ormUser.save({ transaction: tx });
+  }
+
+  // ==============================================================
+  // 🔧 RELATION SAVER (centralized like Python flush model)
+  // ==============================================================
+  private async saveRelations(ormUser: UserMstr, tx?: Transaction) {
+    await ormUser.Profile?.save({ transaction: tx });
+
+    if (ormUser.Contacts?.length) {
+      for (const c of ormUser.Contacts) {
+        await c.save({ transaction: tx });
+      }
+    }
+
+    await ormUser.Sso?.save({ transaction: tx });
+  }
+
+  async getByUsername(username: string, tx?: Transaction): Promise<User | null> {
+    if (!username?.trim()) return null;
+
+    const ormUser = await UserMstr.findOne({
+      where: { Username: username },
+      include: USER_INCLUDE,
+      transaction: tx,
+    });
+
+    return ormUser ? UserMapper.toDomain(ormUser) : null;
+  }
+
   async getBySsoId(
     ssoKey: string,
     ssoType: number,
-    tx?: Transaction
+    tx?: Transaction,
   ): Promise<User | null> {
-
     const ormUser = await UserMstr.findOne({
       include: [
+        { association: "Profile" },
         { model: ContactMstr, as: "Contacts" },
         {
           model: SsoKey,
           as: "Sso",
           where: {
             SsoId: ssoKey,
-            TypeId: ssoType
-          }
+            TypeId: ssoType,
+          },
         },
-        { association: "Profile" }
       ],
       transaction: tx,
     });
 
-    return ormUser
-      ? UserMapper.toDomain(ormUser)
-      : null;
-  }
-
-  // -------------------------------------------------------------------
-  // 🔹 ADD SSO
-  // -------------------------------------------------------------------
-  async addSso(
-    ormUser: UserMstr,
-    ssoId: string,
-    typeId: number,
-    createdBy: number,
-    tx?: Transaction
-  ): Promise<UserMstr> {
-
-    const domainUser = UserMapper.toDomain(ormUser);
-
-    domainUser.addSso(
-      ssoId,
-      typeId,
-      createdBy
-    );
-
-    await UserMapper.updateOrmFromDomain(
-      ormUser,
-      domainUser
-    );
-
-    await ormUser.save({
-      transaction: tx,
-    });
-
-    return ormUser;
-  }
-
-  // -------------------------------------------------------------------
-  // 🔹 SAVE USER
-  // -------------------------------------------------------------------
-  async save(
-    domainUser: User,
-    tx?: Transaction
-  ): Promise<UserMstr | void> {
-
-    const ormUser = await UserMstr.findByPk(domainUser.id, {
-      include: [
-        { model: ContactMstr, as: "Contacts" },
-        { model: SsoKey, as: "Sso" },
-        { association: "Profile" }
-      ],
-      transaction: tx,
-    });
-
-    if (!ormUser) return;
-
-    await UserMapper.updateOrmFromDomain(
-      ormUser,
-      domainUser
-    );
-
-    await ormUser.save({
-      transaction: tx,
-    });
-
-    if (ormUser.Profile) {
-      ormUser.Profile.UserId = ormUser.UserId;
-
-      await ormUser.Profile.save({
-        transaction: tx,
-      });
-    }
-
-    if (ormUser.Contacts) {
-      for (const c of ormUser.Contacts) {
-        c.UserId = ormUser.UserId;
-
-        await c.save({
-          transaction: tx,
-        });
-      }
-    }
-
-    if (ormUser.Sso) {
-      ormUser.Sso.UserId = ormUser.UserId;
-
-      await ormUser.Sso.save({
-        transaction: tx,
-      });
-    }
-
-    return ormUser;
+    return ormUser ? UserMapper.toDomain(ormUser) : null;
   }
 }

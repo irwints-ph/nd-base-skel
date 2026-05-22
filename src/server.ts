@@ -2,9 +2,9 @@
 // 🧩 src/server.ts
 // ==================================================================
 import { createApp } from "./app.ts";
-import { setupDatabase, shutdownDatabase } from "@Infrastructure/Persistence/AppDBContext.ts";
-import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
-import { logger } from "@Infrastructure/Core/Logger.ts";
+import { setupDatabase, shutdownDatabase } from "#Infrastructure/Persistence/AppDBContext.ts";
+import { EnvConfig } from "#Infrastructure/Core/ConfigLoader.ts";
+import { logger } from "#Infrastructure/Core/Logger.ts";
 import { getPortArg } from "./main_functions.ts";
 import { showCfgLogs } from "./main_cfg_logs.ts";
 

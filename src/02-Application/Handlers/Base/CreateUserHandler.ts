@@ -3,17 +3,17 @@
 // ===================================================================
 
 import { Transaction } from "sequelize";
-import { buildUser } from "@Application/Services/Base/UserFactory.ts";
-import { PasswordPolicyService } from "@Domain/Services/PasswordPolicyService.ts";
-import { OneLoginAdapter } from "@Infrastructure/Adapters/OneLoginAdapter.ts";
-import { JwtTokenService, TokenPurpose } from "@Infrastructure/Auth/JwtTokenService.ts";
-import { UserDtoMapper } from "@Infrastructure/Persistence/Mappers/Base/UserDtoMapper.ts";
-import { performRepoAction } from "@Infrastructure/Persistence/Services/RepoActionService.ts";
-import { IUserRepository } from "@Domain/Interfaces/Base/IUserRepository.ts";
-import { CreateUserCommand } from "@Application/Commands/Base/Users/CreateUserCommand.ts";
-import { GetUserRepository } from "@Infrastructure/Dependencies/UserRepoProvider.ts";
-import { getEmailSender } from "@Infrastructure/Dependencies/EmailSender.ts";
-import { TokenMailer } from "@Contracts/Common/TokenMailer.ts";
+import { buildUser } from "#Application/Services/Base/UserFactory.ts";
+import { PasswordPolicyService } from "#Domain/Services/PasswordPolicyService.ts";
+import { OneLoginAdapter } from "#Infrastructure/Adapters/OneLoginAdapter.ts";
+import { JwtTokenService, TokenPurpose } from "#Infrastructure/Auth/JwtTokenService.ts";
+import { UserDtoMapper } from "#Infrastructure/Persistence/Mappers/Base/UserDtoMapper.ts";
+import { performRepoAction } from "#Infrastructure/Persistence/Services/RepoActionService.ts";
+import { IUserRepository } from "#Domain/Interfaces/Base/IUserRepository.ts";
+import { CreateUserCommand } from "#Application/Commands/Base/Users/CreateUserCommand.ts";
+import { GetUserRepository } from "#Infrastructure/Dependencies/UserRepoProvider.ts";
+import { getEmailSender } from "#Infrastructure/Dependencies/EmailSender.ts";
+import { TokenMailer } from "#Contracts/Common/TokenMailer.ts";
 
 export class CreateUserHandler {
   private userRepoFactory = () => GetUserRepository();
@@ -24,15 +24,15 @@ export class CreateUserHandler {
 
     const domainUser = await this.buildDomainUser(cmd);
 
-    const ormUser = await this.persistUser(cmd, domainUser);
+    const domainUserUpdated = await this.persistUser(cmd, domainUser);
 
     await this.handlePostActions(cmd, domainUser);
 
-    if (!ormUser) {
+    if (!domainUserUpdated) {
       throw new Error("User creation failed");
     }
 
-    return UserDtoMapper.toOrmUserFlatBase(ormUser);
+    return UserDtoMapper.toDomainUserFlatBase(domainUserUpdated);
   }
 
   // -------------------------------------------------
@@ -75,7 +75,7 @@ export class CreateUserHandler {
         await this.ensureUniqueness(repo, cmd, tx);
         await this.handleSso(domainUser, cmd);
 
-        return await repo.add(domainUser, tx);
+        return await repo.create(domainUser, tx);
       },
     });
   }
@@ -132,7 +132,7 @@ export class CreateUserHandler {
     const { token } = JwtTokenService.createVerificationToken(
       cmd.email!,
       false,
-      TokenPurpose.Activate
+      TokenPurpose.ACTIVATE
     );
 
     if (!cmd.issuer?.trim()) {

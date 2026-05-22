@@ -1,9 +1,9 @@
 // src/04-Infrastructure/Persistence/Models/Auth/ModuleMstr.ts
 import { DataTypes, Sequelize } from "sequelize";
-import AuditEntity from "@Infrastructure/Persistence/Models/Base/AuditEntity.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
-import type { Models } from "@Infrastructure/Persistence/Models/types.ts";
-import { ModuleMstrTableName } from "@Infrastructure/Persistence/Models/Constants/DBNames.ts";
+import AuditEntity from "#Infrastructure/Persistence/Models/Base/AuditEntity.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
+import type { Models } from "#Infrastructure/Persistence/Models/types.ts";
+import { ModuleMstrTableName } from "#Infrastructure/Persistence/Models/Constants/DBNames.ts";
 
 export default class ModuleMstr extends AuditEntity {
   declare ModuleId: number;

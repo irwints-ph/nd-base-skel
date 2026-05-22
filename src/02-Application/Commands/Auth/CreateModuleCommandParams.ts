@@ -1,5 +1,5 @@
 // src/Application/Commands/Auth/CreateModuleCommand.ts
-import { Module } from "@Domain/Entities/Auth/Module.ts";
+import { Module } from "#Domain/Entities/Auth/Module.ts";
 
 export interface CreateModuleCommandParams {
   moduleId: number;

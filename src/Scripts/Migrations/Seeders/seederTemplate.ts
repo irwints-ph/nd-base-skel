@@ -5,12 +5,12 @@ import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { Model, ModelStatic, Transaction } from "sequelize";
 
-import { sequelize, DatabaseConfig } from "@Infrastructure/Persistence/AppDBContext.ts";
-import { AuditContext, AuditInfo } from "@Infrastructure/Audit/AuditContext.ts";
-import { UnitOfWork } from "@Application/UoW/UnitOfWork.ts";
+import { sequelize, DatabaseConfig } from "#Infrastructure/Persistence/AppDBContext.ts";
+import { AuditContext, AuditInfo } from "#Infrastructure/Audit/AuditContext.ts";
+import { UnitOfWork } from "#Application/UoW/UnitOfWork.ts";
 import { getPrimaryKeyFields } from "./seederUtils.ts";
-import { registerAuditHooks } from "@Infrastructure/Audit/registerAuditHooks.ts";
-import { InitModels } from "@Infrastructure/Core/InitModels.ts";
+import { registerAuditHooks } from "#Infrastructure/Audit/registerAuditHooks.ts";
+import { InitModels } from "#Infrastructure/Core/InitModels.ts";
 import {
   setBaseDir,
   readCsv,
@@ -115,6 +115,7 @@ export async function seedCsvEntities<T extends Model>({
 
         // Add entity to DB
         try {
+          if (!entity) continue;
           if (entity) await entity.save({ transaction: tx });
           if (showLineLog) logEntityInsert(entity, dbModel.name, row);
           // uow.trackNew?.(entity);

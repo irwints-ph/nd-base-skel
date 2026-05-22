@@ -2,22 +2,22 @@
 // 🧩 srv/04-Infrastructure/Persistence/Mappers/Base/UserDtoMapper.ts
 // ===================================================================
 
-import UserMstr from "@Infrastructure/Persistence/Models/Base/UserMstr.ts";
-import ContactMstr from "@Infrastructure/Persistence/Models/Base/ContactMstr.ts";
-import SsoKey from "@Infrastructure/Persistence/Models/Base/SsoKey.ts";
+import UserMstr from "#Infrastructure/Persistence/Models/Base/UserMstr.ts";
+import ContactMstr from "#Infrastructure/Persistence/Models/Base/ContactMstr.ts";
+import SsoKey from "#Infrastructure/Persistence/Models/Base/SsoKey.ts";
 
-import { UserFlatBase } from "@Contracts/Base/Users/UserSchemas.ts";
-import { AppTime } from "@Infrastructure/Core/AppTime.ts";
-import { logger } from "@Infrastructure/Core/Logger.ts";
+import { UserFlatBase } from "#Contracts/Base/Users/UserSchemas.ts";
+import { AppTime } from "#Infrastructure/Core/AppTime.ts";
+import { logger } from "#Infrastructure/Core/Logger.ts";
 
-import { User } from "@Domain/Entities/Base/User/User.ts";
+import { User } from "#Domain/Entities/Base/User/User.ts";
 
 export class UserDtoMapper {
 
   // =========================================================
   // 🔹 DOMAIN → DTO
   // =========================================================
-  static toDomainUserFlatBase(user: User): UserFlatBase {
+  static toDomainUserFlatBase(user: User, the_token?: string | null): UserFlatBase {
 
     const profile = user.profile;
 
@@ -74,15 +74,26 @@ export class UserDtoMapper {
       createdOn: user.created_on,
       updatedBy: user.updated_by,
       updatedOn: user.updated_on,
+      ssoId: user.sso ? (user.sso as any).SsoId ?? null : null,
+      mustChangePassword: user.must_change_password ?? undefined,
+      failedAttempts: user.failed_attempts ?? undefined,
+      isLocked: user.is_locked ?? undefined,
+      passwordLastChanged: user.password_last_changed ?? undefined,
+      passwordHistory: Array.isArray(user.password_history)
+        ? user.password_history
+        : user.password_history
+          ? [user.password_history]
+          : [],
 
-      ssoId,
+      token:the_token ?? null,
+
     };
   }
 
   // =========================================================
   // 🔹 ORM → DTO
   // =========================================================
-  static toOrmUserFlatBase(user: UserMstr): UserFlatBase {
+  static toOrmUserFlatBase(user: UserMstr, the_token?: string | null): UserFlatBase {
 
     const now = AppTime.appNow();
 
@@ -140,7 +151,18 @@ export class UserDtoMapper {
       updatedBy: user.UpdatedBy,
       updatedOn: user.UpdatedOn,
 
-      ssoId,
+      ssoId: ssoId ?? "",
+      token: the_token ?? null,
+      mustChangePassword: user.MustChangePassword ?? undefined,
+      failedAttempts: user.FailedAttempts ?? undefined,
+      isLocked: user.IsLocked ?? undefined,
+      passwordLastChanged: user.PasswordLastChanged ?? undefined,
+      passwordHistory: Array.isArray(user.PasswordHistory)
+        ? user.PasswordHistory
+        : user.PasswordHistory
+          ? [user.PasswordHistory]
+          : [],
+
     };
   }
 

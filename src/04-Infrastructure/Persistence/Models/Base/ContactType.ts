@@ -2,7 +2,7 @@
 import { DataTypes, Sequelize } from "sequelize";
 import AuditEntity from "./AuditEntity.ts";
 import type ContactMstr from "./ContactMstr.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts"
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts"
 import { ContactTypeTableName } from "../Constants/DBNames.ts";
 
 export default class ContactType extends AuditEntity {

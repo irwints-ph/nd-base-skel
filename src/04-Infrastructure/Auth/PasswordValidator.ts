@@ -2,8 +2,8 @@
 // 🧩 App/Infrastructure/Auth/PasswordValidator.ts
 // ===================================================================
 
-import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
-import { PasswordPolicy } from "@Contracts/Config/PasswordPolicy.ts";
+import { EnvConfig } from "#Infrastructure/Core/ConfigLoader.ts";
+import { PasswordPolicy } from "#Contracts/Config/PasswordPolicy.ts";
 
 export interface PasswordValidationResult {
   valid: boolean;

@@ -1,7 +1,9 @@
 // src/contracts/base/users/UserSchemas.ts
 
-// import { UserMstr } from "@/03-domain/models/base/index.ts"
-// import { ContactTypes } from "@/03-domain/models/constants/ContactTypes.ts";
+import { TokenPurpose } from "#Infrastructure/Auth/JwtTokenService.ts"
+
+// import { UserMstr } from "#/03-domain/models/base/index.ts"
+// import { ContactTypes } from "#/03-domain/models/constants/ContactTypes.ts";
 
 
 export interface UserProfileSchema {
@@ -36,10 +38,28 @@ export interface UserCreateFromSso {
 }
 
 export interface UserActivationRequest {
-  userId?: number
-  email?: string
+  email: string
+  feserver?: string
+  fullname?: string
+  app_logo?: string
+  app_name?: string
+  verify_only?: boolean
+  user_id: string
 }
 
+export interface ForgotPasswordCommand {
+  user: UserActivationRequest
+  send_verification_email?: boolean
+  is_forgot?: boolean
+  action_name?: string
+}
+
+export interface VerifyCommand {
+  token: string
+  passwd?: string
+  verify_only?: boolean
+  expected_purpose: TokenPurpose
+}
 export interface UserCreateSchema {
   username: string
   email?: string
@@ -83,6 +103,13 @@ export interface UserFlatBase {
   updatedOn?: Date | null
   fullname: string | null
   ssoId?: string | null
+  token?: string | null
+  // 🔐 Password Management
+  mustChangePassword?: boolean
+  failedAttempts?: number
+  isLocked?: boolean
+  passwordLastChanged?: Date | null
+  passwordHistory?: string[] | []| null
 }
 
 export interface UserFlatReturn {

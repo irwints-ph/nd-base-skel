@@ -2,11 +2,11 @@
 // 🟢 src/02-Application/Queries/Auth/AuthQueryService
 // ===================================================================
 
-import RoleUserMstr from "@Infrastructure/Persistence/Models/Auth/RoleUserMstr.ts";
-import RoleModuleMstr from "@Infrastructure/Persistence/Models/Auth/RoleModuleMstr.ts";
-import ModuleMstr from "@Infrastructure/Persistence/Models/Auth/ModuleMstr.ts";
-import { ModuleAuthorization } from "@Contracts/Base/Modules/ModuleSchemas.ts";
-import { DefaultGroupRoleService } from "@Application/Queries/Base/DefaultGroupRoleService.ts";
+import RoleUserMstr from "#Infrastructure/Persistence/Models/Auth/RoleUserMstr.ts";
+import RoleModuleMstr from "#Infrastructure/Persistence/Models/Auth/RoleModuleMstr.ts";
+import ModuleMstr from "#Infrastructure/Persistence/Models/Auth/ModuleMstr.ts";
+import { ModuleAuthorization } from "#Contracts/Base/Modules/ModuleSchemas.ts";
+import { DefaultGroupRoleService } from "#Application/Queries/Base/DefaultGroupRoleService.ts";
 
 export class AuthQueryService {
   constructor(private sequelize: any) {}

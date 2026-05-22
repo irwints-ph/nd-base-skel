@@ -2,8 +2,8 @@
 // 🧩 src/04-Infrastructure/Persistence/Repositories/ModuleRepository.ts
 // ===================================================================
 
-import { IModuleRepository } from "@Domain/Interfaces/Auth/IModuleRepository.ts";
-import { Module } from "@Domain/Entities/Auth/Module.ts";
+import { IModuleRepository } from "#Domain/Interfaces/Auth/IModuleRepository.ts";
+import { Module } from "#Domain/Entities/Auth/Module.ts";
 import { ModuleMapper } from "../Mappers/Auth/ModuleMapper.ts";
 import { sequelize } from "../AppDBContext.ts";
 import ModuleMstr from "../Models/Auth/ModuleMstr.ts";

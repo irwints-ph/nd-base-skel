@@ -1,6 +1,6 @@
 // src/types/express.d.ts
 
-import { UserFlatBase } from "@Contracts/Base/Users/UserSchemas.ts";
+import { UserFlatBase } from "#Contracts/Base/Users/UserSchemas.ts";
 
 declare global {
   namespace Express {

@@ -56,7 +56,7 @@ export class UserCreate {
     if (!input.lastname) errors.lastname = "Lastname is required.";
     if (!input.email) {
       errors.email = "Email is required.";
-    } else if (!input.email.includes("@")) {
+    } else if (!input.email.includes("#")) {
       errors.email = "Email is invalid.";
     }
 

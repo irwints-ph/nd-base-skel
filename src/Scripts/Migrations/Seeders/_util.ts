@@ -3,9 +3,8 @@
 // ===================================================================
 
 import fs from 'fs'
-// import { sequelize } from '@Infrastructure/Core/sequelize.ts'
-import { sequelize } from "@Infrastructure/Persistence/AppDBContext.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
+import { sequelize } from "#Infrastructure/Persistence/AppDBContext.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
 
 export function readCsvSimple(filePath: string): Array<Record<string, string>> {
   if (!fs.existsSync(filePath)) return []

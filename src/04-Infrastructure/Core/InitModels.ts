@@ -1,26 +1,26 @@
 // src/04-Infrastructure/Core/InitModels.ts
 import { Sequelize } from "sequelize"
-import type { Models } from "@Infrastructure/Persistence/Models/types.ts";
+import type { Models } from "#Infrastructure/Persistence/Models/types.ts";
 
-import UserMstr from "@Infrastructure/Persistence/Models/Base/UserMstr.ts"
-import UserProfile from "@Infrastructure/Persistence/Models/Base/UserProfile.ts"
-import ContactType from "@Infrastructure/Persistence/Models/Base/ContactType.ts"
-import ContactMstr from "@Infrastructure/Persistence/Models/Base/ContactMstr.ts"
-import SsoType from "@Infrastructure/Persistence/Models/Base/SsoType.ts"
-import SsoKey from "@Infrastructure/Persistence/Models/Base/SsoKey.ts"
-import ApiClient from "@Infrastructure/Persistence/Models/Base/ApiClient.ts"
-import Otp from "@Infrastructure/Persistence/Models/Base/Otps.ts"
-import AuditLogs from "@Infrastructure/Persistence/Models/Base/AuditLogs.ts"
-import DefaultConfigurationMstr from "@Infrastructure/Persistence/Models/Base/DefaultConfigurationMstr.ts"
-
-
-import ModuleMstr from "@Infrastructure/Persistence/Models/Auth/ModuleMstr.ts";
-import RoleMstr from "@Infrastructure/Persistence/Models/Auth/RoleMstr.ts";
-import RoleModuleMstr from "@Infrastructure/Persistence/Models/Auth/RoleModuleMstr.ts";
-import RoleUserMstr from "@Infrastructure/Persistence/Models/Auth/RoleUserMstr.ts";
+import UserMstr from "#Infrastructure/Persistence/Models/Base/UserMstr.ts"
+import UserProfile from "#Infrastructure/Persistence/Models/Base/UserProfile.ts"
+import ContactType from "#Infrastructure/Persistence/Models/Base/ContactType.ts"
+import ContactMstr from "#Infrastructure/Persistence/Models/Base/ContactMstr.ts"
+import SsoType from "#Infrastructure/Persistence/Models/Base/SsoType.ts"
+import SsoKey from "#Infrastructure/Persistence/Models/Base/SsoKey.ts"
+import ApiClient from "#Infrastructure/Persistence/Models/Base/ApiClient.ts"
+import Otp from "#Infrastructure/Persistence/Models/Base/Otps.ts"
+import AuditLogs from "#Infrastructure/Persistence/Models/Base/AuditLogs.ts"
+import DefaultConfigurationMstr from "#Infrastructure/Persistence/Models/Base/DefaultConfigurationMstr.ts"
 
 
-// import { ModuleMstr, RoleMstr, RoleModule, RoleUser} from "@/03-domain/models/auth/index.ts"
+import ModuleMstr from "#Infrastructure/Persistence/Models/Auth/ModuleMstr.ts";
+import RoleMstr from "#Infrastructure/Persistence/Models/Auth/RoleMstr.ts";
+import RoleModuleMstr from "#Infrastructure/Persistence/Models/Auth/RoleModuleMstr.ts";
+import RoleUserMstr from "#Infrastructure/Persistence/Models/Auth/RoleUserMstr.ts";
+
+
+// import { ModuleMstr, RoleMstr, RoleModule, RoleUser} from "#/03-domain/models/auth/index.ts"
 export function InitModels(sequelize: Sequelize) {
   // Step 1: Initialize models
   const models: Models = {

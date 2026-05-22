@@ -2,8 +2,8 @@
 import { DataTypes, Sequelize, CreationOptional } from "sequelize";
 import AuditEntity from "./AuditEntity.ts";
 // import type SsoKey from "./SsoKey.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts"
-import { SsoTypeTableName } from "@Infrastructure/Persistence/Models/Constants/DBNames.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts"
+import { SsoTypeTableName } from "#Infrastructure/Persistence/Models/Constants/DBNames.ts";
 
 export default class SsoType extends AuditEntity {
   declare TypeId: CreationOptional<number>;

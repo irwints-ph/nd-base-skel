@@ -2,10 +2,10 @@
 // 🧩 src/Scripts/Migrations/Seeders/06-SeedRoleUsers.ts
 // ===================================================================
 
-import RoleUserMstr from "@Infrastructure/Persistence/Models/Auth/RoleUserMstr.ts";
-import { RoleUserTableName } from "@Infrastructure/Persistence/Models/Constants/DBNames.ts";
+import RoleUserMstr from "#Infrastructure/Persistence/Models/Auth/RoleUserMstr.ts";
+import { RoleUserTableName } from "#Infrastructure/Persistence/Models/Constants/DBNames.ts";
 import { seedCsvEntities } from "./seederTemplate.ts";
-import { UnitOfWork } from "@Application/UoW/UnitOfWork.ts";
+import { UnitOfWork } from "#Application/UoW/UnitOfWork.ts";
 
 export default async function SeedRoleUsers(
   dataDir: string,
@@ -47,7 +47,7 @@ export default async function SeedRoleUsers(
 
 // import path from 'path'
 // import { readCsvSimple, bulkInsertSafe } from './_util.ts'
-// import { RoleUserTableName } from "@Infrastructure/Persistence/Models/Constants/DBNames.ts";
+// import { RoleUserTableName } from "#Infrastructure/Persistence/Models/Constants/DBNames.ts";
 
 // export default async function seed_role_users(
 //   dataDir: string, 

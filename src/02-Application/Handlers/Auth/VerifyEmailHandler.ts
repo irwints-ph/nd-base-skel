@@ -1,19 +1,16 @@
 // ===================================================================
 // 🟢 src/02-Application/Handlers/Auth/VerifyEmailHandler.ts
 // ===================================================================
-import { UserActivationResponse } from "01-Contracts/Base/Users/UserSchemas.ts";
-import { User } from "03-Domain/Entities/Base/User/User.ts";
-import { VerifyEmailCommand } from "@Application/Commands/Auth/VerifyEmailCommand.ts";
-import { IUserRepository } from "@Domain/Interfaces/Base/IUserRepository.ts";
-import { JwtTokenService } from "@Infrastructure/Auth/JwtTokenService.ts";
-import { performRepoAction } from "@Infrastructure/Persistence/Services/RepoActionService.ts";
+import { UserActivationResponse } from "#Contracts/Base/Users/UserSchemas.ts";
+import { User } from "#Domain/Entities/Base/User/User.ts";
+import { GetUserRepository } from "#Infrastructure/Dependencies/UserRepoProvider.ts";
+import { VerifyEmailCommand } from "#Application/Commands/Auth/VerifyEmailCommand.ts";
+// import { IUserRepository } from "#Domain/Interfaces/Base/IUserRepository.ts";
+import { JwtTokenService } from "#Infrastructure/Auth/JwtTokenService.ts";
+import { performRepoAction } from "#Infrastructure/Persistence/Services/RepoActionService.ts";
 
 export class VerifyEmailHandler {
-  private userRepoFactory: () => IUserRepository;
-
-  constructor(userRepoFactory: () => IUserRepository) {
-    this.userRepoFactory = userRepoFactory;
-  }
+  private userRepoFactory = () => GetUserRepository();
 
   async handle(cmd: VerifyEmailCommand) {
     // 1️⃣ Decode token → get user_id

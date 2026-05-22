@@ -2,16 +2,16 @@
 // 🟢 App/Infrastructure/Auth/JwtTokenService.ts
 // ===================================================================
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { User } from "@Domain/Entities/Base/User/User.ts";
-import { UserActivationResponse, UserFlatBase } from "@Contracts/Base/Users/UserSchemas.ts";
-import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
-import { AppTime } from "@Infrastructure/Core/AppTime.ts";
-import { logger } from "@Infrastructure/Core/Logger.ts";
+import { User } from "#Domain/Entities/Base/User/User.ts";
+import { UserActivationResponse, UserFlatBase } from "#Contracts/Base/Users/UserSchemas.ts";
+import { EnvConfig } from "#Infrastructure/Core/ConfigLoader.ts";
+import { AppTime } from "#Infrastructure/Core/AppTime.ts";
+import { logger } from "#Infrastructure/Core/Logger.ts";
 
 export enum TokenPurpose {
-  Activate = "activate",
-  Forgot = "forgot",
-  RequestAccess = "requestaccess",
+  ACTIVATE = "activate",
+  FORGOT = "forgot",
+  REQUEST_ACCESS = "requestaccess",
 }
 
 export enum TokenUserType {
@@ -32,7 +32,7 @@ export class JwtTokenService {
   static createVerificationToken(
     email: string,
     verifyOnly = false,
-    tokenPurpose: TokenPurpose = TokenPurpose.Activate,
+    tokenPurpose: TokenPurpose = TokenPurpose.ACTIVATE,
     userId?: string,
     userType: TokenUserType = TokenUserType.General,
     expiresAt?: Date
@@ -58,7 +58,7 @@ export class JwtTokenService {
   // -----------------------------
   // VERIFY TOKEN
   // -----------------------------
-  static verifyToken(token: string, expectedPurpose: TokenPurpose = TokenPurpose.Activate): UserActivationResponse | null {
+  static verifyToken(token: string, expectedPurpose: TokenPurpose = TokenPurpose.ACTIVATE): UserActivationResponse | null {
     try {
       const cfg = this.config();
       const decoded = jwt.verify(token, cfg.JWT_SECRET_KEY, {
@@ -84,7 +84,7 @@ export class JwtTokenService {
   // CONVENIENCE METHODS
   // -----------------------------
   static createForgotPasswordToken(email: string, verifyOnly = false): string {
-    return this.createVerificationToken(email, verifyOnly, TokenPurpose.Forgot).token;
+    return this.createVerificationToken(email, verifyOnly, TokenPurpose.FORGOT).token;
   }
 
   static generateAccessToken(userId: number, username: string): string {

@@ -2,11 +2,11 @@
 // 🧩 src/Scripts/Migrations/Seeders/05-SeedRoles.ts
 // ===================================================================
 
-import RoleMstr from "@Infrastructure/Persistence/Models/Auth/RoleMstr.ts";
-import { RoleMstrTableName } from "@Infrastructure/Persistence/Models/Constants/DBNames.ts";
+import RoleMstr from "#Infrastructure/Persistence/Models/Auth/RoleMstr.ts";
+import { RoleMstrTableName } from "#Infrastructure/Persistence/Models/Constants/DBNames.ts";
 import { seedCsvEntities } from "./seederTemplate.ts";
-import { UnitOfWork } from "@Application/UoW/UnitOfWork.ts";
-import { EnvConfig } from "@Infrastructure/Core/Config.ts";
+import { UnitOfWork } from "#Application/UoW/UnitOfWork.ts";
+import { EnvConfig } from "#Infrastructure/Core/Config.ts";
 
 const DEFAULT_CREATED_BY = EnvConfig.admin?.superRoot ?? 1;
 
@@ -63,7 +63,7 @@ export default async function SeedRoles(
 // // No Audit
 // import path from 'path'
 // import { readCsvSimple, bulkInsertSafe } from './_util.ts'
-// import { RoleMstrTableName } from "@Infrastructure/Persistence/Models/Constants/DBNames.ts";
+// import { RoleMstrTableName } from "#Infrastructure/Persistence/Models/Constants/DBNames.ts";
 
 // export default async function SeedRoles(dataDir: string, noErrors: boolean): Promise<boolean> {
 //   const tableName = RoleMstrTableName;

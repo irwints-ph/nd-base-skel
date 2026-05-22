@@ -10,15 +10,6 @@
     "esModuleInterop": true,
     "isolatedModules": true,
     "types": ["jest", "node"],
-    "baseUrl": "src",
-    "paths": {
-      "*": ["*", "*.ts"],
-      "@Api/*": ["01-Api/*"],
-      "@Contracts/*": ["01-Contracts/*"],
-      "@Application/*": ["02-Application/*"],
-      "@Domain/*": ["03-Domain/*"],
-      "@Infrastructure/*": ["04-Infrastructure/*"]
-    }
   },
   "ts-node": {
     "esm": true,

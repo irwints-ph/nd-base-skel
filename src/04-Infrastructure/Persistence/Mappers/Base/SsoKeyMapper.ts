@@ -1,7 +1,7 @@
 // src/04-Infrastructure/Persistence/Mappers/Base/SsoKeyMapper.ts
 
-import SsoKey from "@Infrastructure/Persistence/Models/Base/SsoKey.ts";
-import { Sso as DomainSso } from "@Domain/Entities/Base/User/Sso.ts";
+import SsoKey from "#Infrastructure/Persistence/Models/Base/SsoKey.ts";
+import { Sso as DomainSso } from "#Domain/Entities/Base/User/Sso.ts";
 
 export default class SsoKeyMapper {
 

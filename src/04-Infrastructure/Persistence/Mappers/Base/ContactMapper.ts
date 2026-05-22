@@ -2,9 +2,9 @@
 // 🧩 ContactMapper.ts
 // ==================================================================
 
-import ContactMstr from "@Infrastructure/Persistence/Models/Base/ContactMstr.ts";
-import { Contact } from "@Domain/Entities/Base/User/Contact.ts";
-import { AppTime } from "@Infrastructure/Core/AppTime.ts";
+import ContactMstr from "#Infrastructure/Persistence/Models/Base/ContactMstr.ts";
+import { Contact } from "#Domain/Entities/Base/User/Contact.ts";
+import { AppTime } from "#Infrastructure/Core/AppTime.ts";
 
 export default class ContactMapper {
 

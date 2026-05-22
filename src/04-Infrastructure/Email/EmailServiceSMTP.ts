@@ -5,7 +5,7 @@
 import nodemailer from "nodemailer";
 import fs from "fs";
 import path from "path";
-import { IEmailService } from "@Infrastructure/Email/IEmailService.ts";
+import { IEmailService } from "#Infrastructure/Email/IEmailService.ts";
 
 export class EmailServiceSMTP implements IEmailService {
   private transporter;

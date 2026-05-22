@@ -1,6 +1,6 @@
 // src/Domain/Repositories/IModuleRepository.ts
 // src/domain/interfaces/auth/IModuleRepository.ts
-import ModuleMstr from "@Infrastructure/Persistence/Models/Auth/ModuleMstr.ts";
+import ModuleMstr from "#Infrastructure/Persistence/Models/Auth/ModuleMstr.ts";
 import { Transaction } from "sequelize";
 
 export interface IModuleRepository {

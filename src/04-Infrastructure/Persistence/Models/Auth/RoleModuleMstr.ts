@@ -1,10 +1,10 @@
 // src/04-Infrastructure/Persistence/Models/Auth/RoleModuleMstr.ts
 import { DataTypes, Sequelize, ForeignKey, Association } from "sequelize";
-import AuditEntity from "@Infrastructure/Persistence/Models/Base/AuditEntity.ts";
-import type { Models } from "@Infrastructure/Persistence/Models/types.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
-import ModuleMstr from "@Infrastructure/Persistence/Models/Auth/ModuleMstr.ts";
-import RoleMstr from "@Infrastructure/Persistence/Models/Auth/RoleMstr.ts";
+import AuditEntity from "#Infrastructure/Persistence/Models/Base/AuditEntity.ts";
+import type { Models } from "#Infrastructure/Persistence/Models/types.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
+import ModuleMstr from "#Infrastructure/Persistence/Models/Auth/ModuleMstr.ts";
+import RoleMstr from "#Infrastructure/Persistence/Models/Auth/RoleMstr.ts";
 
 export default class RoleModuleMstr extends AuditEntity {
   declare RoleId: ForeignKey<number>;

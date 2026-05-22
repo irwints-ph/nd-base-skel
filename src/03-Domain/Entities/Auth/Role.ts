@@ -1,7 +1,7 @@
 // ===========================================
 // 🧩 Domain/Entities/Auth/Role.ts
 // ===========================================
-import { AppTime } from "@Infrastructure/Core/AppTime.ts";
+import { AppTime } from "#Infrastructure/Core/AppTime.ts";
 
 export class Role {
   public RoleId?: number;

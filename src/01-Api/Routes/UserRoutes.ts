@@ -4,8 +4,8 @@
 
 import { Router } from "express";
 import { UserController } from "../Controllers/Base/UserController.ts";
-// import { GetUserRepository } from "@Infrastructure/Dependencies/UserRepoProvider.ts"
-import { routeHandler } from "@Api/Helpers/RouteHandlerFactory.ts";
+// import { GetUserRepository } from "#Infrastructure/Dependencies/UserRepoProvider.ts"
+import { routeHandler } from "#Api/Helpers/RouteHandlerFactory.ts";
 
 export const UserRoute = Router()
 UserRoute.post("/info", routeHandler(UserController, "userInfo"));

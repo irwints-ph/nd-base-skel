@@ -1,84 +1,195 @@
-// src/04-Infrastructure/Persistence/Models/Base/UserMstr.ts
+// ===================================================================
+// 🧩 src/04-Infrastructure/Persistence/Models/Base/UserMstr.ts
+// ===================================================================
 
-import { DataTypes,Sequelize } from "sequelize";
+import {
+  DataTypes,
+  Sequelize,
+} from "sequelize";
+
 import AuditEntity from "./AuditEntity.ts";
 import type { Models } from "../types.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts"
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
+
 export interface IUserMstrAttributes {
   UserId: number;
   Username: string;
   Password: string;
   BegDate: Date;
   EndDate: Date;
+
+  // 🔐 Password Management
+  MustChangePassword: boolean;
+  FailedAttempts: number;
+  IsLocked: boolean;
+  PasswordLastChanged?: Date | null;
+  PasswordHistory?: string[] | [] | null;
 }
 
-export default class UserMstr extends AuditEntity implements IUserMstrAttributes{
+export default class UserMstr
+  extends AuditEntity
+  implements IUserMstrAttributes
+{
+  // -------------------------
+  // Core fields
+  // -------------------------
   declare UserId: number;
   declare Username: string;
   declare Password: string;
   declare BegDate: Date;
   declare EndDate: Date;
+
   // -------------------------
-  // Declare associations for TypeScript
+  // Password management
   // -------------------------
-  declare Profile?: import("./UserProfile.ts").default; // hasOne UserProfile
-  declare Contacts?: import("./ContactMstr.ts").default[]; // hasMany Contacts
-  declare ApiClients?: import("./ApiClient.ts").default[]; // hasMany ApiClients
-  declare Sso?: import("./SsoKey.ts").default; // hasOne Sso
-  // declare RoleUsers?: import("./RoleUser").default[]; // optional
-  
-  static initModel(sequelize: Sequelize): typeof UserMstr {
+  declare MustChangePassword: boolean;
+  declare FailedAttempts: number;
+  declare IsLocked: boolean;
+
+  declare PasswordLastChanged: Date | null;
+  declare PasswordHistory: string[] | []| null;
+
+  // -------------------------
+  // Associations (TypeScript only)
+  // -------------------------
+  declare Profile?: import("./UserProfile.ts").default;
+
+  declare Contacts?: import("./ContactMstr.ts").default[];
+
+  declare ApiClients?: import("./ApiClient.ts").default[];
+
+  declare Sso?: import("./SsoKey.ts").default;
+
+  // declare RoleUsers?: import("./RoleUserMstr.ts").default[];
+
+  // -------------------------
+  // Init model
+  // -------------------------
+  static initModel(
+    sequelize: Sequelize,
+  ): typeof UserMstr {
     UserMstr.init(
       {
         UserId: {
           type: DataTypes.INTEGER,
           primaryKey: true,
           autoIncrement: true,
-          field: DatabaseNamingConvention.getName("UserId"),
+          field:
+            DatabaseNamingConvention.getName(
+              "UserId",
+            ),
         },
 
         Username: {
           type: DataTypes.STRING(100),
           allowNull: false,
           unique: true,
-          field: DatabaseNamingConvention.getName("Username"),
+          field:
+            DatabaseNamingConvention.getName(
+              "Username",
+            ),
         },
 
         Password: {
           type: DataTypes.STRING(255),
           allowNull: false,
-          field: DatabaseNamingConvention.getName("Password"),
+          field:
+            DatabaseNamingConvention.getName(
+              "Password",
+            ),
         },
 
         BegDate: {
           type: DataTypes.DATE,
           allowNull: false,
           defaultValue: DataTypes.NOW,
-          field: DatabaseNamingConvention.getName("BegDate"),
+          field:
+            DatabaseNamingConvention.getName(
+              "BegDate",
+            ),
         },
 
         EndDate: {
           type: DataTypes.DATE,
           allowNull: false,
-          defaultValue: new Date("9999-12-31T00:00:00Z"),
-          field: DatabaseNamingConvention.getName("EndDate"),
+          defaultValue:
+            new Date("9999-12-31T00:00:00Z"),
+          field:
+            DatabaseNamingConvention.getName(
+              "EndDate",
+            ),
         },
 
-        // Spread audit fields
+        MustChangePassword: {
+          type: DataTypes.BOOLEAN,
+          allowNull: false,
+          defaultValue: false,
+          field:
+            DatabaseNamingConvention.getName(
+              "MustChangePassword",
+            ),
+        },
+
+        FailedAttempts: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          defaultValue: 0,
+          field:
+            DatabaseNamingConvention.getName(
+              "FailedAttempts",
+            ),
+        },
+
+        IsLocked: {
+          type: DataTypes.BOOLEAN,
+          allowNull: false,
+          defaultValue: false,
+          field:
+            DatabaseNamingConvention.getName(
+              "IsLocked",
+            ),
+        },
+
+        PasswordLastChanged: {
+          type: DataTypes.DATE,
+          allowNull: true,
+          defaultValue: DataTypes.NOW,
+          field:
+            DatabaseNamingConvention.getName(
+              "PasswordLastChanged",
+            ),
+        },
+
+        PasswordHistory: {
+          type: DataTypes.TEXT,
+          allowNull: true,
+          field:
+            DatabaseNamingConvention.getName(
+              "PasswordHistory",
+            ),
+        },
+
+        // audit fields (unchanged)
         ...AuditEntity.auditFields(),
       },
       {
         sequelize,
-        tableName: DatabaseNamingConvention.getName("UserMstr") ,
+        tableName:
+          DatabaseNamingConvention.getName(
+            "UserMstr",
+          ),
         modelName: "UserMstr",
-        timestamps: false, // you control audit fields manually
+        timestamps: false,
         underscored: false,
-      }
+      },
     );
 
     return UserMstr;
   }
 
+  // -------------------------
+  // Associations
+  // -------------------------
   static associate(models: Models) {
     UserMstr.hasOne(models.UserProfile, {
       foreignKey: "UserId",
@@ -91,11 +202,13 @@ export default class UserMstr extends AuditEntity implements IUserMstrAttributes
       as: "Sso",
       onDelete: "CASCADE",
     });
+
     UserMstr.hasMany(models.ContactMstr, {
       foreignKey: "UserId",
       as: "Contacts",
       onDelete: "CASCADE",
     });
+
     UserMstr.hasMany(models.ApiClient, {
       foreignKey: "UserId",
       as: "ApiClients",
@@ -107,7 +220,5 @@ export default class UserMstr extends AuditEntity implements IUserMstrAttributes
     //   as: "RoleUsers",
     //   onDelete: "CASCADE",
     // });
-
-
   }
 }

@@ -3,18 +3,18 @@
 // ===================================================================
 import { Request, Response } from "express";
 import { BaseApiController } from "../BaseApiController.ts";
-import { IUserRepository } from "@Domain/Interfaces/Base/IUserRepository.ts";
+import { IUserRepository } from "#Domain/Interfaces/Base/IUserRepository.ts";
 
-import { CreateUserCommand } from "@Application/Commands/Base/Users/CreateUserCommand.ts";
-import { UpdateUserCommand } from "@Application/Commands/Base/Users/UpdateUserCommand.ts";
-import { DeleteUserCommand } from "@Application/Commands/Base/Users/DeleteUserCommand.ts";
+import { CreateUserCommand } from "#Application/Commands/Base/Users/CreateUserCommand.ts";
+import { UpdateUserCommand } from "#Application/Commands/Base/Users/UpdateUserCommand.ts";
+import { DeleteUserCommand } from "#Application/Commands/Base/Users/DeleteUserCommand.ts";
 
-import { CreateUserHandler } from "@Application/Handlers/Base/CreateUserHandler.ts";
-import { UpdateUserHandler } from "@Application/Handlers/Base/UpdateUserHandler.ts";
-import { DeleteUserHandler } from "@Application/Handlers/Base/DeleteUserHandler.ts";
+import { CreateUserHandler } from "#Application/Handlers/Base/CreateUserHandler.ts";
+import { UpdateUserHandler } from "#Application/Handlers/Base/UpdateUserHandler.ts";
+import { DeleteUserHandler } from "#Application/Handlers/Base/DeleteUserHandler.ts";
 
-import { UserQueryService } from "@Application/Queries/Base/UserQueryService.ts";
-import { getActiveUser } from "@Infrastructure/Auth/RequestUtils.ts";
+import { UserQueryService } from "#Application/Queries/Base/UserQueryService.ts";
+import { getActiveUser } from "#Infrastructure/Auth/RequestUtils.ts";
 
 const userService = new UserQueryService();
 

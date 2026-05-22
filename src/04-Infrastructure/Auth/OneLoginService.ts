@@ -1,9 +1,9 @@
 // ===================================================================
 // 🧩 src/app/infrastructure/auth/OneLoginService.ts
 // ===================================================================
-import { ApiReturn } from "@Contracts/Common/BaseSchema.ts";
-import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
-// import { UserCreateFromSso } from "@Contracts/Base/Users/UserSchemas.ts";
+import { ApiReturn } from "#Contracts/Common/BaseSchema.ts";
+import { EnvConfig } from "#Infrastructure/Core/ConfigLoader.ts";
+// import { UserCreateFromSso } from "#Contracts/Base/Users/UserSchemas.ts";
 
 export class OneLoginService {
   private config = EnvConfig.oidc;

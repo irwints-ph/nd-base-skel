@@ -2,7 +2,7 @@ import { DataTypes, Sequelize, ForeignKey } from "sequelize";
 import AuditEntity from "./AuditEntity.ts";
 import type SsoType from "./SsoType.ts";
 import type UserMstr from "./UserMstr.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts"
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts"
 
 export default class SsoKey extends AuditEntity {
   declare TypeId: ForeignKey<SsoType["TypeId"]>;

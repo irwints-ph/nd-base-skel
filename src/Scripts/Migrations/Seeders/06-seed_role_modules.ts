@@ -1,6 +1,6 @@
 import path from 'path'
 import { readCsvSimple, bulkInsertSafe } from './_util.ts'
-import { RoleModuleTableName } from "@Infrastructure/Persistence/Models/Constants/DBNames.ts";
+import { RoleModuleTableName } from "#Infrastructure/Persistence/Models/Constants/DBNames.ts";
 
 
 export default async function seed_role_modules(

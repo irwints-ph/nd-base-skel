@@ -1,5 +1,5 @@
-import { IRoleRepository } from "@Domain/Interfaces/Auth/IRoleRepository.ts";
-import { RoleRepository } from "@Infrastructure/Persistence/Repositories/Auth/RoleRepository.ts";
+import { IRoleRepository } from "#Domain/Interfaces/Auth/IRoleRepository.ts";
+import { RoleRepository } from "#Infrastructure/Persistence/Repositories/Auth/RoleRepository.ts";
 
 let instance: IRoleRepository | null = null
 

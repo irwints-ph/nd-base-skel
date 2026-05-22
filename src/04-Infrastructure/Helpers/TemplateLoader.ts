@@ -5,7 +5,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { createLogger } from "@Infrastructure/Core/Logger.ts";
+import { createLogger } from "#Infrastructure/Core/Logger.ts";
 
 const logger = createLogger("TemplateLoader");
 // Recreate __dirname in ESM

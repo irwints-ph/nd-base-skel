@@ -1,9 +1,9 @@
 // src/Application/Handlers/Auth/CreateModuleHandler.ts
-import { ModuleRepository } from "@Infrastructure/Persistence/Repositories/Auth/ModuleRepository.ts";
-import { sequelize } from "@Infrastructure/Persistence/AppDBContext.ts";
-import { buildModule } from "@Application/Services/Auth/ModuleFactory.ts";
+import { ModuleRepository } from "#Infrastructure/Persistence/Repositories/Auth/ModuleRepository.ts";
+import { sequelize } from "#Infrastructure/Persistence/AppDBContext.ts";
+import { buildModule } from "#Application/Services/Auth/ModuleFactory.ts";
 import { CreateModuleCommand } from "../CreateModuleCommandParams.ts";
-import { EnvConfig } from '@Infrastructure/Core/Config.ts'
+import { EnvConfig } from '#Infrastructure/Core/Config.ts'
 
 export class CreateModuleHandler {
   private repo = new ModuleRepository();

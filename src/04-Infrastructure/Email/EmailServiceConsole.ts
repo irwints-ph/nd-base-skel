@@ -2,7 +2,7 @@
 // 📩 src/04-Infrastructure/Email/EmailServiceConsole.ts
 // ==================================================================
 
-import { IEmailService } from "@Infrastructure/Email/IEmailService.ts";
+import { IEmailService } from "#Infrastructure/Email/IEmailService.ts";
 
 export class EmailServiceConsole implements IEmailService {
   private SMTP_HOST = process.env.SMTP_HOST || "localhost";

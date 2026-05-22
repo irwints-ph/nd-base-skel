@@ -5,17 +5,17 @@
 import { Transaction } from "sequelize";
 import { sequelize } from "../../AppDBContext.ts";
 
-import UserMstr from "@Infrastructure/Persistence/Models/Base/UserMstr.ts";
-import ContactMstr from "@Infrastructure/Persistence/Models/Base/ContactMstr.ts";
-import SsoKey from "@Infrastructure/Persistence/Models/Base/SsoKey.ts";
+import UserMstr from "#Infrastructure/Persistence/Models/Base/UserMstr.ts";
+import ContactMstr from "#Infrastructure/Persistence/Models/Base/ContactMstr.ts";
+import SsoKey from "#Infrastructure/Persistence/Models/Base/SsoKey.ts";
 
-import { ContactTypes } from "@Infrastructure/Persistence/Models/Constants/ContactTypes.ts";
-import { IUserRepository } from "@Domain/Interfaces/Base/IUserRepository.ts";
+import { ContactTypes } from "#Infrastructure/Persistence/Models/Constants/ContactTypes.ts";
+import { IUserRepository } from "#Domain/Interfaces/Base/IUserRepository.ts";
 
-import UserMapper from "@Infrastructure/Persistence/Mappers/Base/UserMapper.ts";
-import { User } from "@Domain/Entities/Base/User/User.ts";
-import { UserUpdateSchema } from "@Contracts/Base/Users/UserSchemas.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
+import UserMapper from "#Infrastructure/Persistence/Mappers/Base/UserMapper.ts";
+import { User } from "#Domain/Entities/Base/User/User.ts";
+import { UserUpdateSchema } from "#Contracts/Base/Users/UserSchemas.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
 
 export class UserRepository implements IUserRepository {
 

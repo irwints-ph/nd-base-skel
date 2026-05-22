@@ -8,9 +8,9 @@
  * are now handled in AppDBContext.ts
  */
 
-import { sequelize, setupDatabase, shutdownDatabase } from '@Infrastructure/Persistence/AppDBContext.ts';
-import type { DatabaseSettings } from '@Infrastructure/Core/DatabaseSettings.ts';
-import { EnvConfig } from '@Infrastructure/Core/Config.ts';
+import { sequelize, setupDatabase, shutdownDatabase } from "#Infrastructure/Persistence/AppDBContext.ts";
+import type { DatabaseSettings } from "#Infrastructure/Core/DatabaseSettings.ts";
+import { EnvConfig } from "#Infrastructure/Core/Config.ts";
 
 /**
  * Expose the existing Sequelize singleton

@@ -2,13 +2,13 @@
 // 🧩 src/infrastructure/audit/AuditHandler.ts
 // ===================================================================
 import { Transaction, Model } from "sequelize";
-import AuditLogs from "@Infrastructure/Persistence/Models/Base/AuditLogs.ts";
+import AuditLogs from "#Infrastructure/Persistence/Models/Base/AuditLogs.ts";
 import { AuditInfo } from "./AuditContext.ts";
 import {
   serializeFullObject,
   serializeValue,
 } from "../Core/Serialization.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
 
 const AuditLogsTableName = DatabaseNamingConvention.getName("AuditLogs");
 export const TABLE_AUDIT_EXCLUDED = new Set<string>([AuditLogsTableName]);

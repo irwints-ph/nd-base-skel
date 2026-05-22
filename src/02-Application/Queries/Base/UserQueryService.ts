@@ -3,15 +3,15 @@
 // ===================================================================
 import { Op, fn, col, where, Transaction } from "sequelize";
 
-import UserMstr from "@Infrastructure/Persistence/Models/Base/UserMstr.ts";
-import ContactMstr from "@Infrastructure/Persistence/Models/Base/ContactMstr.ts";
-import SsoKey from "@Infrastructure/Persistence/Models/Base/SsoKey.ts";
-import UserProfile from "@Infrastructure/Persistence/Models/Base/UserProfile.ts";
-import { UserDtoMapper } from "@Infrastructure/Persistence/Mappers/Base/UserDtoMapper.ts";
-import { GenericQueryService } from "@Infrastructure/Persistence/Queries/GenericQueryService.ts";
-import { PaginatedResponse } from "@Contracts/Common/BaseSchema.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
-import { sequelize } from "@Infrastructure/Persistence/AppDBContext.ts";
+import UserMstr from "#Infrastructure/Persistence/Models/Base/UserMstr.ts";
+import ContactMstr from "#Infrastructure/Persistence/Models/Base/ContactMstr.ts";
+import SsoKey from "#Infrastructure/Persistence/Models/Base/SsoKey.ts";
+import UserProfile from "#Infrastructure/Persistence/Models/Base/UserProfile.ts";
+import { UserDtoMapper } from "#Infrastructure/Persistence/Mappers/Base/UserDtoMapper.ts";
+import { GenericQueryService } from "#Infrastructure/Persistence/Queries/GenericQueryService.ts";
+import { PaginatedResponse } from "#Contracts/Common/BaseSchema.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
+import { sequelize } from "#Infrastructure/Persistence/AppDBContext.ts";
 
 export class UserQueryService {
   private generic: GenericQueryService<any, any>;

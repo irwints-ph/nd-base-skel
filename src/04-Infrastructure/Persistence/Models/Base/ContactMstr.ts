@@ -9,7 +9,7 @@ import {
   Model,
 } from "sequelize";
 
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
 
 import UserMstr from "./UserMstr.ts";
 import ContactType from "./ContactType.ts";

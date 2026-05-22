@@ -2,9 +2,9 @@
 // 🟢 src/01-Api/Routes/RolesRoutes.ts
 // ===================================================================
 import { Router } from "express";
-import { RolesController } from "@Api/Controllers/Base/RoleController.ts";
-// import { GetUserRepository } from "@Infrastructure/Dependencies/UserRepoProvider.ts"
-import { routeHandler } from "@Api/Helpers/RouteHandlerFactory.ts";
+import { RolesController } from "#Api/Controllers/Base/RoleController.ts";
+// import { GetUserRepository } from "#Infrastructure/Dependencies/UserRepoProvider.ts"
+import { routeHandler } from "#Api/Helpers/RouteHandlerFactory.ts";
 
 export const RoleRoute = Router();
 

@@ -2,23 +2,23 @@
 
 import express from "express";
 // import cors from "cors";
-import { corsMiddleware } from "@Api/Middleware/cors.middleware.ts"
-import { ErrorHandler, GlobalInterceptor, NotFoundHandler, timingInterceptor } from "@Api/Middleware/GlobalInterceptor.ts";
+import { corsMiddleware } from "#Api/Middleware/cors.middleware.ts"
+import { ErrorHandler, GlobalInterceptor, NotFoundHandler, timingInterceptor } from "#Api/Middleware/GlobalInterceptor.ts";
 
-import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
-import { logger } from "@Infrastructure/Core/Logger.ts";
-import { setupDatabase, shutdownDatabase } from '@Infrastructure/Persistence/AppDBContext.ts'
+import { EnvConfig } from "#Infrastructure/Core/ConfigLoader.ts";
+import { logger } from "#Infrastructure/Core/Logger.ts";
+import { setupDatabase, shutdownDatabase } from '#Infrastructure/Persistence/AppDBContext.ts'
 
-import AuthRoute from "@Api/Controllers/Base/AuthController.ts";
-import { HomeRoute } from "@Api/Routes/HomeRoutes.ts";
-import { UserRoute } from "@Api/Routes/UserRoutes.ts";
-import { ModuleRoute } from "@Api/Routes/ModuleRoutes.ts";
-import { RoleRoute } from "@Api/Routes/RoleRoutes.ts";
+import AuthRoute from "#Api/Controllers/Base/AuthController.ts";
+import { HomeRoute } from "#Api/Routes/HomeRoutes.ts";
+import { UserRoute } from "#Api/Routes/UserRoutes.ts";
+import { ModuleRoute } from "#Api/Routes/ModuleRoutes.ts";
+import { RoleRoute } from "#Api/Routes/RoleRoutes.ts";
 
 
-// import OtpRoute from "@Api/Controllers/Base/OtpController.ts";
-// import RoleModuleRoute from "@Api/Controllers/Base/RoleModulesController.ts";
-// import UserRoleRoute from "@Api/Controllers/Base/RoleUserController.ts";
+// import OtpRoute from "#Api/Controllers/Base/OtpController.ts";
+// import RoleModuleRoute from "#Api/Controllers/Base/RoleModulesController.ts";
+// import UserRoleRoute from "#Api/Controllers/Base/RoleUserController.ts";
 import { getPortArg } from "./main_functions.ts";
 import { showCfgLogs } from "./main_cfg_logs.ts";
 

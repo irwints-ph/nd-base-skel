@@ -1,8 +1,8 @@
 // 🧩 UnitOfWork.ts (Refactored)
 
 import { Sequelize, Transaction, Model } from "sequelize";
-import { AuditContext } from "@Infrastructure/Audit/AuditContext.ts";
-import { AuditHandler } from "@Infrastructure/Audit/AuditHandler.ts";
+import { AuditContext } from "#Infrastructure/Audit/AuditContext.ts";
+import { AuditHandler } from "#Infrastructure/Audit/AuditHandler.ts";
 
 type ChangeType = "INSERT" | "UPDATE" | "DELETE";
 

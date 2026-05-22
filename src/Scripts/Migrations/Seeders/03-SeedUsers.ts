@@ -1,22 +1,15 @@
-// ===================================================================
-// 🧩 src/scripts/migrations/seeders/seedUsers.ts
-// ===================================================================
-
 import { seedCsvEntities } from "./seederTemplate.ts";
-import { buildUser } from "@Application/Services/Base/UserFactory.ts";
-import { UserRepository } from "@Infrastructure/Persistence/Repositories/Base/UserRepository.ts";
+import { buildUser } from "#Application/Services/Base/UserFactory.ts";
+import { UserRepository } from "#Infrastructure/Persistence/Repositories/Base/UserRepository.ts";
 import { mapCreateUserSeed } from "./03-CreateUserSeedMap.ts";
-import { UnitOfWork } from "@Application/UoW/UnitOfWork.ts";
-import { User } from "@Domain/Entities/Base/User/User.ts";
-import UserMstr from "@Infrastructure/Persistence/Models/Base/UserMstr.ts";
+import { UnitOfWork } from "#Application/UoW/UnitOfWork.ts";
+import UserMstr from "#Infrastructure/Persistence/Models/Base/UserMstr.ts";
+import UserMapper from "#Infrastructure/Persistence/Mappers/Base/UserMapper.ts";
 
-// ------------------------------------------------------------------
-// Seeder
-// ------------------------------------------------------------------
 export async function SeedUsers(
   dataDir: string,
   noErrors = true,
-  fileSuffix?: string, 
+  fileSuffix?: string,
 ): Promise<boolean> {
 
   if (!noErrors) return false;
@@ -25,19 +18,17 @@ export async function SeedUsers(
 
   const mapToEntity = async (
     row: Record<string, any>,
-    uow?: UnitOfWork
+    uow?: UnitOfWork,
   ): Promise<UserMstr | null> => {
 
-    if (!uow) throw new Error("UnitOfWork is required for user seeding");
+    if (!uow) {
+      throw new Error("UnitOfWork is required for user seeding");
+    }
 
-    // -----------------------------
-    // MAP CSV → DTO
-    // -----------------------------
+    // 1️⃣ Map CSV → DTO
     const dto = mapCreateUserSeed(row);
 
-    // -----------------------------
-    // BUILD DOMAIN USER
-    // -----------------------------
+    // 2️⃣ Build DOMAIN USER
     const domainUser = await buildUser({
       username: dto.username,
       password: dto.password,
@@ -45,35 +36,24 @@ export async function SeedUsers(
       lastname: dto.lastname,
       createdBy: DEFAULT_CREATED_BY,
       email: dto.email,
-      // isEmailValidated: dto.active,
+      isEmailValidated: dto.active ?? false,
     });
 
-    // -----------------------------
-    // SAVE VIA REPOSITORY (UoW)
-    // -----------------------------
+    // 3️⃣ Persist via repository
     const repo = new UserRepository();
-    // repo.session = uow.transaction;
+    const ormUser = await repo.create(domainUser, uow.transaction);
 
-    const ormUser = await repo.add(domainUser, uow.transaction);
-
-    // -----------------------------
-    // LOGGING
-    // -----------------------------
+    // 4️⃣ Logging
     console.log(
-      ` → Insert User: username=${domainUser.username}, ` +
-      `userId=${ormUser.UserId ?? "N/A"}, ` +
-      `name=${domainUser.profile?.fullname ?? "N/A"}, ` +
-      `email=${domainUser.getPrimaryEmail?.() ?? dto.email}`
+      ` → Insert User: ` +
+        `username=${domainUser.username}, ` +
+        `userId=${ormUser.id}, ` +
+        `email=${domainUser.getPrimaryEmail?.() ?? dto.email}`
     );
 
-    // IMPORTANT:
-    // Return UserMstr so seederTemplate Save Audit if flag is set
-    return ormUser;
+    return UserMapper.toOrm(ormUser); // 👈 IMPORTANT: return ORM, NOT domain
   };
 
-  // ------------------------------------------------------------------
-  // RUN SEEDER TEMPLATE
-  // ------------------------------------------------------------------
   return await seedCsvEntities<UserMstr>({
     dbModel: UserMstr,
     mapToEntity,

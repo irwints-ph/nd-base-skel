@@ -2,12 +2,12 @@
 // 🟢 src/02-Application/Queries/Auth/RoleUserServiceQuery.ts
 // ===================================================================
 import { Op, fn, col, where, DataTypes } from "sequelize";
-import { GenericQueryService } from "@Infrastructure/Persistence/Queries/GenericQueryService.ts";
-import { PaginatedResponse } from "@Contracts/Common/BaseSchema.ts";
+import { GenericQueryService } from "#Infrastructure/Persistence/Queries/GenericQueryService.ts";
+import { PaginatedResponse } from "#Contracts/Common/BaseSchema.ts";
 
-import RoleUserMstr from "@Infrastructure/Persistence/Models/Auth/RoleUserMstr.ts";
-import { RoleUserMapper } from "@Infrastructure/Persistence/Mappers/Auth/RoleUserMapper.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
+import RoleUserMstr from "#Infrastructure/Persistence/Models/Auth/RoleUserMstr.ts";
+import { RoleUserMapper } from "#Infrastructure/Persistence/Mappers/Auth/RoleUserMapper.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
 
 export class RoleUserServiceQuery {
   private generic: GenericQueryService<any, any>;

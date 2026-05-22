@@ -2,8 +2,8 @@
 // 🟢 src/04-Infrastructure/Persistence/Queries/GenericQueryService.ts
 // ===================================================================
 import { FindOptions, Model, Op, Transaction } from "sequelize";
-import { PaginatedResponse } from "@Contracts/Common/BaseSchema.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
+import { PaginatedResponse } from "#Contracts/Common/BaseSchema.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
 
 type MapFn<T extends Model, R> = (entity: T) => R;
 

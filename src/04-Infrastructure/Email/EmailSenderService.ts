@@ -2,11 +2,11 @@
 // 📩 src/04-Infrastructure/Email/EmailSenderService.ts
 // ==================================================================
 
-import { IEmailSenderService } from "@Application/Interfaces/Services/IEmailSenderService.ts";
-import { IEmailService } from "@Infrastructure/Email/IEmailService.ts";
-import { createLogger, type AppLogger } from "@Infrastructure/Core/Logger.ts";
-import { TemplateLoader } from "@Infrastructure/Helpers/TemplateLoader.ts";
-import { TokenMailer } from "@Contracts/Common/TokenMailer.ts";
+import { IEmailSenderService } from "#Application/Interfaces/Services/IEmailSenderService.ts";
+import { IEmailService } from "#Infrastructure/Email/IEmailService.ts";
+import { createLogger, type AppLogger } from "#Infrastructure/Core/Logger.ts";
+import { TemplateLoader } from "#Infrastructure/Helpers/TemplateLoader.ts";
+import { TokenMailer } from "#Contracts/Common/TokenMailer.ts";
 
 const CompanyNameCfg = process.env.AS_COMPANY_NAME || "MyCompany";
 const EmailProviderCfg = process.env.AS_EMAIL_PROVIDER || "CONSOLE";
@@ -45,12 +45,12 @@ export class EmailSenderService implements IEmailSenderService {
 
       const htmlBody = template
         .replace("{{ company_name }}", CompanyNameCfg)
-        .replace("{{ verify_link }}", verifyLink)
+        .replaceAll("{{ verify_link }}", verifyLink)
         .replace("{{ logo_url }}", `${options.local_issuer}${options.app_logo ?? ""}`)
         .replace("{{ year }}", TheYear)
         .replace("{{ full_name }}", options.fullname ?? "")
         .replace("{{ app_name }}", options.app_name ?? CompanyNameCfg)
-        .replace("{{ title_header }}", "Verification");
+        .replaceAll("{{ title_header }}", "Verification");
 
       this.logger.info(`📧 Sending verification email to: ${options.email}`);
 
@@ -83,7 +83,7 @@ export class EmailSenderService implements IEmailSenderService {
 
       const htmlBody = template
         .replace("{{ company_name }}", CompanyNameCfg)
-        .replace("{{ verify_link }}", verifyLink)
+        .replaceAll("{{ verify_link }}", verifyLink)
         .replace("{{ logo_url }}", `${options.local_issuer}${options.app_logo ?? ""}`)
         .replace("{{ year }}", TheYear)
         .replace("{{ full_name }}", options.fullname ?? "")

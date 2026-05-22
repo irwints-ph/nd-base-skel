@@ -1,8 +1,8 @@
 // ===================================================================
 // 🧩 src/04-Infrastructure/Auth/OLAuth.ts
 // ===================================================================
-import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
-import { AuthenticateOLUserUseCase } from "@Application/UseCases/Auth/AuthenticateOLUserUseCase.ts";
+import { EnvConfig } from "#Infrastructure/Core/ConfigLoader.ts";
+import { AuthenticateOLUserUseCase } from "#Application/UseCases/Auth/AuthenticateOLUserUseCase.ts";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
 export const OLIssuer = EnvConfig.oidc.authority;

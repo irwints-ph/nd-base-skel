@@ -1,6 +1,6 @@
 // src/tests/utils/common.ts
 import jwt from "jsonwebtoken";
-import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts"; // adjust import path
+import { EnvConfig } from "#Infrastructure/Core/ConfigLoader.ts"; // adjust import path
 
 // -------------------------------
 // Fake user and fake module for testing

@@ -1,7 +1,7 @@
 // file: 04-Infrastructure/Persistence/Models/Base/AuditEntity.ts
 
 import { Model, DataTypes,ModelAttributes } from "sequelize";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts"
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts"
 
 export default class AuditEntity extends Model {
   // -----------------------------

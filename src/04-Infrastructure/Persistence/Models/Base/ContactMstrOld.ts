@@ -7,7 +7,7 @@ import {
 import AuditEntity from "./AuditEntity.ts";
 import type UserMstr from "./UserMstr.ts";
 import type ContactType from "./ContactType.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts"
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts"
 
 export default class ContactMstr extends AuditEntity {
   declare ContactTypeId: ForeignKey<ContactType["ContactTypeId"]>;

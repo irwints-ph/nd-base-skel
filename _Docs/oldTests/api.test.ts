@@ -25,7 +25,6 @@ describe('API Integration Tests', () => {
     expect(data).toHaveProperty('data.email');
     expect(data).toHaveProperty('data.fullname');
     expect(data.data.username).toBe(uname);
-    // expect(data.data.email).toBe('root@email.org');
 
   });
 

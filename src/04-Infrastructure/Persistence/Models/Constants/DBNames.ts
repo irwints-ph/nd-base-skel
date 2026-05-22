@@ -1,4 +1,4 @@
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts"
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts"
 
 export const SsoTypeTableName = DatabaseNamingConvention.getName("SsoType");
 export const ContactTypeTableName = DatabaseNamingConvention.getName("ContactTypes");

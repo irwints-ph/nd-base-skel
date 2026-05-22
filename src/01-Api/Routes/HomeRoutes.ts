@@ -4,7 +4,7 @@
 
 import { Router } from "express";
 import HomeController from "../Controllers/HomeController.ts";
-import { routeHandler } from "@Api/Helpers/RouteHandlerFactory.ts";
+import { routeHandler } from "#Api/Helpers/RouteHandlerFactory.ts";
 
 export const HomeRoute = Router();
 

@@ -2,11 +2,11 @@
 // 🧩 src/Scripts/Migrations/Seeders/04-SeedModules.ts
 // ===================================================================
 
-import ModuleMstr from "@Infrastructure/Persistence/Models/Auth/ModuleMstr.ts";
-import { ModuleMstrTableName } from "@Infrastructure/Persistence/Models/Constants/DBNames.ts";
-import { EnvConfig } from '@Infrastructure/Core/Config.ts'
+import ModuleMstr from "#Infrastructure/Persistence/Models/Auth/ModuleMstr.ts";
+import { ModuleMstrTableName } from "#Infrastructure/Persistence/Models/Constants/DBNames.ts";
+import { EnvConfig } from "#Infrastructure/Core/Config.ts";
 import { setBaseDir } from "./seederHelper.ts";
-import { UnitOfWork } from "@Application/UoW/UnitOfWork.ts";
+import { UnitOfWork } from "#Application/UoW/UnitOfWork.ts";
 import { seedCsvEntities } from "./seederTemplate.ts";
 
 const DEFAULT_CREATED_BY = EnvConfig.admin.superRoot;;

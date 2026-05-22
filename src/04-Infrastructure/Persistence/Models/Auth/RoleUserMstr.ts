@@ -3,9 +3,9 @@
 // ===================================================================
 
 import { DataTypes, Sequelize, ForeignKey } from "sequelize";
-import AuditEntity from "@Infrastructure/Persistence/Models/Base/AuditEntity.ts";
-import type { Models } from "@Infrastructure/Persistence/Models/types.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
+import AuditEntity from "#Infrastructure/Persistence/Models/Base/AuditEntity.ts";
+import type { Models } from "#Infrastructure/Persistence/Models/types.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
 
 export default class RoleUserMstr extends AuditEntity {
   declare RoleId: ForeignKey<number>;

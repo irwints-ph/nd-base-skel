@@ -2,7 +2,7 @@
 import { DataTypes, Sequelize, ForeignKey } from "sequelize";
 import AuditEntity from "./AuditEntity.ts";
 import type UserMstr from "./UserMstr.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts"
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts"
 
 export default class ApiClient extends AuditEntity {
   declare UserId: ForeignKey<UserMstr["UserId"]>;

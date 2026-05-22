@@ -7,8 +7,8 @@ import path from "path";
 import csvParser from "csv-parser";
 import { Model, ModelStatic, Transaction } from "sequelize";
 
-import { UnitOfWork } from "@Application/UoW/UnitOfWork.ts";
-import { AuditContext, AuditInfo } from "@Infrastructure/Audit/AuditContext.ts";
+import { UnitOfWork } from "#Application/UoW/UnitOfWork.ts";
+import { AuditContext, AuditInfo } from "#Infrastructure/Audit/AuditContext.ts";
 
 let BASE_DIR = "";
 

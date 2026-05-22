@@ -1,10 +1,10 @@
 // ===================================================================
 // 🧩 src/04-Infrastructure/Persistence/Repositories/ModuleRepository.ts
 // ===================================================================
-import { IRoleRepository } from "@Domain/Interfaces/Auth/IRoleRepository.ts";
-import RoleMstr from "@Infrastructure/Persistence/Models/Auth/RoleMstr.ts";
-import { Role } from "@Domain/Entities/Auth/Role.ts";
-import { RoleMapper } from "@Infrastructure/Persistence/Mappers/Auth/RoleMapper.ts";
+import { IRoleRepository } from "#Domain/Interfaces/Auth/IRoleRepository.ts";
+import RoleMstr from "#Infrastructure/Persistence/Models/Auth/RoleMstr.ts";
+import { Role } from "#Domain/Entities/Auth/Role.ts";
+import { RoleMapper } from "#Infrastructure/Persistence/Mappers/Auth/RoleMapper.ts";
 
 import { Transaction } from "sequelize";
 

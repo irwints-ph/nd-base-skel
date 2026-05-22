@@ -3,19 +3,19 @@
 // ==================================================================
 import express from "express";
 
-import { corsMiddleware } from "@Api/Middleware/cors.middleware.ts";
+import { corsMiddleware } from "#Api/Middleware/cors.middleware.ts";
 import {
   ErrorHandler,
   GlobalInterceptor,
   NotFoundHandler,
   timingInterceptor,
-} from "@Api/Middleware/GlobalInterceptor.ts";
+} from "#Api/Middleware/GlobalInterceptor.ts";
 
-import AuthRoute from "@Api/Controllers/Base/AuthController.ts";
-import { HomeRoute } from "@Api/Routes/HomeRoutes.ts";
-import { UserRoute } from "@Api/Routes/UserRoutes.ts";
-import { ModuleRoute } from "@Api/Routes/ModuleRoutes.ts";
-import { RoleRoute } from "@Api/Routes/RoleRoutes.ts";
+import AuthRoute from "#Api/Controllers/Base/AuthController.ts";
+import { HomeRoute } from "#Api/Routes/HomeRoutes.ts";
+import { UserRoute } from "#Api/Routes/UserRoutes.ts";
+import { ModuleRoute } from "#Api/Routes/ModuleRoutes.ts";
+import { RoleRoute } from "#Api/Routes/RoleRoutes.ts";
 
 // ------------------------------------------------------------------
 // 🏗️ CREATE APP (USED BY TESTS + SERVER)

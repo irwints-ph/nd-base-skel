@@ -1,6 +1,6 @@
 // src/Infrastructure/Auth/BcryptPasswordHasher.ts
 import bcrypt from "bcrypt";
-import { IPasswordHasher } from "@Application/Security/IPasswordHasher.ts";
+import { IPasswordHasher } from "#Application/Security/IPasswordHasher.ts";
 
 export class BcryptPasswordHasher implements IPasswordHasher {
   private readonly saltRounds: number;

@@ -1,5 +1,5 @@
-import { IUserRepository } from "@Domain/Interfaces/Base/IUserRepository.ts";
-import { UserRepository } from "@Infrastructure/Persistence/Repositories/Base/UserRepository.ts";
+import { IUserRepository } from "#Domain/Interfaces/Base/IUserRepository.ts";
+import { UserRepository } from "#Infrastructure/Persistence/Repositories/Base/UserRepository.ts";
 
 let instance: IUserRepository | null = null
 

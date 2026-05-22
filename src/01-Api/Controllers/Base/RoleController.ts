@@ -4,17 +4,17 @@
 
 import { Request, Response } from "express";
 import { BaseApiController } from "../BaseApiController.ts";
-import { IRoleRepository } from "@Domain/Interfaces/Auth/IRoleRepository.ts";
+import { IRoleRepository } from "#Domain/Interfaces/Auth/IRoleRepository.ts";
 
-import { RoleServiceQuery } from "@Application/Queries/Auth/RoleServiceQuery.ts";
-// import { CreateRoleCommand } from "@Application/Commands/Auth/Roles/CreateRoleCommand.ts";
-// import { UpdateRoleCommand } from "@Application/Commands/Auth/Roles/UpdateRoleCommand.ts";
-// import { DeleteRoleCommand } from "@Application/Commands/Auth/Roles/DeleteRoleCommand.ts";
+import { RoleServiceQuery } from "#Application/Queries/Auth/RoleServiceQuery.ts";
+// import { CreateRoleCommand } from "#Application/Commands/Auth/Roles/CreateRoleCommand.ts";
+// import { UpdateRoleCommand } from "#Application/Commands/Auth/Roles/UpdateRoleCommand.ts";
+// import { DeleteRoleCommand } from "#Application/Commands/Auth/Roles/DeleteRoleCommand.ts";
 
-// import { CreateRoleHandler } from "@Application/Handlers/Auth/Roles/CreateRoleHandler.ts";
-// import { UpdateRoleHandler } from "@Application/Handlers/Auth/Roles/UpdateRoleHandler.ts";
-// import { DeleteRoleHandler } from "@Application/Handlers/Auth/Roles/DeleteRoleHandler.ts";
-import { IUserRepository } from "@Domain/Interfaces/Base/IUserRepository.ts";
+// import { CreateRoleHandler } from "#Application/Handlers/Auth/Roles/CreateRoleHandler.ts";
+// import { UpdateRoleHandler } from "#Application/Handlers/Auth/Roles/UpdateRoleHandler.ts";
+// import { DeleteRoleHandler } from "#Application/Handlers/Auth/Roles/DeleteRoleHandler.ts";
+import { IUserRepository } from "#Domain/Interfaces/Base/IUserRepository.ts";
 const roleQueryService = new RoleServiceQuery();
 
 export class RolesController extends BaseApiController {

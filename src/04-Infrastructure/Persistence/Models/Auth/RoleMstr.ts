@@ -1,8 +1,8 @@
 // src/04-Infrastructure/Persistence/Models/Auth/RoleMstr.ts
 import { DataTypes, Sequelize } from "sequelize";
-import AuditEntity from "@Infrastructure/Persistence/Models/Base/AuditEntity.ts";
-import { DatabaseNamingConvention } from "@Infrastructure/Core/DatabaseNaming.ts";
-import type { Models } from "@Infrastructure/Persistence/Models/types.ts";
+import AuditEntity from "#Infrastructure/Persistence/Models/Base/AuditEntity.ts";
+import { DatabaseNamingConvention } from "#Infrastructure/Core/DatabaseNaming.ts";
+import type { Models } from "#Infrastructure/Persistence/Models/types.ts";
 
 export default class RoleMstr extends AuditEntity {
   declare RoleId: number;

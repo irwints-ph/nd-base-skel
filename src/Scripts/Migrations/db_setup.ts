@@ -1,6 +1,6 @@
 // src/Scripts/Migrations/dbSetup.ts
 import { Sequelize, Model } from "sequelize";
-import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
+import { EnvConfig } from "#Infrastructure/Core/ConfigLoader.ts";
 import {
   UserMstr,
   UserProfile,
@@ -12,9 +12,9 @@ import {
   Otps,
   AuditLogs,
   DefaultConfigurationMstr,
-} from "@Infrastructure/Persistence/Models/Base/index.ts";
+} from "#Infrastructure/Persistence/Models/Base/index.ts";
 
-import { RoleMstr, ModuleMstr, RoleUserMstr, RoleModuleMstr } from "@Infrastructure/Persistence/Models/Auth/index.ts";
+import { RoleMstr, ModuleMstr, RoleUserMstr, RoleModuleMstr } from "#Infrastructure/Persistence/Models/Auth/index.ts";
 
 let poolSetting: any = undefined;
 const type = EnvConfig.database.type?.toLowerCase();

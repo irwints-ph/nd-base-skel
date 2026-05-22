@@ -1,13 +1,10 @@
 // src/middleware/globalInterceptor.ts
 import { Request, Response, NextFunction } from "express";
-// import { IAuthQueryService } from "@Domain/Interfaces/Auth/IAuthQueryService.ts";
-import { AuthQueryService } from "@Application/Queries/Auth/AuthQueryService.ts";
-// import { sequelize } from "@Infrastructure/Core/sequelize.ts";
-import { sequelize } from "@Infrastructure/Persistence/AppDBContext.ts";
-import { logger } from "@Infrastructure/Core/Logger.ts";
-import { EnvConfig } from '@Infrastructure/Core/Config.ts'
-
-import { getActiveUser } from "@Infrastructure/Auth/RequestUtils.ts"
+import { AuthQueryService } from "#Application/Queries/Auth/AuthQueryService.ts";
+import { sequelize } from "#Infrastructure/Persistence/AppDBContext.ts";
+import { logger } from "#Infrastructure/Core/Logger.ts";
+import { EnvConfig } from '#Infrastructure/Core/Config.ts'
+import { getActiveUser } from "#Infrastructure/Auth/RequestUtils.ts"
 
 //Put only thos that doen't need user detrails /Authorization
 const PUBLIC_PATHS = [

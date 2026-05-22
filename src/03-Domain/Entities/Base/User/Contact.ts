@@ -42,6 +42,8 @@ export class Contact {
 
     createdBy?: number
     createdOn?: Date
+    updatedBy?: number
+    updatedOn?: Date
   }) {
     this.Id = params.id
 
@@ -56,6 +58,8 @@ export class Contact {
 
     this.CreatedBy = params.createdBy
     this.CreatedOn = params.createdOn
+    this.UpdatedBy = params.updatedBy
+    this.UpdatedOn = params.updatedOn
   }
 
   // ---------------------------------------------------------

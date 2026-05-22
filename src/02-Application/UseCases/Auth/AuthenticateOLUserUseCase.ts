@@ -1,17 +1,18 @@
 // ===================================================================
 // 🧩 src/02-Application/UseCases/Auth/AuthenticateOLUserUseCase.ts
 // ===================================================================
-import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
-import { logger } from "@Infrastructure/Core/Logger.ts";
-import { UserDtoMapper } from "@Infrastructure/Persistence/Mappers/Base/UserDtoMapper.ts";
-import { User } from "@Domain/Entities/Base/User/User.ts";
-import { UserMstr } from "@Infrastructure/Persistence/Models/Base/index.ts";
-import { CreateOlUserCommand } from "@Application/Commands/Base/Users/CreateOlUserCommand.ts";
-import { CreateOlUserHandler } from "@Application/Handlers/Base/CreateOlUserHandler.ts";
-import { UserCreateFromSso } from "@Contracts/Base/Users/UserSchemas.ts";
-import { GetUserRepository } from "@Infrastructure/Dependencies/UserRepoProvider.ts";
-import { performRepoAction } from "@Infrastructure/Persistence/Services/RepoActionService.ts";
-import { UnitOfWork } from "@Application/UoW/UnitOfWork.ts";
+import { EnvConfig } from "#Infrastructure/Core/ConfigLoader.ts";
+import { logger } from "#Infrastructure/Core/Logger.ts";
+import { UserDtoMapper } from "#Infrastructure/Persistence/Mappers/Base/UserDtoMapper.ts";
+import { User } from "#Domain/Entities/Base/User/User.ts";
+import { UserMstr } from "#Infrastructure/Persistence/Models/Base/index.ts";
+import { CreateOlUserCommand } from "#Application/Commands/Base/Users/CreateOlUserCommand.ts";
+import { CreateOlUserHandler } from "#Application/Handlers/Base/CreateOlUserHandler.ts";
+import { UserCreateFromSso } from "#Contracts/Base/Users/UserSchemas.ts";
+import { GetUserRepository } from "#Infrastructure/Dependencies/UserRepoProvider.ts";
+import { performRepoAction } from "#Infrastructure/Persistence/Services/RepoActionService.ts";
+import { UnitOfWork } from "#Application/UoW/UnitOfWork.ts";
+import UserMapper from "#Infrastructure/Persistence/Mappers/Base/UserMapper.ts";
 
 export class AuthenticateOLUserUseCase {
   // Mimic Dependency Injection
@@ -47,38 +48,32 @@ export class AuthenticateOLUserUseCase {
       // ------------------------------------------------------------
       // Existing email account
       // ------------------------------------------------------------
-      let ormUser: UserMstr | null =
+      let emailOrmUser: UserMstr | null =
         await repo.getByEmailOrm(
           email,
           uow?.transaction
         );
 
-      if (ormUser) {
+      if (emailOrmUser) {
         const action = async (uow: any) => {
-          const domainUser: User | null =
-            await repo.getById(
-              ormUser.UserId,
-              uow.transaction
-            );
-
+          const domainUser: User | null = UserMapper.toDomain(emailOrmUser);
           if (domainUser) {
             domainUser.addSso(
               ssokey,
               1,
-              ormUser.UserId
+              emailOrmUser.UserId
             );
 
             domainUser.validateEmail(email);
+            
+            await repo.save(
+              domainUser,
+              uow.transaction
+            );
 
-            const updatedOrmUser =
-              await repo.save(
-                domainUser,
-                uow.transaction
-              );
-
-            return updatedOrmUser
+            return emailOrmUser
               ? UserDtoMapper.toOrmUserFlatBase(
-                  updatedOrmUser
+                  emailOrmUser
                 )
               : null;
           }
@@ -88,7 +83,7 @@ export class AuthenticateOLUserUseCase {
 
         const outDomainUser =
           await performRepoAction({
-            changedBy: ormUser.Username ?? "",
+            changedBy: emailOrmUser.Username ?? "",
             actionName: "LinkSsoEmail",
             action,
             showlog: false,
@@ -188,17 +183,17 @@ export class AuthenticateOLUserUseCase {
 // // ===================================================================
 // // 🧩 src/02-Application/UseCases/Auth/AuthenticateOLUserUseCase.ts
 // // ===================================================================
-// import { EnvConfig } from "@Infrastructure/Core/ConfigLoader.ts";
-// import { logger } from "@Infrastructure/Core/Logger.ts";
-// import { UserDtoMapper } from "@Infrastructure/Persistence/Mappers/Base/UserDtoMapper.ts";
-// import { User } from "@Domain/Entities/Base/User/User.ts";
-// import { UserMstr } from "@Infrastructure/Persistence/Models/Base/index.ts";
-// import { CreateOlUserCommand } from "@Application/Commands/Base/Users/CreateOlUserCommand.ts";
-// import { CreateOlUserHandler } from "@Application/Handlers/Base/CreateOlUserHandler.ts";
-// import { UserCreateFromSso } from "@Contracts/Base/Users/UserSchemas.ts";
-// import { GetUserRepository } from "@Infrastructure/Dependencies/UserRepoProvider.ts";
-// import { performRepoAction } from "@Infrastructure/Persistence/Services/RepoActionService.ts";
-// import { UnitOfWork } from "@Application/UoW/UnitOfWork.ts";
+// import { EnvConfig } from "#Infrastructure/Core/ConfigLoader.ts";
+// import { logger } from "#Infrastructure/Core/Logger.ts";
+// import { UserDtoMapper } from "#Infrastructure/Persistence/Mappers/Base/UserDtoMapper.ts";
+// import { User } from "#Domain/Entities/Base/User/User.ts";
+// import { UserMstr } from "#Infrastructure/Persistence/Models/Base/index.ts";
+// import { CreateOlUserCommand } from "#Application/Commands/Base/Users/CreateOlUserCommand.ts";
+// import { CreateOlUserHandler } from "#Application/Handlers/Base/CreateOlUserHandler.ts";
+// import { UserCreateFromSso } from "#Contracts/Base/Users/UserSchemas.ts";
+// import { GetUserRepository } from "#Infrastructure/Dependencies/UserRepoProvider.ts";
+// import { performRepoAction } from "#Infrastructure/Persistence/Services/RepoActionService.ts";
+// import { UnitOfWork } from "#Application/UoW/UnitOfWork.ts";
 
 // export class AuthenticateOLUserUseCase {
 //   // private userRepoFactory: () => IUserRepository;
